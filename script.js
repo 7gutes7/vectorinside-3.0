@@ -461,7 +461,7 @@ function initHero3DModel() {
     mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
   });
 
-  // Load GLTF / GLB model poligonalFINAL-optimized.glb with DRACOLoader matching Three.js r128
+  // Load GLTF / GLB model (Native standard GLB - 100% web compatible, zero WASM/worker errors)
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
 
@@ -471,7 +471,7 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
+    const modelUrl = 'poligonalFINAL-standard.glb';
 
     function setupModel(gltf) {
       const model = gltf.scene;
@@ -495,11 +495,11 @@ function initHero3DModel() {
 
       modelGroup.add(model);
       modelGroup.position.set(0, 0, 0); // Exact alignment using Blender pivot point
-      console.log('poligonalFINAL-optimized.glb loaded successfully!');
+      console.log('3D model loaded successfully!');
     }
 
     loader.load(modelUrl, setupModel, undefined, (err) => {
-      console.warn('CDN 3D model load failed, retrying with local path:', err);
+      console.warn('Standard 3D model load failed, retrying with optimized GLB:', err);
       loader.load('poligonalFINAL-optimized.glb', setupModel, undefined, (err2) => {
         console.error('Local 3D model load failed:', err2);
       });
