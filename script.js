@@ -471,7 +471,7 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    loader.load('poligonalFINAL-optimized.glb', (gltf) => {
+    loader.load('https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb', (gltf) => {
       const model = gltf.scene;
 
       // Scale model keeping exact Blender pivot point (orange dot between eyes)
