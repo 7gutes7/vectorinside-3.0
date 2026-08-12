@@ -471,7 +471,7 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    const modelUrl = 'poligonalFINAL-standard.glb';
+    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
 
     function setupModel(gltf) {
       const model = gltf.scene;
