@@ -461,10 +461,10 @@ function initHero3DModel() {
     mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
   });
 
-  // Load GLTF / GLB model poligonalFINAL.glb
+  // Load GLTF / GLB model poligonalFINAL-optimized.glb (5.0MB High-Performance Web Version)
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
-    loader.load('poligonalFINAL.glb', (gltf) => {
+    loader.load('poligonalFINAL-optimized.glb', (gltf) => {
       const model = gltf.scene;
 
       // Scale model keeping exact Blender pivot point (orange dot between eyes)
