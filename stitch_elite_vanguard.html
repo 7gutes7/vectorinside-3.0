@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vector Inside | Diseño desde el Núcleo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Montserrat:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffffff",
+                        "surface-bright": "#3a3939",
+                        "on-primary-fixed": "#161e00",
+                        "surface-dim": "#131313",
+                        "secondary": "#ddb7ff",
+                        "on-background": "#e5e2e1",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "secondary-container": "#6f00be",
+                        "outline-variant": "#444933",
+                        "on-primary-container": "#556d00",
+                        "primary-container": "#c3f400",
+                        "inverse-surface": "#e5e2e1",
+                        "background": "#131313",
+                        "error-container": "#93000a",
+                        "outline": "#8e9379",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary-fixed": "#2c0051",
+                        "primary-fixed-dim": "#abd600",
+                        "on-primary-fixed-variant": "#3c4d00",
+                        "on-tertiary-fixed": "#100069",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#2a2a2a",
+                        "on-primary": "#283500",
+                        "surface-variant": "#353534",
+                        "on-tertiary-container": "#5a55c6",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-container": "#d6a9ff",
+                        "on-tertiary-fixed-variant": "#3b35a6",
+                        "on-error": "#690005",
+                        "surface-container": "#201f1f",
+                        "tertiary-container": "#e2dfff",
+                        "on-secondary": "#490080",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#ffffff",
+                        "surface": "#131313",
+                        "on-tertiary": "#231790",
+                        "inverse-on-surface": "#313030",
+                        "tertiary-fixed-dim": "#c3c0ff",
+                        "tertiary-fixed": "#e2dfff",
+                        "secondary-fixed": "#f0dbff",
+                        "surface-tint": "#abd600",
+                        "primary-fixed": "#c3f400",
+                        "on-surface-variant": "#c4c9ac",
+                        "inverse-primary": "#506600"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Montserrat"],
+                        "headline-lg": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "headline-xl": ["Montserrat"],
+                        "label-md": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Montserrat"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["80px", { "lineHeight": "88px", "letterSpacing": "-0.04em", "fontWeight": "900" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom utilities for the specific High-Vanguard Brutalist aesthetic */
+        .bg-vector-black { background-color: #080808; }
+        .bg-operative-white { background-color: #FFFFFF; }
+        .text-vector-black { color: #080808; }
+        .border-operative-white { border-color: rgba(255, 255, 255, 0.1); }
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-primary {
+            box-shadow: 0 0 40px rgba(195, 244, 0, 0.2);
+        }
+        .glow-secondary {
+            box-shadow: 0 0 40px rgba(111, 0, 190, 0.3);
+        }
+        .glow-tertiary {
+            box-shadow: 0 0 40px rgba(90, 85, 198, 0.3);
+        }
+        .btn-primary {
+            background-color: #c3f400; /* Vector Lime */
+            color: #080808;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(195, 244, 0, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        /* Grid reflow adjustments */
+        .brutalist-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        @media (min-width: 768px) {
+            .brutalist-grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-transparent flex justify-between items-center w-full px-margin-desktop py-8 max-w-container-max mx-auto">
+<div class="font-display-lg text-display-lg font-black text-on-surface tracking-tighter" style="font-size: 32px; line-height: 1;">
+            Vector Inside
+        </div>
+<div class="hidden md:flex space-x-8">
+<a class="font-label-md text-label-md text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#">Platform</a>
+<a class="font-label-md text-label-md text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#">Security</a>
+<a class="font-label-md text-label-md text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#">Intelligence</a>
+<a class="font-label-md text-label-md text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#">Architecture</a>
+</div>
+<button class="hidden md:block font-label-md text-label-md px-6 py-3 border-2 border-outline-variant hover:border-primary transition-colors text-primary uppercase tracking-widest bg-surface-container-lowest glass-panel">
+            Solicitar Diagnóstico
+        </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</nav>
+<!-- SECTION 1: Hero -->
+<section class="relative min-h-screen bg-vector-black flex items-center justify-center overflow-hidden pt-32 pb-24">
+<!-- Abstract Liquid Background Effect (simulated with CSS/HTML for this structure) -->
+<div class="absolute inset-0 z-0 opacity-40 mix-blend-screen" style="background: radial-gradient(circle at 50% 50%, rgba(195, 244, 0, 0.1) 0%, rgba(0,0,0,0) 50%);"></div>
+<div class="absolute inset-0 z-0 flex items-center justify-center opacity-80 pointer-events-none">
+<img alt="Geometric Wolf" class="w-full h-full object-cover md:object-contain scale-110 md:scale-100 mix-blend-lighten" data-alt="A highly detailed 3D render of a geometric wolf head made of translucent, refractive glass. It reflects neon lime green, vivid blue, and deep purple lights against a pitch-black background with subtle liquid-like swirling patterns. High-end, futuristic, vanguard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA418mrON0dvwvKjN7-UxJego8j-cSQWTqm47QbILcdMpTjSrZgqeDbxSrNo_YKxSNuzTislZSIfBcHRTg1w5wEYal2f3lajH6gRDauaxsMqoPlR39gWJqln9R_S9napWSsbUTLaEuj6OUgnZzt2IyQRL96QhhL3pqM9j9T0tcMVW1vDQakIJ985sTHxBUTgPRtdugOgrnIZOtkrWPwSaTOBNuO1RCpXOlQMtcrU1XeQGvHypUdEpmkhw"/>
+</div>
+<div class="relative z-10 container mx-auto px-margin-mobile md:px-margin-desktop text-center max-w-container-max flex flex-col items-center">
+<h1 class="font-display-lg text-display-lg text-primary mb-6 drop-shadow-2xl max-w-5xl uppercase" style="text-shadow: 0 0 30px rgba(255,255,255,0.2);">
+                Diseñamos instinto.<br/>Tu marca el único destino.
+            </h1>
+<h2 class="font-body-lg text-body-lg text-on-surface-variant mb-12 max-w-2xl font-label-md uppercase tracking-widest border-t border-b border-outline-variant py-4">
+                Aceleración Digital, Diseño desde el Núcleo.
+            </h2>
+<button class="btn-primary font-label-md text-label-md font-bold px-10 py-5 uppercase tracking-widest shadow-2xl">
+                Solicitar Diagnóstico Vector
+            </button>
+</div>
+</section>
+<!-- SECTION 2: Fricción -->
+<section class="bg-operative-white text-vector-black py-32 border-t-8 border-primary-container">
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max">
+<div class="brutalist-grid border-l border-t border-vector-black border-opacity-20">
+<div class="col-span-4 md:col-span-2 border-r border-b border-vector-black border-opacity-20 p-8 flex items-start">
+<span class="font-label-md text-label-md text-outline font-bold">01 // OBSERVATION</span>
+</div>
+<div class="col-span-4 md:col-span-10 border-r border-b border-vector-black border-opacity-20 p-8 md:p-16 lg:p-24 bg-gray-50">
+<p class="font-headline-xl text-headline-xl uppercase tracking-tighter text-vector-black leading-tight">
+                        Muchas empresas tienen presencia digital...<br/>
+<span class="text-primary-container font-black" style="color: #6f00be;">Vector Inside</span> convierte el caos en arquitectura.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Ecosistema -->
+<section class="bg-vector-black py-32 relative overflow-hidden">
+<div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 64px 64px;"></div>
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max relative z-10">
+<div class="mb-16 border-b border-operative-white pb-6 flex justify-between items-end">
+<h2 class="font-headline-xl text-headline-xl text-primary uppercase">Ecosistema Operativo</h2>
+<span class="font-label-md text-label-md text-primary-container hidden md:block">SYS_V.1.0 // ONLINE</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 brutalist-grid">
+<!-- Card 1 -->
+<div class="col-span-4 md:col-span-3 glass-panel p-8 group hover:bg-surface-container-high transition-colors border-r border-b border-operative-white h-full min-h-[400px] flex flex-col justify-between glow-secondary relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container opacity-20 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+<div class="flex justify-between items-start mb-8 z-10">
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim border border-secondary-fixed-dim px-2 py-1">STRATEGY</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim text-3xl">architecture</span>
+</div>
+<div class="z-10 relative w-full h-32 mb-6">
+<div class="bg-cover bg-center w-full h-full opacity-50 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0 mix-blend-screen" data-alt="A minimalist, geometric icon set for a high-tech strategy firm. Symbols for 'Strategy', 'Growth', 'AI Systems', and 'Motion Lab'. Stark white strokes on a dark glass background with subtle acrylic glow. Brutalist design." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGH8IDxJlgjERmxkUBKO-kemQTfBjrYLrMUOzOXEZCkeocKQ8UdkMvC-AATpI8CayllaDbZPfjYa0iv25e7iLxJ6mZUeO5qkgFs76speYYM2kkWs9hsxtZSmliB4Wu1ACMCldV9bjXTjsAbkdNPjSpKfTxXzKPfDFhqsyJOXojXz3vKrfv3hu0EEBmfIwjS03dn15bCaygMvmL179prDgdRbzq6AIZWoSr_mLKPtT5azqfV6swqweP3g')"></div>
+</div>
+<div class="z-10">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Core Architecture</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Diseño de sistemas robustos para escalabilidad estructural.</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="col-span-4 md:col-span-3 glass-panel p-8 group hover:bg-surface-container-high transition-colors border-r border-b border-operative-white h-full min-h-[400px] flex flex-col justify-between glow-primary relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container opacity-20 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+<div class="flex justify-between items-start mb-8 z-10">
+<span class="font-label-sm text-label-sm text-primary-container border border-primary-container px-2 py-1">GROWTH</span>
+<span class="material-symbols-outlined text-primary-container text-3xl">trending_up</span>
+</div>
+<div class="z-10 relative w-full h-32 mb-6">
+<div class="bg-cover bg-center w-full h-full opacity-50 group-hover:opacity-100 transition-opacity mix-blend-screen" data-alt="A minimalist, geometric icon set for a high-tech strategy firm. Symbols for 'Strategy', 'Growth', 'AI Systems', and 'Motion Lab'. Stark white strokes on a dark glass background with subtle acrylic glow. Brutalist design." style="background-position: top right;"></div>
+</div>
+<div class="z-10">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Market Injection</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Estrategias agresivas de penetración y adquisición.</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="col-span-4 md:col-span-3 glass-panel p-8 group hover:bg-surface-container-high transition-colors border-r border-b border-operative-white h-full min-h-[400px] flex flex-col justify-between glow-tertiary relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-on-tertiary-container opacity-20 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+<div class="flex justify-between items-start mb-8 z-10">
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim border border-tertiary-fixed-dim px-2 py-1">AI SYSTEMS</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-3xl">smart_toy</span>
+</div>
+<div class="z-10 relative w-full h-32 mb-6">
+<div class="bg-cover bg-center w-full h-full opacity-50 group-hover:opacity-100 transition-opacity mix-blend-screen" data-alt="A minimalist, geometric icon set for a high-tech strategy firm. Symbols for 'Strategy', 'Growth', 'AI Systems', and 'Motion Lab'. Stark white strokes on a dark glass background with subtle acrylic glow. Brutalist design." style="background-position: bottom left;"></div>
+</div>
+<div class="z-10">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Neural Ops</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Automatización inteligente y análisis predictivo en tiempo real.</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="col-span-4 md:col-span-3 glass-panel p-8 group hover:bg-surface-container-high transition-colors border-b border-operative-white h-full min-h-[400px] flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-full h-full opacity-10 blur-xl group-hover:opacity-30 transition-opacity" style="background: linear-gradient(45deg, #c3f400, #6f00be);"></div>
+<div class="flex justify-between items-start mb-8 z-10">
+<span class="font-label-sm text-label-sm text-primary border border-primary px-2 py-1">CREATIVE LAB</span>
+<span class="material-symbols-outlined text-primary text-3xl">brush</span>
+</div>
+<div class="z-10 relative w-full h-32 mb-6">
+<div class="bg-cover bg-center w-full h-full opacity-50 group-hover:opacity-100 transition-opacity mix-blend-screen" data-alt="A minimalist, geometric icon set for a high-tech strategy firm. Symbols for 'Strategy', 'Growth', 'AI Systems', and 'Motion Lab'. Stark white strokes on a dark glass background with subtle acrylic glow. Brutalist design." style="background-position: bottom right;"></div>
+</div>
+<div class="z-10">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Visual Synthesis</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Interfaces brutalistas y experiencias inmersivas WebGL.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: Evidencia -->
+<section class="bg-[#F5F5F5] text-vector-black py-32 border-y-8 border-vector-black">
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop max-w-container-max">
+<div class="flex flex-col md:flex-row justify-between items-start mb-16">
+<h2 class="font-headline-xl text-headline-xl uppercase tracking-tighter">Evidencia Operativa</h2>
+<div class="font-label-md text-label-md uppercase bg-vector-black text-primary px-4 py-2 mt-4 md:mt-0">
+                    DATA LOG // VERIFICADO
+                </div>
+</div>
+<div class="brutalist-grid gap-gutter">
+<div class="col-span-4 md:col-span-8 bg-vector-black p-2 md:p-6 relative">
+<div class="absolute top-0 left-0 bg-primary-container text-vector-black font-label-sm px-2 py-1 z-10 m-4">SYBORX / DASHBOARD</div>
+<img alt="SyborX Dashboard" class="w-full h-auto grayscale contrast-125 object-cover aspect-video" data-alt="A large digital display screen mounted on a dark wall in a modern office, showing a complex 'SYBORX // SYSTEM OVERVIEW' dashboard. The interface is high-contrast black and bright neon lime green, featuring network graphs, data streams, threat matrices, and performance charts in a dense, highly technical layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADJrqB1_MXVZRsXocTYUdILM7iNn2XlH-DDx0aogOREQI47FC_8dLqkb-2n-sggD71W4kVxXa2Y4xL1VGF1p7K6UD51PlHyGg768HU80aWU0r5Jxd2CZmANmdhc1vnJhVxWQdCNsy35dudVIbg7Y7SVxlvHB9YcpYVO0on2oSyZYYaIdx1TrCPnMSRdfWwOSxtFRlSJexsYB-lNg9pqCref_uz-1oy-5q8mck7q06vVJEQCK8QFdp52w"/>
+</div>
+<div class="col-span-4 md:col-span-4 bg-surface-bright p-2 md:p-6 relative">
+<div class="absolute top-0 left-0 bg-secondary-container text-primary font-label-sm px-2 py-1 z-10 m-4">BRAND MANUAL / V1</div>
+<img alt="Brand Manual Evidence" class="w-full h-auto object-cover aspect-square" data-alt="A 3D render of a stylized, melting letter 'V'. It is made of thick, glossy, viscous liquid in vibrant neon lime green, deep purple, and bright cyan colors. The letter floats in a dark, futuristic tunnel-like space with bright, thin white light lines receding into the background, creating a sense of speed and high technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC34jpEUkDcpMvbfuSwRDVKWpgWtzh9VBEL-QhrzFNWqlr1vpz57zNehwnrqR37zADMI2t3zK-SyEB-pxUbCviBVoWs_aUhEWj4Vu-FB4b0bcmRdkNW7OpaS-rvNHulZEFM1E4ZhXYKloi1Ujxvp-O8iKoronddGb6WDXb0hhUE0MyvHUzVSq0RLn9jeZMXIV8RoujghuaXGAWf8jkIX_aa6VCpK1GJmFiPEri1Tpdf9LhEIPyXxXybgA"/>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: Cierre -->
+<section class="bg-black text-primary py-40 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[70vh]">
+<!-- Giant Watermark -->
+<div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none select-none overflow-hidden">
+<span class="font-display-lg font-black" style="font-size: 80vw; line-height: 0.8; letter-spacing: -0.1em;">V</span>
+</div>
+<div class="container mx-auto px-margin-mobile md:px-margin-desktop relative z-10 max-w-4xl">
+<h2 class="font-headline-xl text-headline-xl mb-12 tracking-tighter" style="text-shadow: 0 4px 20px rgba(0,0,0,0.8);">
+                Convertimos la complejidad del crecimiento en una arquitectura clara.
+            </h2>
+<button class="btn-primary font-label-md text-label-md font-bold px-12 py-6 text-xl uppercase tracking-widest w-full md:w-auto">
+                INICIAR PROTOCOLO
+            </button>
+</div>
+</section>
+<!-- Footer from JSON -->
+<footer class="bg-surface-container-lowest text-primary w-full py-12 px-margin-desktop border-t border-outline-variant">
+<div class="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="font-headline-lg text-headline-lg text-on-surface mb-8 md:mb-0 uppercase tracking-tighter">
+                Vector Inside
+            </div>
+<div class="flex flex-col md:items-end justify-between h-full">
+<div class="flex flex-wrap gap-6 mb-8 md:mb-0 justify-start md:justify-end">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-opacity uppercase" href="#">Termos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-opacity uppercase" href="#">Privacidade</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-opacity uppercase" href="#">Protocolos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-opacity uppercase" href="#">Sistemas</a>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant text-left md:text-right mt-8">
+                    © 2024 VECTOR INSIDE. ALL RIGHTS RESERVED. OPERATIVE SYSTEM V.1.0
+                </div>
+</div>
+</div>
+</footer>
+</body></html>

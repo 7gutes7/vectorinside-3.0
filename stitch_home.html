@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vector Inside | Diseño desde el Núcleo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Montserrat:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-highest": "#353534",
+                      "on-tertiary-fixed-variant": "#3b35a6",
+                      "on-tertiary": "#231790",
+                      "surface-variant": "#353534",
+                      "on-surface": "#e5e2e1",
+                      "on-secondary-fixed-variant": "#6900b3",
+                      "primary-container": "#c3f400",
+                      "primary-fixed-dim": "#abd600",
+                      "tertiary-fixed-dim": "#c3c0ff",
+                      "secondary-fixed-dim": "#ddb7ff",
+                      "on-primary": "#283500",
+                      "secondary-fixed": "#f0dbff",
+                      "outline-variant": "#444933",
+                      "surface-container-low": "#1c1b1b",
+                      "inverse-primary": "#506600",
+                      "surface-container-high": "#2a2a2a",
+                      "on-surface-variant": "#c4c9ac",
+                      "error": "#ffb4ab",
+                      "on-primary-fixed": "#161e00",
+                      "on-primary-container": "#556d00",
+                      "background": "#131313",
+                      "secondary": "#ddb7ff",
+                      "primary": "#ffffff",
+                      "surface-tint": "#abd600",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#3c4d00",
+                      "inverse-on-surface": "#313030",
+                      "on-tertiary-fixed": "#100069",
+                      "on-background": "#e5e2e1",
+                      "outline": "#8e9379",
+                      "surface-container-lowest": "#0e0e0e",
+                      "tertiary": "#ffffff",
+                      "surface-container": "#201f1f",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary-container": "#5a55c6",
+                      "on-secondary": "#490080",
+                      "on-secondary-fixed": "#2c0051",
+                      "primary-fixed": "#c3f400",
+                      "inverse-surface": "#e5e2e1",
+                      "tertiary-fixed": "#e2dfff",
+                      "surface": "#131313",
+                      "tertiary-container": "#e2dfff",
+                      "surface-dim": "#131313",
+                      "secondary-container": "#6f00be",
+                      "surface-bright": "#3a3939",
+                      "on-secondary-container": "#d6a9ff",
+                      "error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "grid-margin": "4rem",
+                      "stack-sm": "0.5rem",
+                      "section-padding": "8rem",
+                      "stack-md": "1rem",
+                      "grid-gutter": "1.5rem",
+                      "stack-lg": "2rem"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Montserrat"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "label-caps": [
+                              "Montserrat"
+                      ],
+                      "headline-lg-mobile": [
+                              "Montserrat"
+                      ],
+                      "headline-lg": [
+                              "Montserrat"
+                      ],
+                      "display-lg": [
+                              "Montserrat"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "38px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "display-lg": [
+                              "84px",
+                              {
+                                      "lineHeight": "90px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .acrylic-glow-purple {
+            transition: all 0.5s ease;
+        }
+        .acrylic-glow-purple:hover {
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.4);
+            border-color: rgba(168, 85, 247, 0.8);
+        }
+        
+        .acrylic-glow-lime {
+            transition: all 0.5s ease;
+        }
+        .acrylic-glow-lime:hover {
+            box-shadow: 0 0 40px rgba(204, 255, 0, 0.4);
+            border-color: rgba(204, 255, 0, 0.8);
+        }
+
+        .acrylic-glow-blue {
+            transition: all 0.5s ease;
+        }
+        .acrylic-glow-blue:hover {
+            box-shadow: 0 0 40px rgba(67, 61, 174, 0.4);
+            border-color: rgba(67, 61, 174, 0.8);
+        }
+
+        .acrylic-glow-mixed {
+            transition: all 0.5s ease;
+        }
+        .acrylic-glow-mixed:hover {
+            box-shadow: -20px 20px 40px rgba(204, 255, 0, 0.3), 20px -20px 40px rgba(168, 85, 247, 0.3);
+            border-color: rgba(204, 255, 0, 0.6);
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel:hover {
+             border-top: 1px solid #CCFF00;
+             border-left: 1px solid #CCFF00;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-transparent no-border backdrop-blur-md flex justify-between items-center px-grid-margin py-stack-md max-w-full mx-auto">
+<div class="flex-shrink-0">
+<img class="h-8 invert" data-alt="Vector Inside Monogram Logo, stark white, geometric, industrial minimalist aesthetic, sharp edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9sX1ZszYuDYlcxDhwz3IPX3lCvD5qNIE7YejZuniPKCC2hm5vv7qhaMo0bTgWMlJQV9k1X7CAJe_mAlVl9u0159z_8gCfVimOnRb4MvFZtN9ECDzBcM8f6yeovFsP79pnm-tteDW3LX55ovdx9ESrc1w3BwH_onR4KNTOzx3mJCelwqUpBPrnUe89hLFea8_MCN0WbpTgQgDjwcEm3ITh_1e4pXPx8aJGJY9UJWia0dROy9x_gsCNzVfsTpBAAJvOmGI"/>
+</div>
+<ul class="hidden md:flex space-x-grid-gutter">
+<li><a class="font-label-caps text-label-caps text-primary hover:text-primary-fixed transition-colors" href="#">Soluções</a></li>
+<li><a class="font-label-caps text-label-caps text-primary hover:text-primary-fixed transition-colors" href="#">Metodologia</a></li>
+<li><a class="font-label-caps text-label-caps text-primary hover:text-primary-fixed transition-colors" href="#">Cases</a></li>
+<li><a class="font-label-caps text-label-caps text-primary hover:text-primary-fixed transition-colors" href="#">Sobre</a></li>
+</ul>
+<div class="hidden md:block">
+<a class="inline-block bg-primary-fixed text-black font-label-caps text-label-caps px-6 py-3 rounded-DEFAULT hover:shadow-[0_0_20px_rgba(67,61,174,0.5)] transition-all duration-300" href="#">Solicitar Diagnóstico</a>
+</div>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</nav>
+<!-- SECTION 1 (Hero) -->
+<section class="relative min-h-screen flex items-center justify-center pt-24 pb-section-padding px-grid-margin overflow-hidden bg-[#080808]">
+<!-- STITCH_SHADER_START:ANIMATION_6 class="absolute inset-0 w-full h-full opacity-60 pointer-events-none" -->
+<div class="absolute inset-0 w-full h-full opacity-60 pointer-events-none" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_6" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_6');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+varying vec2 v_texCoord;
+
+// Simplex noise for organic movement
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+float snoise(vec2 v) {
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+    vec2 i  = floor(v + dot(v, C.yy));
+    vec2 x0 = v -   i + dot(i, C.xx);
+    vec2 i1;
+    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod289(i);
+    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+    m = m*m;
+    m = m*m;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+    vec3 g;
+    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Animate the flow
+    float noise1 = snoise(uv * 2.0 + u_time * 0.1);
+    float noise2 = snoise(uv * 3.0 - u_time * 0.15 + mouse);
+    
+    // Define the colors (Vector Inside Palette)
+    vec3 black = vec3(0.031, 0.031, 0.031); // #080808
+    vec3 lime = vec3(0.8, 1.0, 0.0);       // #CCFF00
+    vec3 purple = vec3(0.66, 0.33, 0.97);  // #A855F7
+    vec3 blue = vec3(0.26, 0.24, 0.68);    // #433DAE
+    
+    // Blend layers
+    float mask1 = smoothstep(-0.5, 0.8, noise1);
+    float mask2 = smoothstep(-0.2, 0.6, noise2);
+    
+    vec3 color = black;
+    color = mix(color, purple, mask1 * 0.4);
+    color = mix(color, blue, mask2 * 0.3);
+    color = mix(color, lime, (mask1 * mask2) * 0.2);
+    
+    // Add a dark vignette
+    float dist = distance(uv, vec2(0.5));
+    color *= smoothstep(1.2, 0.2, dist);
+    
+    gl_FragColor = vec4(color, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_6 -->
+<!-- STITCH_THREEJS_START:ANIMATION_7 class="absolute inset-0 w-full h-full pointer-events-none z-0" -->
+<div class="absolute inset-0 w-full h-full pointer-events-none z-0" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_7" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_7');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Three.js Scene for the refractive Wolf
+const scene = new THREE.Scene();
+const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || window.innerHeight;
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xccff00, 2);
+pointLight.position.set(5, 5, 5);
+scene.add(pointLight);
+
+// Load the wolf texture to map onto a plane or geometry if we could, 
+// but since we are recreating the "vibe", we'll use a stylized crystal wolf-like geometry
+// Using a combination of polyhedral geometry to represent the crystal/polygonal nature
+const geometry = new THREE.IcosahedronGeometry(2, 1);
+const material = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0,
+    transmission: 0.9,
+    thickness: 1.0,
+    ior: 1.5,
+    transparent: true,
+    opacity: 0.8,
+    emissive: 0xccff00,
+    emissiveIntensity: 0.2
+});
+
+const wolfMesh = new THREE.Mesh(geometry, material);
+scene.add(wolfMesh);
+
+camera.position.z = 5;
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    wolfMesh.rotation.y += 0.005;
+    wolfMesh.rotation.x += 0.002;
+    
+    // Subtle float
+    wolfMesh.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+    
+    renderer.render(scene, camera);
+}
+
+// Handle resize
+window.addEventListener('resize', () => {
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+});
+
+animate();
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_7 -->
+<div class="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
+<img class="w-64 h-64 object-contain mb-8 opacity-80 mix-blend-screen" data-alt="A low-poly 3D geometric wolf head, half solid white matte, half transparent glass with glowing lime internal refractions, severe brutalist aesthetic, centered." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKAP-MCNbYBb4mHpCLRCh8e6aXZVr8jaSzFz5a-le_3qHvaOM4QgKxDvJu9MWxHlFluHwh0KKlhZy5oi99Mn67Jne1cOD5biV8BBdEDs9DOFg1KeA1ve62vKotcolmu4VXWuFP9eUwMJoFaQKmHTC7YDAPSwJXjxvoB8SKgBM_bJzEbktxACxCCtKG0688bAf_MkwdLBFgLF50SPqeVTCrfH7N3Mwpw6gJw_qtCi0Mv3O81ijGgDs89LqIZkXFcIBQcF8"/>
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-primary mb-stack-lg uppercase leading-none mix-blend-difference">
+                Diseñamos instinto. <br/><span class="text-transparent border-text" style="-webkit-text-stroke: 1px #CCFF00;">Tu marca el único destino.</span>
+</h1>
+<h2 class="font-headline-md text-headline-md text-primary-fixed mb-stack-md uppercase">Aceleración Digital, Diseño desde el Núcleo.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl mb-stack-lg">
+                Firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos que buscan dejar de operar desde la improvisación.
+            </p>
+<a class="inline-block bg-primary-fixed text-black font-headline-md text-body-lg px-8 py-4 rounded-DEFAULT hover:shadow-[0_0_30px_rgba(67,61,174,0.6)] transition-all duration-300 transform hover:-translate-y-1" href="#">
+                Solicitar Diagnóstico Vector
+            </a>
+</div>
+</section>
+<!-- SECTION 2 (The Friction) -->
+<section class="bg-primary text-black py-section-padding px-grid-margin border-t-2 border-black">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-grid-gutter">
+<div class="md:col-span-5 flex flex-col justify-center border-r-2 border-black pr-grid-gutter">
+<h2 class="font-headline-lg text-headline-lg uppercase mb-stack-md leading-tight">El orden como principio empresarial.</h2>
+<div class="w-16 h-2 bg-black mb-stack-lg"></div>
+</div>
+<div class="md:col-span-7 flex flex-col justify-center pl-grid-gutter">
+<p class="font-body-lg text-body-lg mb-stack-md">
+                    Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no método; tecnología, pero no integración real. El desorden comercial cuesta ventas. El desorden visual cuesta confianza. La fricción impide el avance.
+                </p>
+<p class="font-headline-md text-headline-md uppercase mt-stack-lg">
+                    Vector Inside convierte el caos en arquitectura.
+                </p>
+</div>
+</div>
+</section>
+<!-- SECTION 3 (Ecosystem) -->
+<section class="bg-[#080808] py-section-padding px-grid-margin relative overflow-hidden">
+<div class="max-w-7xl mx-auto relative z-10">
+<h2 class="font-headline-lg text-headline-lg text-primary text-center mb-section-padding uppercase">Ecosistema Vector</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-grid-gutter">
+<!-- Card 1 -->
+<div class="glass-panel p-8 acrylic-glow-purple group cursor-default">
+<h3 class="font-label-mono text-label-mono text-[#A855F7] mb-stack-sm uppercase tracking-widest">01</h3>
+<h4 class="font-headline-md text-headline-md text-primary mb-stack-md group-hover:text-[#A855F7] transition-colors">Vector Strategy &amp; Brand</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Construimos marcas con identidad, significado, diferenciación y presencia competitiva.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-8 acrylic-glow-lime group cursor-default">
+<h3 class="font-label-mono text-label-mono text-primary-fixed mb-stack-sm uppercase tracking-widest">02</h3>
+<h4 class="font-headline-md text-headline-md text-primary mb-stack-md group-hover:text-primary-fixed transition-colors">Vector Growth &amp; Sales</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Transformamos identidad en demanda. Convertimos la venta en un sistema entrenable, medible y escalable.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-8 acrylic-glow-blue group cursor-default">
+<h3 class="font-label-mono text-label-mono text-[#433DAE] mb-stack-sm uppercase tracking-widest">03</h3>
+<h4 class="font-headline-md text-headline-md text-primary mb-stack-md group-hover:text-[#433DAE] transition-colors">Vector AI Systems &amp; Web</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Instalamos IA y automatización bajo criterio humano. Diseñamos páginas web como interfaces de conversión.</p>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel p-8 acrylic-glow-mixed group cursor-default">
+<h3 class="font-label-mono text-label-mono text-primary mb-stack-sm uppercase tracking-widest opacity-50">04</h3>
+<h4 class="font-headline-md text-headline-md text-primary mb-stack-md transition-colors">Vector Creative &amp; Motion Lab</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Convertimos estrategia en imagen, video y piezas audiovisuales para construir impacto y memoria.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4 (Evidence) -->
+<section class="bg-[#F5F5F5] text-black py-section-padding px-grid-margin border-y-2 border-black">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline-lg text-headline-lg uppercase mb-stack-lg text-center border-b-2 border-black pb-stack-md">Estrategia demostrada, no discurso inflado.</h2>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-grid-gutter mb-section-padding">
+<div class="md:col-span-8 border-2 border-black p-2 bg-white">
+<img class="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-500" data-alt="A high-contrast, futuristic user interface dashboard on a dark background featuring neon lime and deep purple accents, complex data visualizations, and minimalist typography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCK2soASQ2x4Vapf-ijmqtceNx6Obw7dNd666MnOg0ni1WqK8A1eh3mRzfujTS2yNwm6EkAkBwvwb0Wl7fiIk4xAlgJvXSG6OzjR_gXh72II8ARGIJmJeqzgMSwGyXk97OpwO_ZO6opDHE3m5x8BqoMskqlS4oVzSzIEGq7RL_CDgOm4XDDMUzf8MyFgHzIN6o9ApQ_bDaIXWmDacRAhNptpPBZvhtk58IMpTnkPgN8O466IibrRLN-QHxLWkphbiJgOmk"/>
+</div>
+<div class="md:col-span-4 flex flex-col justify-between">
+<div class="border-2 border-black h-64 bg-black relative group overflow-hidden mb-grid-gutter">
+<div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-100 transition-opacity duration-500" data-alt="A minimalist, brutalist corporate identity manual mockup, stark white background, harsh shadows, featuring a rigid geometric logo printed on thick matte black paper." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBA3yogo5JQHUJFhkJ_YlcaQrG3OkA4sFhy0pCVSm6cHEuw9gb9qsW9cm3vZauusw2Uj2KwFsNbRjlFMh7S0p1pyG4LjnbiymiEzZKL8ECx55CIpccjobAII9PtLiU-Kc_zBXkkbWzuPQyKeV0MOUNUa2Bk4wYeshds6ldyVirqgc0D0G4GT6SsifO6TZQl90i9hTsAItamwK2ACEb9XOtYRa_18bdCO_iv5_lkEBw9E6RFYhnARWA4_A')"></div>
+</div>
+<div class="border-2 border-black h-64 bg-white p-6 flex flex-col justify-end">
+<p class="font-label-mono text-label-mono uppercase border-b-2 border-black pb-2 mb-2">Systems</p>
+<h4 class="font-headline-md text-headline-md">Arquitectura Visual</h4>
+</div>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-center max-w-4xl mx-auto">
+                Diagnóstico antes de ejecución. Tecnología bajo criterio humano. Producción creativa con intención. No entregamos piezas aisladas; construimos sistemas conectados.
+            </p>
+</div>
+</section>
+<!-- SECTION 5 (The Close) -->
+<section class="bg-black text-primary py-section-padding px-grid-margin relative overflow-hidden flex flex-col items-center justify-center min-h-[80vh]">
+<img class="absolute inset-0 w-full h-full object-cover opacity-5 pointer-events-none" data-alt="Vector Inside Monogram Logo, massive scale, faint glowing lime green watermark style, subtle presence behind text." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAct7xBYD9Eoz1VlZllk-1a7v2DDLIIYiIrrCruC7Fiy8_v2CJnsLWX_wkXTCmfoentB1H51yEH2ail1QUFZtf3_nYfwnOoAIGcG73o0lZh6INiBA3_UxI1HwJARtBHxWZp27pRexadMLITsag-8IlZ4whXp3r2iShVo_b-Kk0RjzavZpNuvSzntse4aftQd_dNRzBGt23x_i3sXnKsF8Q4q_G0zT5AoywDsdoSFWCKWJKufM1X_Ina8gDJn5fqD2vvA4" style="filter: drop-shadow(0 0 20px #CCFF00);"/>
+<div class="relative z-10 text-center max-w-4xl">
+<h2 class="font-headline-lg text-headline-lg uppercase mb-stack-lg leading-tight">Convertimos la complejidad del crecimiento en una arquitectura clara.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-section-padding">
+                Cada intervención debe dejar al cliente con más claridad, más estructura y más capacidad de acción que antes.
+            </p>
+<a class="inline-block bg-primary-fixed text-black font-headline-md text-headline-md px-12 py-6 rounded-DEFAULT border-2 border-transparent hover:border-white hover:bg-transparent hover:text-primary-fixed transition-all duration-300 shadow-[0_0_40px_rgba(204,255,0,0.2)]" href="#">
+                Solicitar Diagnóstico Vector
+            </a>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-background text-primary w-full border-t-2 border-outline-variant grid grid-cols-1 md:grid-cols-12 gap-grid-gutter px-grid-margin py-section-padding">
+<div class="md:col-span-4">
+<div class="font-headline-md text-headline-md font-black text-on-background mb-stack-md uppercase tracking-tighter">Vector Inside</div>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2026 Vector Inside. High-Performance Digital Systems.</p>
+<p class="font-label-mono text-label-mono text-on-surface-variant mt-2">Aceleración Digital, Diseño desde el Núcleo.</p>
+</div>
+<div class="md:col-span-8 flex flex-wrap justify-end gap-grid-gutter">
+<div class="flex flex-col space-y-2">
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary-fixed transition-colors" href="#">Privacidade</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary-fixed transition-colors" href="#">Termos</a>
+</div>
+<div class="flex flex-col space-y-2">
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary-fixed transition-colors" href="#">LinkedIn</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary-fixed transition-colors" href="#">Instagram</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary-fixed transition-colors" href="#">X</a>
+</div>
+</div>
+</footer>
+</body></html>
