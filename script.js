@@ -461,49 +461,60 @@ function initHero3DModel() {
     mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
   });
 
-  // Load GLTF / GLB model (Native standard GLB - 100% web compatible, zero WASM/worker errors)
+  // 1. Configurar el decodificador de Draco (indispensable para compresión Draco)
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
 
     if (typeof THREE.DRACOLoader !== 'undefined') {
       const dracoLoader = new THREE.DRACOLoader();
-      dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/');
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
       loader.setDRACOLoader(dracoLoader);
     }
 
+    // 2. URL directa desde cuenta de Cloudinary
     const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
 
-    function setupModel(gltf) {
-      const model = gltf.scene;
+    console.log("Iniciando la carga del modelo 3D desde Cloudinary...");
 
-      // Scale model keeping exact Blender pivot point (orange dot between eyes)
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 7.66 / maxDim; // Increased by an additional 10%
-      model.scale.set(scale, scale, scale);
+    // 3. Ejecutar la carga con el Log Test completo y progreso
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        console.log("¡Modelo cargado con éxito!", gltf);
+        const model = gltf.scene;
 
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.position.set(0, 0, 0);
-          if (child.material) {
-            child.material.roughness = 0.25;
-            child.material.metalness = 0.75;
+        // Scale model keeping exact Blender pivot point (orange dot between eyes)
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 7.66 / maxDim; // Increased size scale
+        model.scale.set(scale, scale, scale);
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.position.set(0, 0, 0);
+            if (child.material) {
+              child.material.roughness = 0.25;
+              child.material.metalness = 0.75;
+            }
           }
+        });
+
+        modelGroup.add(model);
+        modelGroup.position.set(0, 0, 0); // Exact alignment using Blender pivot point
+      },
+      (xhr) => {
+        if (xhr.total > 0) {
+          const porcentaje = (xhr.loaded / xhr.total) * 100;
+          console.log(`Progreso de descarga del modelo 3D: ${porcentaje.toFixed(2)}%`);
+        } else {
+          console.log(`Bytes descargados del modelo 3D: ${xhr.loaded}`);
         }
-      });
-
-      modelGroup.add(model);
-      modelGroup.position.set(0, 0, 0); // Exact alignment using Blender pivot point
-      console.log('3D model loaded successfully!');
-    }
-
-    loader.load(modelUrl, setupModel, undefined, (err) => {
-      console.warn('Standard 3D model load failed, retrying with optimized GLB:', err);
-      loader.load('poligonalFINAL-optimized.glb', setupModel, undefined, (err2) => {
-        console.error('Local 3D model load failed:', err2);
-      });
-    });
+      },
+      (error) => {
+        console.error("¡ERROR crítico al cargar el modelo desde Cloudinary!", error);
+      }
+    );
   }
 
   function syncSize() {
