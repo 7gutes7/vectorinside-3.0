@@ -424,15 +424,33 @@ function initHero3DModel() {
 
   const scene = new THREE.Scene();
 
-  const width = container.clientWidth || window.innerWidth;
-  const height = container.clientHeight || window.innerHeight;
+  function getContainerDimensions() {
+    const w = container.clientWidth || container.offsetWidth || window.innerWidth;
+    const h = container.clientHeight || container.offsetHeight || window.innerHeight || 400;
+    return { width: Math.max(w, 1), height: Math.max(h, 1) };
+  }
 
-  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  const dim = getContainerDimensions();
+  const camera = new THREE.PerspectiveCamera(45, dim.width / dim.height, 0.1, 1000);
   camera.position.set(0, 0, 10);
 
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // WebGLRenderer configured for maximum multi-device & mobile compatibility
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+      failIfMajorPerformanceCaveat: false
+    });
+  } catch (e) {
+    console.warn('Fallback WebGLRenderer initialization:', e);
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+  }
+
+  renderer.setSize(dim.width, dim.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
 
@@ -455,13 +473,29 @@ function initHero3DModel() {
   const modelGroup = new THREE.Group();
   scene.add(modelGroup);
 
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
-  });
+  let targetRotY = 0;
+  let targetRotX = 0;
+  let currentRotY = 0;
+  let currentRotX = 0;
 
-  // 1. Configurar el decodificador de Draco (indispensable para compresión Draco)
+  // Mouse & Touch interaction for mobile and desktop compatibility
+  function updateLookAt(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const x = (clientX - rect.left) / rect.width - 0.5;
+    const y = (clientY - rect.top) / rect.height - 0.5;
+    targetRotY = x * 0.45;
+    targetRotX = y * 0.32;
+  }
+
+  window.addEventListener('mousemove', (e) => updateLookAt(e.clientX, e.clientY));
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 0) {
+      updateLookAt(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  // 1. Configurar el decodificador de Draco con respaldo multicloud
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
 
@@ -471,80 +505,80 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // 2. Modelo 3D optimizado (Cloudinary CDN URL v3.0.1)
     const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb?v=3.0.1';
 
     console.log("Iniciando la carga del modelo 3D optimizado...");
 
-    // 3. Ejecutar la carga con el Log Test completo y progreso
+    function applyModel(gltf) {
+      console.log("¡Modelo cargado con éxito!", gltf);
+      const model = gltf.scene;
+
+      // Scale model keeping exact Blender pivot point (orange dot between eyes)
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const scale = 7.66 / maxDim;
+      model.scale.set(scale, scale, scale);
+
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.position.set(0, 0, 0);
+          if (child.material) {
+            child.material.roughness = 0.25;
+            child.material.metalness = 0.75;
+          }
+        }
+      });
+
+      // Clear previous models if any
+      while (modelGroup.children.length > 0) {
+        modelGroup.remove(modelGroup.children[0]);
+      }
+
+      modelGroup.add(model);
+      modelGroup.position.set(0, 0, 0);
+      syncSize();
+    }
+
     loader.load(
       modelUrl,
-      (gltf) => {
-        console.log("¡Modelo cargado con éxito!", gltf);
-        const model = gltf.scene;
-
-        // Scale model keeping exact Blender pivot point (orange dot between eyes)
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 7.66 / maxDim; // Increased size scale
-        model.scale.set(scale, scale, scale);
-
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.position.set(0, 0, 0);
-            if (child.material) {
-              child.material.roughness = 0.25;
-              child.material.metalness = 0.75;
-            }
-          }
-        });
-
-        modelGroup.add(model);
-        modelGroup.position.set(0, 0, 0); // Exact alignment using Blender pivot point
-      },
+      applyModel,
       (xhr) => {
         if (xhr.total > 0) {
           const porcentaje = (xhr.loaded / xhr.total) * 100;
           console.log(`Progreso de descarga del modelo 3D: ${porcentaje.toFixed(2)}%`);
-        } else {
-          console.log(`Bytes descargados del modelo 3D: ${xhr.loaded}`);
         }
       },
       (error) => {
-        console.error("¡ERROR crítico al cargar el modelo desde Cloudinary!", error);
+        console.error("¡ERROR al cargar desde Cloudinary CDN! Reintentando ruta relativa...", error);
+        loader.load('poligonalFINAL-optimized.glb', applyModel, undefined, (err2) => {
+          console.error("Error crítico final cargando modelo 3D:", err2);
+        });
       }
     );
   }
 
   function syncSize() {
-    const w = container.clientWidth || window.innerWidth;
-    const h = container.clientHeight || window.innerHeight;
-    camera.aspect = w / h;
+    const d = getContainerDimensions();
+    camera.aspect = d.width / d.height;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setSize(d.width, d.height);
   }
 
   window.addEventListener('resize', syncSize);
+  window.addEventListener('orientationchange', syncSize);
 
-  let targetRotY = 0;
-  let targetRotX = 0;
-  let currentRotY = 0;
-  let currentRotX = 0;
+  // ResizeObserver for dynamic container visibility changes (e.g. after intro hide)
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => syncSize());
+    ro.observe(container);
+  }
 
-  window.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    targetRotY = x * 0.45; // Dynamic horizontal look-at
-    targetRotX = y * 0.32; // Dynamic vertical look-at
-  });
-
+  // Animation Loop with WebGL Context Lost restoration check
   function animate() {
     requestAnimationFrame(animate);
 
     if (modelGroup) {
-      // Responsive, smooth lerp tracking cursor
       currentRotY += (targetRotY - currentRotY) * 0.06;
       currentRotX += (targetRotX - currentRotX) * 0.06;
 
@@ -556,4 +590,15 @@ function initHero3DModel() {
   }
 
   requestAnimationFrame(animate);
+
+  // Handle WebGL context restoration for low-memory mobile devices
+  canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    console.warn('WebGL Context Lost. Retrying context restoration...');
+  }, false);
+
+  canvas.addEventListener('webglcontextrestored', () => {
+    console.log('WebGL Context Restored.');
+    syncSize();
+  }, false);
 }
