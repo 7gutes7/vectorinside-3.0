@@ -461,17 +461,19 @@ function initHero3DModel() {
     mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
   });
 
-  // Load GLTF / GLB model poligonalFINAL-optimized.glb (5.0MB High-Performance Web Version with DRACO Compression)
+  // Load GLTF / GLB model poligonalFINAL-optimized.glb with DRACOLoader matching Three.js r128
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
 
     if (typeof THREE.DRACOLoader !== 'undefined') {
       const dracoLoader = new THREE.DRACOLoader();
-      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+      dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/');
       loader.setDRACOLoader(dracoLoader);
     }
 
-    loader.load('https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb', (gltf) => {
+    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
+
+    function setupModel(gltf) {
       const model = gltf.scene;
 
       // Scale model keeping exact Blender pivot point (orange dot between eyes)
@@ -493,9 +495,14 @@ function initHero3DModel() {
 
       modelGroup.add(model);
       modelGroup.position.set(0, 0, 0); // Exact alignment using Blender pivot point
-      console.log('poligonalFINAL.glb loaded successfully!');
-    }, undefined, (err) => {
-      console.error('Error loading 3D model:', err);
+      console.log('poligonalFINAL-optimized.glb loaded successfully!');
+    }
+
+    loader.load(modelUrl, setupModel, undefined, (err) => {
+      console.warn('CDN 3D model load failed, retrying with local path:', err);
+      loader.load('poligonalFINAL-optimized.glb', setupModel, undefined, (err2) => {
+        console.error('Local 3D model load failed:', err2);
+      });
     });
   }
 
