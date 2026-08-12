@@ -471,8 +471,8 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // 2. Modelo 3D optimizado (5.0 MB - Cache-Busting Version v3.0.1)
-    const modelUrl = 'poligonalFINAL-optimized.glb?v=3.0.1';
+    // 2. Modelo 3D optimizado (Cloudinary CDN URL v3.0.1)
+    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb?v=3.0.1';
 
     console.log("Iniciando la carga del modelo 3D optimizado...");
 
