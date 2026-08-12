@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize Three.js Gradient Waves Background Shader
   initGradientWavesShader();
 
-  // 2. Initialize 3D Model poligonalFINAL.glb
+  // 2. Initialize 3D Model poligonalFINAL-optimized.glb
   initHero3DModel();
 
   // 3. Setup Intersection Observer for Scroll Animations
@@ -471,10 +471,10 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // 2. URL directa desde cuenta de Cloudinary
-    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
+    // 2. Modelo 3D optimizado (5.0 MB)
+    const modelUrl = 'poligonalFINAL-optimized.glb';
 
-    console.log("Iniciando la carga del modelo 3D desde Cloudinary...");
+    console.log("Iniciando la carga del modelo 3D optimizado...");
 
     // 3. Ejecutar la carga con el Log Test completo y progreso
     loader.load(
