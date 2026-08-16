@@ -2,7 +2,20 @@
  * Vector Inside 3.0 - High-Performance Interactive Logic
  */
 
+// Force browser to disable scroll memory restoration so refreshes ALWAYS land on Hero
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
+window.addEventListener('beforeunload', () => {
+  window.scrollTo(0, 0);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Always reset scroll position to top (Hero section) on page load/refresh
+  window.scrollTo(0, 0);
+
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
   initPageVideoIntro();
 
@@ -23,6 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. Mobile Menu Toggle
   initMobileMenu();
+
+  // Fallback trigger if intro screen is disabled or absent
+  const introScreen = document.getElementById('intro-screen');
+  if (!introScreen || window.getComputedStyle(introScreen).display === 'none') {
+    setTimeout(triggerStrokeTextEffect, 300);
+  }
 });
 
 /**
@@ -45,6 +64,8 @@ function initPageVideoIntro() {
     introScreen.style.opacity = '0';
     setTimeout(() => {
       introScreen.style.display = 'none';
+      // Trigger StrokeText effect on "Diseñamos instinto." right after intro finishes
+      triggerStrokeTextEffect();
     }, 750);
   }
 
@@ -478,24 +499,45 @@ function initHero3DModel() {
   let currentRotY = 0;
   let currentRotX = 0;
 
-  // Mouse & Touch interaction for mobile and desktop compatibility
-  function updateLookAt(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-    const x = (clientX - rect.left) / rect.width - 0.5;
-    const y = (clientY - rect.top) / rect.height - 0.5;
-    targetRotY = x * 0.45;
-    targetRotX = y * 0.32;
+  let isHoveredOverModel = false;
+  let currentHoverLerp = 0; // 0.0 = Default Blender Blue, 1.0 = Iridescent Green + Eye Glow
+  const detectedEyeMeshes = [];
+  const detectedHeadMeshes = [];
+
+  // Max subtle tilt when cursor is directly over the 3D model box (14° = ~0.244 rad)
+  const SUBTLE_MAX_RAD = 14 * (Math.PI / 180);
+
+  // Mouse & touch tracking attached EXCLUSIVELY to container (#hero-3d-container)
+  function handleContainerHover(e) {
+    isHoveredOverModel = true;
+    const rect = container.getBoundingClientRect();
+    const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+
+    const relX = ((clientX - rect.left) / rect.width) - 0.5; // [-0.5, +0.5]
+    const relY = ((clientY - rect.top) / rect.height) - 0.5;  // [-0.5, +0.5]
+
+    // Calculate subtle look-at angle
+    targetRotY = relX * (2 * SUBTLE_MAX_RAD);
+    targetRotX = relY * (2 * SUBTLE_MAX_RAD);
   }
 
-  window.addEventListener('mousemove', (e) => updateLookAt(e.clientX, e.clientY));
-  window.addEventListener('touchmove', (e) => {
-    if (e.touches && e.touches.length > 0) {
-      updateLookAt(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  }, { passive: true });
+  function handleContainerLeave() {
+    isHoveredOverModel = false;
+    // Instantly deactivate tracking when cursor is no longer OVER the model box
+    targetRotY = 0;
+    targetRotX = 0;
+  }
 
-  // 1. Configurar el decodificador de Draco con respaldo multicloud
+  // Active listeners scoped EXCLUSIVELY to #hero-3d-container
+  container.addEventListener('mousemove', handleContainerHover);
+  container.addEventListener('touchmove', handleContainerHover, { passive: true });
+  container.addEventListener('mouseenter', handleContainerHover);
+  container.addEventListener('mouseleave', handleContainerLeave);
+  container.addEventListener('pointerleave', handleContainerLeave);
+  container.addEventListener('touchend', handleContainerLeave);
+
+  // Configurar el decodificador de Draco con respaldo multicloud
   if (typeof THREE.GLTFLoader !== 'undefined') {
     const loader = new THREE.GLTFLoader();
 
@@ -505,55 +547,67 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb?v=3.0.1';
-
-    console.log("Iniciando la carga del modelo 3D optimizado...");
-
-    function applyModel(gltf) {
-      console.log("¡Modelo cargado con éxito!", gltf);
-      const model = gltf.scene;
-
-      // Scale model keeping exact Blender pivot point (orange dot between eyes)
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      const scale = 7.66 / maxDim;
-      model.scale.set(scale, scale, scale);
-
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.position.set(0, 0, 0);
-          if (child.material) {
-            child.material.roughness = 0.25;
-            child.material.metalness = 0.75;
-          }
-        }
-      });
-
-      // Clear previous models if any
-      while (modelGroup.children.length > 0) {
-        modelGroup.remove(modelGroup.children[0]);
-      }
-
-      modelGroup.add(model);
-      modelGroup.position.set(0, 0, 0);
-      syncSize();
-    }
-
+    // Single Authoritative Model at all times: poligonalFINAL-optimized.glb
     loader.load(
-      modelUrl,
-      applyModel,
+      'poligonalFINAL-optimized.glb?v=3.0.20',
+      (gltf) => {
+        console.log("¡Modelo 3D (poligonalFINAL-optimized.glb) cargado con éxito!", gltf);
+        const model = gltf.scene;
+
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        // Perfect scale fitting full wolf head & ears without any top/bottom clipping
+        const scale = 7.80 / maxDim;
+
+        model.scale.set(scale, scale, scale);
+        model.position.sub(center.multiplyScalar(scale));
+
+        detectedEyeMeshes.length = 0;
+        detectedHeadMeshes.length = 0;
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material) {
+              child.material = child.material.clone();
+              child.material.needsUpdate = true;
+            }
+
+            const name = (child.name || '').trim();
+            const matName = (child.material ? child.material.name || '' : '').trim();
+
+            // Target 'Grid' as EYE sub-mesh and 'mesh_node' as HEAD sub-mesh
+            if (name === 'Grid' || matName === 'Material' || name.toLowerCase().includes('grid')) {
+              console.log("--> OJOS IDENTIFICADOS EXACTAMENTE:", name, matName);
+              detectedEyeMeshes.push(child);
+            } else {
+              console.log("--> CABEZA IDENTIFICADA EXACTAMENTE:", name, matName);
+              detectedHeadMeshes.push(child);
+            }
+          }
+        });
+
+        while (modelGroup.children.length > 0) {
+          modelGroup.remove(modelGroup.children[0]);
+        }
+
+        modelGroup.add(model);
+        // Center vertically with slight Y offset (-0.15) so ears fit 100% inside viewport
+        modelGroup.position.set(0, -0.15, 0);
+        modelGroup.rotation.set(0, 0, 0);
+        syncSize();
+      },
       (xhr) => {
         if (xhr.total > 0) {
           const porcentaje = (xhr.loaded / xhr.total) * 100;
           console.log(`Progreso de descarga del modelo 3D: ${porcentaje.toFixed(2)}%`);
         }
       },
-      (error) => {
-        console.error("¡ERROR al cargar desde Cloudinary CDN! Reintentando ruta relativa...", error);
-        loader.load('poligonalFINAL-optimized.glb', applyModel, undefined, (err2) => {
-          console.error("Error crítico final cargando modelo 3D:", err2);
-        });
+      (err) => {
+        console.error("Error cargando poligonalFINAL-optimized.glb:", err);
       }
     );
   }
@@ -574,16 +628,51 @@ function initHero3DModel() {
     ro.observe(container);
   }
 
-  // Animation Loop with WebGL Context Lost restoration check
+  // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Yellow Eye Glow (hover)
   function animate() {
     requestAnimationFrame(animate);
 
     if (modelGroup) {
-      currentRotY += (targetRotY - currentRotY) * 0.06;
-      currentRotX += (targetRotX - currentRotX) * 0.06;
+      currentRotY += (targetRotY - currentRotY) * 0.10;
+      currentRotX += (targetRotX - currentRotX) * 0.10;
 
-      modelGroup.rotation.y = currentRotY;
-      modelGroup.rotation.x = currentRotX;
+      modelGroup.rotation.y = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotY));
+      modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
+      modelGroup.rotation.z = 0;
+
+      // Animate smooth lerp between states (0.0 = Blender Blue, 1.0 = Iridescent Green + Eye Glow)
+      const targetLerp = isHoveredOverModel ? 1.0 : 0.0;
+      currentHoverLerp += (targetLerp - currentHoverLerp) * 0.10;
+
+      // 1. Head Mesh: Morph from Blender Blue (#3897cd) to Iridescent Green (#10b981) + Metallic sheen
+      detectedHeadMeshes.forEach((headMesh) => {
+        if (headMesh.material) {
+          headMesh.material.metalness = THREE.MathUtils.lerp(0.35, 0.88, currentHoverLerp);
+          headMesh.material.roughness = THREE.MathUtils.lerp(0.55, 0.20, currentHoverLerp);
+
+          const blueColor = new THREE.Color(0x3897cd);   // Original Blender Blue
+          const greenColor = new THREE.Color(0x10b981);  // Iridescent Emerald Green
+          headMesh.material.color.copy(blueColor).lerp(greenColor, currentHoverLerp * 0.65);
+
+          if (headMesh.material.emissive) {
+            headMesh.material.emissiveIntensity = 0;
+          }
+          headMesh.material.needsUpdate = true;
+        }
+      });
+
+      // 2. Eye Mesh: Ignite from normal to High-Intensity Vector Yellow (#c3f400)
+      detectedEyeMeshes.forEach((eyeMesh) => {
+        if (eyeMesh.material) {
+          if (!eyeMesh.material.emissive) {
+            eyeMesh.material.emissive = new THREE.Color(0xc3f400);
+          } else {
+            eyeMesh.material.emissive.setHex(0xc3f400);
+          }
+          eyeMesh.material.emissiveIntensity = currentHoverLerp * 5.0;
+          eyeMesh.material.needsUpdate = true;
+        }
+      });
     }
 
     renderer.render(scene, camera);
@@ -601,4 +690,94 @@ function initHero3DModel() {
     console.log('WebGL Context Restored.');
     syncSize();
   }, false);
+}
+
+/**
+ * StrokeText Effect Component logic for "Diseñamos \n instinto."
+ * High-Speed responsive execution:
+ * strokeColor="#A78BFA", fillColor="#F8FAFC", drawDuration=0.85s, fillDelay=0.1s, fillMode="wipe", ease="power2.out"
+ */
+function triggerStrokeTextEffect() {
+  const strokePath = document.querySelector('.stroke-draw-path');
+  const wipeRect = document.getElementById('stroke-wipe-rect');
+  if (!strokePath || !wipeRect) return;
+
+  // Reset initial states
+  strokePath.style.strokeDashoffset = '1800';
+  wipeRect.setAttribute('width', '0%');
+
+  if (typeof gsap !== 'undefined') {
+    const tl = gsap.timeline();
+
+    // 1. Accelerated Stroke Drawing Animation (drawDuration: 0.85s, ease: power2.out)
+    tl.to(strokePath, {
+      strokeDashoffset: 0,
+      duration: 0.85,
+      ease: "power2.out"
+    })
+      // 2. Accelerated Wipe Fill Animation (duration: 0.6s)
+      .to(wipeRect, {
+        attr: { width: "100%" },
+        duration: 0.6,
+        ease: "power2.inOut"
+      }, "+=0.1")
+      // 3. Trigger Curtain Reveal for "Tu marca el único destino." as wipe fill concludes
+      .add(() => {
+        triggerCurtainRevealEffect();
+      }, "-=0.2");
+  } else {
+    // CSS Fallback
+    strokePath.style.transition = 'stroke-dashoffset 0.85s cubic-bezier(0.16, 1, 0.3, 1)';
+    strokePath.style.strokeDashoffset = '0';
+    setTimeout(() => {
+      wipeRect.style.transition = 'width 0.6s cubic-bezier(0.65, 0, 0.35, 1)';
+      wipeRect.setAttribute('width', '100%');
+      setTimeout(triggerCurtainRevealEffect, 450);
+    }, 950);
+  }
+}
+
+/**
+ * High-Speed Left-to-Right Curtain Reveal Effect for "Tu marca el único destino."
+ */
+function triggerCurtainRevealEffect() {
+  const curtainOverlay = document.getElementById('hero-curtain-overlay');
+  const curtainText = document.getElementById('hero-curtain-text');
+  if (!curtainOverlay || !curtainText) return;
+
+  if (typeof gsap !== 'undefined') {
+    const tl = gsap.timeline();
+
+    // 1. Reset
+    gsap.set(curtainOverlay, { scaleX: 0, transformOrigin: "left center" });
+    gsap.set(curtainText, { opacity: 0 });
+
+    // 2. Fast Curtain sweep across from Left to Right (scaleX 0 -> 1 in 0.28s)
+    tl.to(curtainOverlay, {
+      scaleX: 1,
+      duration: 0.28,
+      ease: "power3.in"
+    })
+    // 3. Reveal text inside curtain
+    .set(curtainText, { opacity: 1 })
+    // 4. Fast Un-curtain to Right (scaleX 1 -> 0 in 0.32s)
+    .set(curtainOverlay, { transformOrigin: "right center" })
+    .to(curtainOverlay, {
+      scaleX: 0,
+      duration: 0.32,
+      ease: "power3.out"
+    });
+  } else {
+    // CSS Fallback
+    curtainOverlay.style.transition = 'transform 0.28s cubic-bezier(0.7, 0, 0.3, 1)';
+    curtainOverlay.style.transformOrigin = 'left';
+    curtainOverlay.style.transform = 'scaleX(1)';
+
+    setTimeout(() => {
+      curtainText.style.opacity = '1';
+      curtainOverlay.style.transformOrigin = 'right';
+      curtainOverlay.style.transition = 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)';
+      curtainOverlay.style.transform = 'scaleX(0)';
+    }, 290);
+  }
 }
