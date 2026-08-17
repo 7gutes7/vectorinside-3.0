@@ -640,19 +640,19 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // Animate smooth lerp between states (0.0 = Blender Blue, 1.0 = Iridescent Green + Eye Glow)
+      // Animate smooth lerp between Normal state (#A4A1FF, metalness 0.75, roughness 0.25) and Hover state (#3897cd, metalness 0.35, roughness 0.55)
       const targetLerp = isHoveredOverModel ? 1.0 : 0.0;
       currentHoverLerp += (targetLerp - currentHoverLerp) * 0.10;
 
-      // 1. Head Mesh: Morph from Blender Blue (#3897cd) to Iridescent Green (#10b981) + Metallic sheen
+      // 1. Head Mesh: Normal state is #A4A1FF (metalness 0.75, roughness 0.25), morphs to #3897cd on hover
       detectedHeadMeshes.forEach((headMesh) => {
         if (headMesh.material) {
-          headMesh.material.metalness = THREE.MathUtils.lerp(0.35, 0.88, currentHoverLerp);
-          headMesh.material.roughness = THREE.MathUtils.lerp(0.55, 0.20, currentHoverLerp);
+          headMesh.material.metalness = THREE.MathUtils.lerp(0.75, 0.35, currentHoverLerp);
+          headMesh.material.roughness = THREE.MathUtils.lerp(0.25, 0.55, currentHoverLerp);
 
-          const blueColor = new THREE.Color(0x3897cd);   // Original Blender Blue
-          const greenColor = new THREE.Color(0x10b981);  // Iridescent Emerald Green
-          headMesh.material.color.copy(blueColor).lerp(greenColor, currentHoverLerp * 0.65);
+          const defaultColor = new THREE.Color(0xA4A1FF);   // Normal state: #A4A1FF
+          const hoverColor = new THREE.Color(0x3897cd);     // Hover state: #3897cd (Blender Blue)
+          headMesh.material.color.copy(defaultColor).lerp(hoverColor, currentHoverLerp);
 
           if (headMesh.material.emissive) {
             headMesh.material.emissiveIntensity = 0;
@@ -661,15 +661,19 @@ function initHero3DModel() {
         }
       });
 
-      // 2. Eye Mesh: Ignite from normal to High-Intensity Vector Yellow (#c3f400)
+      // 2. Eye Mesh: Normal state glowing #A4A1FF -> Hover state subtle #3897cd
       detectedEyeMeshes.forEach((eyeMesh) => {
         if (eyeMesh.material) {
+          const eyeNormal = new THREE.Color(0xA4A1FF);
+          const eyeHover = new THREE.Color(0x3897cd);
+          const currentEyeColor = eyeNormal.clone().lerp(eyeHover, currentHoverLerp);
+
           if (!eyeMesh.material.emissive) {
-            eyeMesh.material.emissive = new THREE.Color(0xc3f400);
+            eyeMesh.material.emissive = currentEyeColor;
           } else {
-            eyeMesh.material.emissive.setHex(0xc3f400);
+            eyeMesh.material.emissive.copy(currentEyeColor);
           }
-          eyeMesh.material.emissiveIntensity = currentHoverLerp * 5.0;
+          eyeMesh.material.emissiveIntensity = THREE.MathUtils.lerp(3.5, 0.5, currentHoverLerp);
           eyeMesh.material.needsUpdate = true;
         }
       });
