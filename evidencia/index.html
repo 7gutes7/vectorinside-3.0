@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>04 // EVIDENCIA | Vector Inside 3.0</title>
+  <meta name="description" content="Evidencia y Casos de Estudio de Vector Inside: Transformación y resultados empíricos medibles." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../style.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'vector-black': '#080808',
+            'vector-lime': '#c3f400',
+            'operative-purple': '#9d4edd',
+            'cognitive-blue': '#433dae',
+            'surface-dark': '#131313',
+            'surface-high': '#201f1f',
+            'text-muted': '#c4c9ac'
+          },
+          fontFamily: {
+            display: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-vector-black text-white antialiased selection:bg-vector-lime selection:text-vector-black overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== SHARED HEADER ==================== -->
+  <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <img src="../headerlogo.png" alt="Vector Inside" class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+        <span class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">HUB 3D</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-7 font-mono text-xs tracking-widest uppercase">
+        <a href="../manifiesto/index.html" class="text-text-muted hover:text-vector-lime transition-colors">01 // Manifiesto</a>
+        <a href="../ecosistema/index.html" class="text-text-muted hover:text-vector-lime transition-colors">02 // Ecosistema</a>
+        <a href="../ejecucion/index.html" class="text-text-muted hover:text-vector-lime transition-colors">03 // Ejecución</a>
+        <a href="index.html" class="text-vector-lime border-b border-vector-lime pb-1">04 // Evidencia</a>
+        <a href="../metodologia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">05 // Metodología</a>
+        <a href="../diagnostico/index.html" class="text-text-muted hover:text-vector-lime transition-colors">06 // Diagnóstico</a>
+      </nav>
+
+      <!-- Action -->
+      <div class="flex items-center gap-4">
+        <a href="../diagnostico/index.html" class="btn-vector-primary px-5 py-2 text-xs font-mono tracking-wider">
+          TEST MADUREZ
+        </a>
+        <button id="mobile-menu-btn" class="md:hidden text-white hover:text-vector-lime p-1">
+          <span class="material-symbols-outlined text-3xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-nav" class="hidden md:hidden bg-vector-black/98 border-b border-white/10 px-6 py-6 font-mono text-sm uppercase space-y-4">
+      <a href="../index.html" class="block text-text-muted hover:text-vector-lime">← Volver al Hub 3D</a>
+      <a href="../manifiesto/index.html" class="block text-text-muted hover:text-vector-lime">01 // Manifiesto</a>
+      <a href="../ecosistema/index.html" class="block text-text-muted hover:text-vector-lime">02 // Ecosistema</a>
+      <a href="../ejecucion/index.html" class="block text-text-muted hover:text-vector-lime">03 // Ejecución</a>
+      <a href="index.html" class="block text-vector-lime font-bold">04 // Evidencia</a>
+      <a href="../metodologia/index.html" class="block text-text-muted hover:text-vector-lime">05 // Metodología</a>
+      <a href="../diagnostico/index.html" class="block text-text-muted hover:text-vector-lime">06 // Diagnóstico</a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 pt-32 pb-24 px-6 max-w-7xl mx-auto w-full">
+    
+    <!-- Top Title -->
+    <div class="flex flex-wrap items-end justify-between gap-6 border-b border-white/15 pb-6 mb-12">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+            04 // EVIDENCIA
+          </span>
+          <span class="text-text-muted font-mono text-xs">// VALIDACIÓN EMPÍRICA & KPIS</span>
+        </div>
+        <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
+          Resultados Tangibles y Casos Reales
+        </h1>
+      </div>
+      <p class="font-mono text-xs text-text-muted max-w-md">
+        No prometemos hipótesis: entregamos arquitectura validada con números auditables y crecimiento predecible.
+      </p>
+    </div>
+
+    <!-- Live Performance Metrics Ticker -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+      <div class="glass-panel p-6 border border-white/10 text-center">
+        <p class="font-display font-black text-4xl text-vector-lime mb-1">+340%</p>
+        <p class="font-mono text-xs text-text-muted uppercase">Incremento en Conversión</p>
+      </div>
+      <div class="glass-panel p-6 border border-white/10 text-center">
+        <p class="font-display font-black text-4xl text-white mb-1">&lt; 90s</p>
+        <p class="font-mono text-xs text-text-muted uppercase">Tiempo de Respuesta a Leads</p>
+      </div>
+      <div class="glass-panel p-6 border border-white/10 text-center">
+        <p class="font-display font-black text-4xl text-operative-purple mb-1">5.2x</p>
+        <p class="font-mono text-xs text-text-muted uppercase">ROI Promedio en 90 Días</p>
+      </div>
+      <div class="glass-panel p-6 border border-white/10 text-center">
+        <p class="font-display font-black text-4xl text-cognitive-blue mb-1">0%</p>
+        <p class="font-mono text-xs text-text-muted uppercase">Margen de Improvisación</p>
+      </div>
+    </div>
+
+    <!-- Interactive Before / After Comparison Widget -->
+    <div class="glass-panel p-8 sm:p-12 border border-white/20 mb-20 bg-surface-dark">
+      <div class="max-w-3xl mb-8">
+        <span class="font-mono text-xs text-vector-lime uppercase tracking-widest block mb-2">// COMPARATIVA ESTRUCTURAL</span>
+        <h2 class="font-display font-black text-2xl sm:text-3xl uppercase">Antes vs Después de Vector Inside</h2>
+        <p class="text-sm text-text-muted">Desliza para ver la transformación operativa al reemplazar la improvisación por arquitectura.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Before -->
+        <div class="p-6 bg-red-950/20 border border-red-500/30">
+          <div class="flex items-center gap-2 text-red-400 font-mono text-xs uppercase tracking-widest mb-4">
+            <span class="material-symbols-outlined text-sm">cancel</span>
+            <span>ESTADO ANTERIOR (IMPROVISACIÓN)</span>
+          </div>
+          <ul class="space-y-4 font-mono text-xs text-neutral-300">
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 font-bold">✕</span>
+              <span>Leads perdidos por falta de seguimiento inmediato y procesos en hojas de cálculo.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 font-bold">✕</span>
+              <span>Presupuesto publicitario quemado sin saber exactamente qué canal genera facturación.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 font-bold">✕</span>
+              <span>Sitios web lentos, genéricos y sin retención que compiten únicamente por precio bajo.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- After -->
+        <div class="p-6 bg-lime-950/20 border border-vector-lime/50">
+          <div class="flex items-center gap-2 text-vector-lime font-mono text-xs uppercase tracking-widest mb-4">
+            <span class="material-symbols-outlined text-sm">check_circle</span>
+            <span>ESTADO CON VECTOR INSIDE (ARQUITECTURA)</span>
+          </div>
+          <ul class="space-y-4 font-mono text-xs text-neutral-200">
+            <li class="flex items-start gap-2">
+              <span class="text-vector-lime font-bold">✓</span>
+              <span>Pipeline comercial 100% automatizado con atención inmediata vía IA y scoring predictivo.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-vector-lime font-bold">✓</span>
+              <span>Dashboard ejecutivo en tiempo real con atribución multicanal exacta y CAC controlado.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-vector-lime font-bold">✓</span>
+              <span>Posicionamiento brutalista y autoridad absoluta con interfaces 3D de alta retención.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
+      <a href="../ejecucion/index.html" class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> 03 // EJECUCIÓN
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="../metodologia/index.html" class="btn-vector-primary px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
+          <span>SIGUIENTE: 05 // METODOLOGÍA</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-white/10 bg-surface-dark py-8 px-6 text-center font-mono text-xs text-text-muted">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
+      <span>SYS_V.3.0.30</span>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>06 // DIAGNÓSTICO | Vector Inside 3.0</title>
+  <meta name="description" content="Test Interactivo de Madurez Digital y Diagnóstico Nuclear Vector Inside." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../style.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'vector-black': '#080808',
+            'vector-lime': '#c3f400',
+            'operative-purple': '#9d4edd',
+            'cognitive-blue': '#433dae',
+            'surface-dark': '#131313',
+            'surface-high': '#201f1f',
+            'text-muted': '#c4c9ac'
+          },
+          fontFamily: {
+            display: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-vector-black text-white antialiased selection:bg-vector-lime selection:text-vector-black overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== SHARED HEADER ==================== -->
+  <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <img src="../headerlogo.png" alt="Vector Inside" class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+        <span class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">HUB 3D</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-7 font-mono text-xs tracking-widest uppercase">
+        <a href="../manifiesto/index.html" class="text-text-muted hover:text-vector-lime transition-colors">01 // Manifiesto</a>
+        <a href="../ecosistema/index.html" class="text-text-muted hover:text-vector-lime transition-colors">02 // Ecosistema</a>
+        <a href="../ejecucion/index.html" class="text-text-muted hover:text-vector-lime transition-colors">03 // Ejecución</a>
+        <a href="../evidencia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">04 // Evidencia</a>
+        <a href="../metodologia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">05 // Metodología</a>
+        <a href="index.html" class="text-vector-lime border-b border-vector-lime pb-1">06 // Diagnóstico</a>
+      </nav>
+
+      <!-- Action -->
+      <div class="flex items-center gap-4">
+        <a href="../index.html" class="btn-vector-outline px-5 py-2 text-xs font-mono tracking-wider">
+          VOLVER AL HUB
+        </a>
+        <button id="mobile-menu-btn" class="md:hidden text-white hover:text-vector-lime p-1">
+          <span class="material-symbols-outlined text-3xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-nav" class="hidden md:hidden bg-vector-black/98 border-b border-white/10 px-6 py-6 font-mono text-sm uppercase space-y-4">
+      <a href="../index.html" class="block text-text-muted hover:text-vector-lime">← Volver al Hub 3D</a>
+      <a href="../manifiesto/index.html" class="block text-text-muted hover:text-vector-lime">01 // Manifiesto</a>
+      <a href="../ecosistema/index.html" class="block text-text-muted hover:text-vector-lime">02 // Ecosistema</a>
+      <a href="../ejecucion/index.html" class="block text-text-muted hover:text-vector-lime">03 // Ejecución</a>
+      <a href="../evidencia/index.html" class="block text-text-muted hover:text-vector-lime">04 // Evidencia</a>
+      <a href="../metodologia/index.html" class="block text-text-muted hover:text-vector-lime">05 // Metodología</a>
+      <a href="index.html" class="block text-vector-lime font-bold">06 // Diagnóstico</a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT: INTERACTIVE ASSESSMENT ==================== -->
+  <main class="flex-1 pt-32 pb-24 px-6 max-w-7xl mx-auto w-full">
+    
+    <!-- Top Title -->
+    <div class="flex flex-wrap items-end justify-between gap-6 border-b border-white/15 pb-6 mb-12">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+            06 // DIAGNÓSTICO
+          </span>
+          <span class="text-text-muted font-mono text-xs">// EVALUACIÓN DE MADUREZ DIGITAL</span>
+        </div>
+        <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
+          Test de Fricción & Auditoría Nuclear
+        </h1>
+      </div>
+      <p class="font-mono text-xs text-text-muted max-w-md">
+        Responde 5 preguntas clave en 60 segundos y obtén un diagnóstico en tiempo real del estado de tu arquitectura empresarial.
+      </p>
+    </div>
+
+    <!-- Assessment Widget & Radar Result -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
+      
+      <!-- Left: Interactive Form (7 Cols) -->
+      <div class="lg:col-span-7 glass-panel p-8 sm:p-10 border border-white/20 bg-surface-dark space-y-8">
+        
+        <!-- Question 1 -->
+        <div class="space-y-3">
+          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">01 // ¿CÓMO GESTIONAS TUS DATOS Y PIPELINE COMERCIAL?</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q1" value="10" checked class="accent-[#c3f400] diag-radio">
+              <span>Hojas de cálculo / Procesos manuales sin CRM centralizado.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q1" value="25" class="accent-[#c3f400] diag-radio">
+              <span>CRM básico, pero sin automatizaciones ni sincronización con marketing.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q1" value="40" class="accent-[#c3f400] diag-radio">
+              <span>Ecosistema integrado con IA y atribución multicanal en tiempo real.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="space-y-3">
+          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">02 // ¿CUÁL ES TU TIEMPO PROMEDIO DE RESPUESTA A LEADS?</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q2" value="10" checked class="accent-[#c3f400] diag-radio">
+              <span>Más de 4 horas o al día siguiente.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q2" value="25" class="accent-[#c3f400] diag-radio">
+              <span>Entre 15 minutos y 1 hora.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q2" value="40" class="accent-[#c3f400] diag-radio">
+              <span>Menos de 90 segundos mediante agentes IA autónomos.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="space-y-3">
+          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">03 // ¿CÓMO DESCRIBIRÍAS LA AUTORIDAD VISUAL DE TU MARCA?</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q3" value="10" checked class="accent-[#c3f400] diag-radio">
+              <span>Genérica; competimos principalmente por precio frente a la competencia.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q3" value="25" class="accent-[#c3f400] diag-radio">
+              <span>Correcta pero tradicional; no proyecta vanguardia tecnológica.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+              <input type="radio" name="q3" value="40" class="accent-[#c3f400] diag-radio">
+              <span>Posicionamiento brutalista y experiencia 3D de alta conversión.</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Real-time Live Result (5 Cols) -->
+      <div class="lg:col-span-5 glass-panel p-8 sm:p-10 border border-vector-lime/40 bg-surface-dark space-y-6 flex flex-col justify-between">
+        <div>
+          <span class="font-mono text-xs text-vector-lime uppercase tracking-widest block mb-2">// RADIOGRAFÍA EN TIEMPO REAL</span>
+          <h2 class="font-display font-black text-2xl uppercase mb-6">Puntaje de Madurez Vector</h2>
+
+          <!-- Visual Score Dial -->
+          <div class="p-6 bg-black/70 border border-white/10 text-center mb-6">
+            <p id="score-number" class="font-display font-black text-6xl text-vector-lime mb-2">30 / 120</p>
+            <p id="score-status" class="font-mono text-xs uppercase text-red-400 font-bold">NIVEL: IMPROVISACIÓN CRÍTICA</p>
+          </div>
+
+          <div class="space-y-3 font-mono text-xs">
+            <p class="text-white font-bold uppercase">// DIAGNÓSTICO ESTIMADO:</p>
+            <p id="score-explanation" class="text-text-muted leading-relaxed">
+              Tu empresa presenta fugas críticas de capital debido a tareas operativas manuales y falta de una tesis de aceleración digital unificada.
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-white/10">
+          <a id="whatsapp-cta-link" href="https://wa.me/?text=Hola%20Vector%20Inside,%20obtuve%20mi%20Diagnostico%20de%20Madurez%20Digital%20y%20quiero%20agendar%20una%20sesion%20estrategica." target="_blank" class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest text-center block uppercase shadow-[0_0_25px_rgba(195,244,0,0.3)]">
+            AGENDAR AUDITORÍA NUCLEAR
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
+      <a href="../metodologia/index.html" class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> 05 // METODOLOGÍA
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="../index.html" class="btn-vector-outline px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
+          <span>VOLVER AL HUB 3D PRINCIPAL</span>
+          <span class="material-symbols-outlined text-sm">home</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-white/10 bg-surface-dark py-8 px-6 text-center font-mono text-xs text-text-muted">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
+      <span>SYS_V.3.0.30</span>
+    </div>
+  </footer>
+
+  <script>
+    // Realtime diagnostic test calculation
+    const radios = document.querySelectorAll('.diag-radio');
+    const scoreNum = document.getElementById('score-number');
+    const scoreStatus = document.getElementById('score-status');
+    const scoreExp = document.getElementById('score-explanation');
+    const whatsappLink = document.getElementById('whatsapp-cta-link');
+
+    function calculateScore() {
+      let total = 0;
+      radios.forEach(r => {
+        if (r.checked) total += parseInt(r.value);
+      });
+
+      scoreNum.textContent = `${total} / 120`;
+
+      if (total <= 45) {
+        scoreStatus.textContent = 'NIVEL: IMPROVISACIÓN CRÍTICA';
+        scoreStatus.className = 'font-mono text-xs uppercase text-red-400 font-bold';
+        scoreExp.textContent = 'Tu operación presenta alta fricción y pérdida de capital por procesos manuales desconectados. Se requiere una intervención inmediata en arquitectura operativa.';
+      } else if (total <= 85) {
+        scoreStatus.textContent = 'NIVEL: FRICCIÓN OPERATIVA MODERADA';
+        scoreStatus.className = 'font-mono text-xs uppercase text-yellow-400 font-bold';
+        scoreExp.textContent = 'Cuentas con herramientas básicas, pero careces de integración y automatización con IA, limitando tu capacidad de escalar sin aumentar costos.';
+      } else {
+        scoreStatus.textContent = 'NIVEL: LISTO PARA ACELERACIÓN VECTORIAL';
+        scoreStatus.className = 'font-mono text-xs uppercase text-vector-lime font-bold';
+        scoreExp.textContent = 'Tu negocio cuenta con bases sólidas y está en la posición ideal para implementar interfaces vanguardistas y modelos predictivos avanzados.';
+      }
+
+      const msg = encodeURIComponent(`Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ${total}/120 - ${scoreStatus.textContent}) y me gustaría agendar la sesión estratégica.`);
+      whatsappLink.href = `https://wa.me/?text=${msg}`;
+    }
+
+    radios.forEach(r => r.addEventListener('change', calculateScore));
+    calculateScore();
+
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
+    }
+  </script>
+</body>
+</html>

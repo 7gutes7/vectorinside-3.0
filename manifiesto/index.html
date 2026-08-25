@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01 // MANIFIESTO | Vector Inside 3.0</title>
+  <meta name="description" content="Manifiesto Vector Inside: Convertimos la fricción y la improvisación en arquitectura de crecimiento integral." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../style.css" />
+
+  <!-- GSAP for Smooth Kinetic Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'vector-black': '#080808',
+            'vector-lime': '#c3f400',
+            'operative-purple': '#9d4edd',
+            'cognitive-blue': '#433dae',
+            'surface-dark': '#131313',
+            'surface-high': '#201f1f',
+            'text-muted': '#c4c9ac'
+          },
+          fontFamily: {
+            display: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-vector-black text-white antialiased selection:bg-vector-lime selection:text-vector-black overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== SHARED HEADER ==================== -->
+  <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <img src="../headerlogo.png" alt="Vector Inside" class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+        <span class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">HUB 3D</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-7 font-mono text-xs tracking-widest uppercase">
+        <a href="index.html" class="text-vector-lime border-b border-vector-lime pb-1">01 // Manifiesto</a>
+        <a href="../ecosistema/index.html" class="text-text-muted hover:text-vector-lime transition-colors">02 // Ecosistema</a>
+        <a href="../ejecucion/index.html" class="text-text-muted hover:text-vector-lime transition-colors">03 // Ejecución</a>
+        <a href="../evidencia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">04 // Evidencia</a>
+        <a href="../metodologia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">05 // Metodología</a>
+        <a href="../diagnostico/index.html" class="text-text-muted hover:text-vector-lime transition-colors">06 // Diagnóstico</a>
+      </nav>
+
+      <!-- Action -->
+      <div class="flex items-center gap-4">
+        <a href="../diagnostico/index.html" class="btn-vector-primary px-5 py-2 text-xs font-mono tracking-wider">
+          TEST MADUREZ
+        </a>
+        <button id="mobile-menu-btn" class="md:hidden text-white hover:text-vector-lime p-1">
+          <span class="material-symbols-outlined text-3xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-nav" class="hidden md:hidden bg-vector-black/98 border-b border-white/10 px-6 py-6 font-mono text-sm uppercase space-y-4">
+      <a href="../index.html" class="block text-text-muted hover:text-vector-lime">← Volver al Hub 3D</a>
+      <a href="index.html" class="block text-vector-lime font-bold">01 // Manifiesto</a>
+      <a href="../ecosistema/index.html" class="block text-text-muted hover:text-vector-lime">02 // Ecosistema</a>
+      <a href="../ejecucion/index.html" class="block text-text-muted hover:text-vector-lime">03 // Ejecución</a>
+      <a href="../evidencia/index.html" class="block text-text-muted hover:text-vector-lime">04 // Evidencia</a>
+      <a href="../metodologia/index.html" class="block text-text-muted hover:text-vector-lime">05 // Metodología</a>
+      <a href="../diagnostico/index.html" class="block text-text-muted hover:text-vector-lime">06 // Diagnóstico</a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 pt-32 pb-24 px-6 max-w-7xl mx-auto w-full">
+    
+    <!-- Top Meta Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6 mb-12">
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+          01 // MANIFIESTO
+        </span>
+        <span class="text-text-muted font-mono text-xs">// ARQUITECTURA VS IMPROVISACIÓN</span>
+      </div>
+
+      <!-- Controls: Toggle Reading Mode -->
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xs text-text-muted">MODO LECTURA:</span>
+        <button id="toggle-reading-mode" class="px-3 py-1 font-mono text-xs border border-white/20 bg-white/5 hover:border-vector-lime hover:text-vector-lime transition-all">
+          ENFOQUE RÁPIDO
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Brutalist Statement Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-white/20 bg-surface-dark mb-16 overflow-hidden">
+      
+      <!-- Left Column: Visual Image with pure brightness -->
+      <div class="lg:col-span-4 relative min-h-[360px] lg:min-h-full border-b lg:border-b-0 lg:border-r border-white/20 overflow-hidden group">
+        <img src="../arqui.jpeg" alt="Arquitectura Vector Inside" class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-vector-black/80 via-transparent to-transparent"></div>
+        <div class="absolute bottom-6 left-6 right-6">
+          <p class="font-mono text-xs text-vector-lime tracking-widest uppercase">COORDENADA NUCLEO</p>
+          <p class="font-display font-black text-xl uppercase">Convertimos el Caos en Estructura</p>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Kinetic Text -->
+      <div class="lg:col-span-8 p-8 sm:p-12 lg:p-16 flex flex-col justify-between bg-white text-vector-black">
+        <div>
+          <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-4 block">// DECLARACIÓN FUNDACIONAL</span>
+          <h1 id="kinetic-manifesto" class="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase leading-tight tracking-tight mb-8">
+            Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no método; presupuesto publicitario, pero no tracción predecible.
+          </h1>
+        </div>
+
+        <div class="p-6 bg-vector-black text-white border-l-4 border-vector-lime">
+          <p class="font-display font-black text-xl sm:text-2xl text-vector-lime uppercase tracking-tight mb-2">
+            No agregamos parches: rediseñamos la arquitectura desde el núcleo.
+          </p>
+          <p class="font-mono text-xs text-text-muted">
+            La aceleración real no es aumentar el volumen de ruido, sino eliminar la fricción estructural que frena la conversión.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Comparison: Fricción vs Solución Vector -->
+    <div class="mb-20">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <p class="font-mono text-xs text-vector-lime tracking-widest uppercase mb-2">// RADIOGRAFÍA DE LA FRICCIÓN</p>
+        <h2 class="font-display font-black text-3xl sm:text-4xl uppercase">Haz clic en cada síntoma para diagnosticar el impacto</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="friction-cards-grid">
+        
+        <!-- Card 1 -->
+        <div class="friction-card glass-panel p-8 border border-white/10 cursor-pointer hover:border-vector-lime transition-all" data-fric="1">
+          <div class="flex items-center justify-between mb-6">
+            <span class="font-mono text-2xl font-black text-vector-lime">01</span>
+            <span class="material-symbols-outlined text-white/50 group-hover:text-vector-lime">troubleshoot</span>
+          </div>
+          <h3 class="font-display font-bold text-xl uppercase mb-3">Improvisación Táctica</h3>
+          <p class="text-sm text-text-muted leading-relaxed mb-4">
+            Estrategias que cambian cada mes según tendencias aisladas, sin una tesis central de crecimiento.
+          </p>
+          <div class="diagnostic-reveal hidden pt-4 border-t border-white/10 text-xs font-mono text-vector-lime">
+            → Solución Vector: Matriz Operativa de Crecimiento predecible.
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="friction-card glass-panel p-8 border border-white/10 cursor-pointer hover:border-vector-lime transition-all" data-fric="2">
+          <div class="flex items-center justify-between mb-6">
+            <span class="font-mono text-2xl font-black text-operative-purple">02</span>
+            <span class="material-symbols-outlined text-white/50">layers_clear</span>
+          </div>
+          <h3 class="font-display font-bold text-xl uppercase mb-3">Silos Tecnológicos</h3>
+          <p class="text-sm text-text-muted leading-relaxed mb-4">
+            Herramientas desconectadas, datos dispersos y equipos perdiendo 30% de su tiempo en tareas manuales.
+          </p>
+          <div class="diagnostic-reveal hidden pt-4 border-t border-white/10 text-xs font-mono text-operative-purple">
+            → Solución Vector: Infraestructura de Datos y Automatización Cognitiva.
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="friction-card glass-panel p-8 border border-white/10 cursor-pointer hover:border-vector-lime transition-all" data-fric="3">
+          <div class="flex items-center justify-between mb-6">
+            <span class="font-mono text-2xl font-black text-cognitive-blue">03</span>
+            <span class="material-symbols-outlined text-white/50">brand_awareness</span>
+          </div>
+          <h3 class="font-display font-bold text-xl uppercase mb-3">Identidad Sin Instinto</h3>
+          <p class="text-sm text-text-muted leading-relaxed mb-4">
+            Marcas genéricas que compiten por precio porque no logran proyectar autoridad ni diferenciación implacable.
+          </p>
+          <div class="diagnostic-reveal hidden pt-4 border-t border-white/10 text-xs font-mono text-cognitive-blue">
+            → Solución Vector: Posicionamiento Brutalista y Vanguardia Visual.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Dock -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
+      <a href="../index.html" class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> REGRESAR AL HUB 3D
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="../ecosistema/index.html" class="btn-vector-primary px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
+          <span>SIGUIENTE: 02 // ECOSISTEMA</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-white/10 bg-surface-dark py-8 px-6 text-center font-mono text-xs text-text-muted">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
+      <span>SYS_V.3.0.30</span>
+    </div>
+  </footer>
+
+  <!-- Interactivity Script -->
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
+    }
+
+    // Interactive card expansion
+    const cards = document.querySelectorAll('.friction-card');
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const reveal = card.querySelector('.diagnostic-reveal');
+        if (reveal) {
+          reveal.classList.toggle('hidden');
+          card.classList.toggle('border-vector-lime');
+        }
+      });
+    });
+
+    // Reading mode toggle
+    const toggleBtn = document.getElementById('toggle-reading-mode');
+    let fastMode = false;
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        fastMode = !fastMode;
+        toggleBtn.textContent = fastMode ? 'MODO COMPLETO' : 'ENFOQUE RÁPIDO';
+        toggleBtn.classList.toggle('bg-vector-lime');
+        toggleBtn.classList.toggle('text-vector-black');
+        document.getElementById('friction-cards-grid').scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  </script>
+</body>
+</html>

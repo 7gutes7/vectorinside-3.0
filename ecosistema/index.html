@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>02 // ECOSISTEMA | Vector Inside 3.0</title>
+  <meta name="description" content="Ecosistema Vector Inside: 3 Vectores Nucleares de Aceleración (Operativo, Cognitivo y Expansivo)." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../style.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'vector-black': '#080808',
+            'vector-lime': '#c3f400',
+            'operative-purple': '#9d4edd',
+            'cognitive-blue': '#433dae',
+            'surface-dark': '#131313',
+            'surface-high': '#201f1f',
+            'text-muted': '#c4c9ac'
+          },
+          fontFamily: {
+            display: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-vector-black text-white antialiased selection:bg-vector-lime selection:text-vector-black overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== SHARED HEADER ==================== -->
+  <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <img src="../headerlogo.png" alt="Vector Inside" class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+        <span class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">HUB 3D</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-7 font-mono text-xs tracking-widest uppercase">
+        <a href="../manifiesto/index.html" class="text-text-muted hover:text-vector-lime transition-colors">01 // Manifiesto</a>
+        <a href="index.html" class="text-vector-lime border-b border-vector-lime pb-1">02 // Ecosistema</a>
+        <a href="../ejecucion/index.html" class="text-text-muted hover:text-vector-lime transition-colors">03 // Ejecución</a>
+        <a href="../evidencia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">04 // Evidencia</a>
+        <a href="../metodologia/index.html" class="text-text-muted hover:text-vector-lime transition-colors">05 // Metodología</a>
+        <a href="../diagnostico/index.html" class="text-text-muted hover:text-vector-lime transition-colors">06 // Diagnóstico</a>
+      </nav>
+
+      <!-- Action -->
+      <div class="flex items-center gap-4">
+        <a href="../diagnostico/index.html" class="btn-vector-primary px-5 py-2 text-xs font-mono tracking-wider">
+          TEST MADUREZ
+        </a>
+        <button id="mobile-menu-btn" class="md:hidden text-white hover:text-vector-lime p-1">
+          <span class="material-symbols-outlined text-3xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-nav" class="hidden md:hidden bg-vector-black/98 border-b border-white/10 px-6 py-6 font-mono text-sm uppercase space-y-4">
+      <a href="../index.html" class="block text-text-muted hover:text-vector-lime">← Volver al Hub 3D</a>
+      <a href="../manifiesto/index.html" class="block text-text-muted hover:text-vector-lime">01 // Manifiesto</a>
+      <a href="index.html" class="block text-vector-lime font-bold">02 // Ecosistema</a>
+      <a href="../ejecucion/index.html" class="block text-text-muted hover:text-vector-lime">03 // Ejecución</a>
+      <a href="../evidencia/index.html" class="block text-text-muted hover:text-vector-lime">04 // Evidencia</a>
+      <a href="../metodologia/index.html" class="block text-text-muted hover:text-vector-lime">05 // Metodología</a>
+      <a href="../diagnostico/index.html" class="block text-text-muted hover:text-vector-lime">06 // Diagnóstico</a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 pt-32 pb-24 px-6 max-w-7xl mx-auto w-full">
+    
+    <!-- Header Section -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6 mb-12">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+            02 // ECOSISTEMA
+          </span>
+          <span class="text-text-muted font-mono text-xs">// 3 VECTORES DE ACELERACIÓN</span>
+        </div>
+        <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
+          Arquitectura Tridimensional de Crecimiento
+        </h1>
+      </div>
+      <p class="font-mono text-xs text-text-muted max-w-md">
+        Un sistema integral que unifica ingeniería de datos, automatización operativa y diseño de alto impacto.
+      </p>
+    </div>
+
+    <!-- Vector Tabs Switcher -->
+    <div class="flex flex-wrap items-center gap-3 mb-8">
+      <button class="vector-tab-btn active px-6 py-3 font-mono text-xs tracking-wider uppercase border border-vector-lime bg-vector-lime text-vector-black font-bold transition-all" data-target="vec-operativo">
+        [ VECTOR OPERATIVO ]
+      </button>
+      <button class="vector-tab-btn px-6 py-3 font-mono text-xs tracking-wider uppercase border border-white/20 bg-surface-dark text-white hover:border-operative-purple transition-all" data-target="vec-cognitivo">
+        [ VECTOR COGNITIVO ]
+      </button>
+      <button class="vector-tab-btn px-6 py-3 font-mono text-xs tracking-wider uppercase border border-white/20 bg-surface-dark text-white hover:border-cognitive-blue transition-all" data-target="vec-expansivo">
+        [ VECTOR EXPANSIVO ]
+      </button>
+    </div>
+
+    <!-- Vector Panels -->
+    <div class="mb-20">
+      
+      <!-- Panel 1: Vector Operativo -->
+      <div id="vec-operativo" class="vector-panel grid grid-cols-1 lg:grid-cols-12 gap-8 glass-panel p-8 sm:p-12 border border-vector-lime/40">
+        <div class="lg:col-span-6 flex flex-col justify-between">
+          <div>
+            <span class="font-mono text-xs text-vector-lime tracking-widest uppercase block mb-3">// INFRAESTRUCTURA & EJECUCIÓN</span>
+            <h2 class="font-display font-black text-3xl sm:text-4xl uppercase text-white mb-6">
+              Automatización de Procesos & Eliminación de Desperdicio
+            </h2>
+            <p class="text-text-muted text-base leading-relaxed mb-6">
+              Diseñamos sistemas que reducen el trabajo manual repetitivo en un 70%. Convertimos flujos comerciales complejos en pipelines automatizados y predecibles.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
+            <div>
+              <p class="font-display font-black text-3xl text-vector-lime">-70%</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Tiempo en Tareas Manuales</p>
+            </div>
+            <div>
+              <p class="font-display font-black text-3xl text-vector-lime">3.4x</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Velocidad de Cierre Comercial</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 bg-surface-high p-6 border border-white/10 flex flex-col justify-center space-y-4 font-mono text-xs">
+          <p class="text-vector-lime uppercase tracking-widest font-bold">// CAPACIDADES NUCLEARES:</p>
+          <div class="p-3 bg-black/50 border-l-2 border-vector-lime">
+            <span class="text-white font-bold block">1. Orquestación de CRM & Pipelines</span>
+            <span class="text-text-muted">Sincronización bidireccional en tiempo real entre marketing y ventas.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-vector-lime">
+            <span class="text-white font-bold block">2. Arquitectura de Datos Unificada</span>
+            <span class="text-text-muted">Dashboards ejecutivos con métricas de costo por adquisición y LTV reales.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-vector-lime">
+            <span class="text-white font-bold block">3. Reducción de Latencia Operativa</span>
+            <span class="text-text-muted">Atención inmediata a leads en menos de 90 segundos mediante IA.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Vector Cognitivo -->
+      <div id="vec-cognitivo" class="vector-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-8 glass-panel p-8 sm:p-12 border border-operative-purple/40">
+        <div class="lg:col-span-6 flex flex-col justify-between">
+          <div>
+            <span class="font-mono text-xs text-operative-purple tracking-widest uppercase block mb-3">// INTELIGENCIA & MODELOS PREDICTIVOS</span>
+            <h2 class="font-display font-black text-3xl sm:text-4xl uppercase text-white mb-6">
+              Inteligencia Artificial Aplicada a la Decisión
+            </h2>
+            <p class="text-text-muted text-base leading-relaxed mb-6">
+              Transformamos montañas de datos crudos en agentes autónomos y motores predictivos que guían las decisiones críticas de tu negocio.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
+            <div>
+              <p class="font-display font-black text-3xl text-operative-purple">+180%</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Precisión en Pronóstico de Ventas</p>
+            </div>
+            <div>
+              <p class="font-display font-black text-3xl text-operative-purple">24/7</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Calificación Cognitiva Autónoma</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 bg-surface-high p-6 border border-white/10 flex flex-col justify-center space-y-4 font-mono text-xs">
+          <p class="text-operative-purple uppercase tracking-widest font-bold">// CAPACIDADES NUCLEARES:</p>
+          <div class="p-3 bg-black/50 border-l-2 border-operative-purple">
+            <span class="text-white font-bold block">1. Agentes IA Especializados en Dominio</span>
+            <span class="text-text-muted">Modelos entrenados con la data propietaria de tu empresa.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-operative-purple">
+            <span class="text-white font-bold block">2. Scoring Predictivo de Prospectos</span>
+            <span class="text-text-muted">Priorización algorítmica de cuentas de alto valor.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-operative-purple">
+            <span class="text-white font-bold block">3. Automatización de Informes Estratégicos</span>
+            <span class="text-text-muted">Síntesis ejecutiva instantánea sin intervención humana.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Vector Expansivo -->
+      <div id="vec-expansivo" class="vector-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-8 glass-panel p-8 sm:p-12 border border-cognitive-blue/40">
+        <div class="lg:col-span-6 flex flex-col justify-between">
+          <div>
+            <span class="font-mono text-xs text-cognitive-blue tracking-widest uppercase block mb-3">// BRANDING, EXPERIENCIA & CONVERSIÓN</span>
+            <h2 class="font-display font-black text-3xl sm:text-4xl uppercase text-white mb-6">
+              Diseño de Alto Impacto & Dominio Visual
+            </h2>
+            <p class="text-text-muted text-base leading-relaxed mb-6">
+              Interfaces WebGL, experiencias 3D y sistemas de identidad brutalista que posicionan a tu marca como la única opción viable en su categoría.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
+            <div>
+              <p class="font-display font-black text-3xl text-cognitive-blue">+320%</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Tiempo de Retención en Web</p>
+            </div>
+            <div>
+              <p class="font-display font-black text-3xl text-cognitive-blue">4.2x</p>
+              <p class="font-mono text-xs text-text-muted uppercase">Autoridad Percibida de Marca</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 bg-surface-high p-6 border border-white/10 flex flex-col justify-center space-y-4 font-mono text-xs">
+          <p class="text-cognitive-blue uppercase tracking-widest font-bold">// CAPACIDADES NUCLEARES:</p>
+          <div class="p-3 bg-black/50 border-l-2 border-cognitive-blue">
+            <span class="text-white font-bold block">1. Desarrollo Web Vanguardista (WebGL / Three.js)</span>
+            <span class="text-text-muted">Experiencias que rompen los estándares genéricos de la industria.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-cognitive-blue">
+            <span class="text-white font-bold block">2. Sistemas de Diseño Escalables</span>
+            <span class="text-text-muted">Componentes reutilizables con rendimiento de carga ultra-rápido.</span>
+          </div>
+          <div class="p-3 bg-black/50 border-l-2 border-cognitive-blue">
+            <span class="text-white font-bold block">3. Posicionamiento Brutalista</span>
+            <span class="text-text-muted">Narrativas visuales que erradican la comparación de precio.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Interactive ROI / Waste Calculator -->
+    <div class="glass-panel p-8 sm:p-12 border border-white/20 mb-20 bg-surface-dark">
+      <div class="max-w-3xl mb-8">
+        <span class="font-mono text-xs text-vector-lime uppercase tracking-widest block mb-2">// SIMULADOR INTERACTIVO</span>
+        <h2 class="font-display font-black text-2xl sm:text-3xl uppercase">Calculadora de Fricción Operativa</h2>
+        <p class="text-sm text-text-muted">Estima cuánto capital y tiempo pierde tu equipo al año por operar con procesos manuales y herramientas desarticuladas.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Sliders -->
+        <div class="lg:col-span-6 space-y-6">
+          <div>
+            <div class="flex justify-between font-mono text-xs mb-2">
+              <span>TAMAÑO DEL EQUIPO COMERCIAL/OPERATIVO:</span>
+              <span id="team-size-val" class="text-vector-lime font-bold">12 personas</span>
+            </div>
+            <input type="range" id="team-size" min="3" max="100" value="12" class="w-full accent-[#c3f400] cursor-pointer" />
+          </div>
+
+          <div>
+            <div class="flex justify-between font-mono text-xs mb-2">
+              <span>COSTO PROMEDIO HORA POR COLABORADOR (USD):</span>
+              <span id="cost-hour-val" class="text-vector-lime font-bold">$25 USD/h</span>
+            </div>
+            <input type="range" id="cost-hour" min="10" max="120" value="25" class="w-full accent-[#c3f400] cursor-pointer" />
+          </div>
+        </div>
+
+        <!-- Calculated Live Metrics -->
+        <div class="lg:col-span-6 grid grid-cols-2 gap-4 bg-black/60 p-6 border border-white/10">
+          <div class="p-4 bg-surface-high border-l-2 border-red-500">
+            <p class="font-mono text-[10px] text-text-muted uppercase">HORAS PERDIDAS / AÑO</p>
+            <p id="calc-hours" class="font-display font-black text-2xl text-red-400">4,320 hrs</p>
+            <p class="font-mono text-[9px] text-neutral-500 mt-1">~360 hrs/año por persona</p>
+          </div>
+          <div class="p-4 bg-surface-high border-l-2 border-red-500">
+            <p class="font-mono text-[10px] text-text-muted uppercase">CAPITAL DESPERDICIADO</p>
+            <p id="calc-waste" class="font-display font-black text-2xl text-red-400">$108,000</p>
+            <p class="font-mono text-[9px] text-neutral-500 mt-1">Costo de ineficiencia</p>
+          </div>
+          <div class="col-span-2 p-4 bg-surface-high border-l-2 border-vector-lime flex items-center justify-between">
+            <div>
+              <p class="font-mono text-[10px] text-vector-lime uppercase">RETORNO ESTIMADO CON VECTOR INSIDE</p>
+              <p id="calc-savings" class="font-display font-black text-xl text-vector-lime">+$75,600 USD / AÑO</p>
+            </div>
+            <a href="../diagnostico/index.html" class="btn-vector-primary px-4 py-2 text-[10px] font-mono">
+              AUDITAR AHORA
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
+      <a href="../manifiesto/index.html" class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> 01 // MANIFIESTO
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="../ejecucion/index.html" class="btn-vector-primary px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
+          <span>SIGUIENTE: 03 // EJECUCIÓN</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-white/10 bg-surface-dark py-8 px-6 text-center font-mono text-xs text-text-muted">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
+      <span>SYS_V.3.0.30</span>
+    </div>
+  </footer>
+
+  <script>
+    // Tab switching logic
+    const tabs = document.querySelectorAll('.vector-tab-btn');
+    const panels = document.querySelectorAll('.vector-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.classList.remove('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+          t.classList.add('bg-surface-dark', 'text-white');
+        });
+        panels.forEach(p => p.classList.add('hidden'));
+
+        tab.classList.add('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+        tab.classList.remove('bg-surface-dark', 'text-white');
+
+        const target = document.getElementById(tab.dataset.target);
+        if (target) target.classList.remove('hidden');
+      });
+    });
+
+    // Live Calculator Logic
+    const teamInput = document.getElementById('team-size');
+    const costInput = document.getElementById('cost-hour');
+    const teamVal = document.getElementById('team-size-val');
+    const costVal = document.getElementById('cost-hour-val');
+    const calcHours = document.getElementById('calc-hours');
+    const calcWaste = document.getElementById('calc-waste');
+    const calcSavings = document.getElementById('calc-savings');
+
+    function updateCalc() {
+      const team = parseInt(teamInput.value);
+      const cost = parseInt(costInput.value);
+      teamVal.textContent = `${team} personas`;
+      costVal.textContent = `$${cost} USD/h`;
+
+      const lostHoursPerPerson = 360; // hours lost per year in manual friction
+      const totalLostHours = team * lostHoursPerPerson;
+      const totalWaste = totalLostHours * cost;
+      const savings = Math.round(totalWaste * 0.70);
+
+      calcHours.textContent = totalLostHours.toLocaleString() + ' hrs';
+      calcWaste.textContent = '$' + totalWaste.toLocaleString() + ' USD';
+      calcSavings.textContent = '+$' + savings.toLocaleString() + ' USD / AÑO';
+    }
+
+    teamInput.addEventListener('input', updateCalc);
+    costInput.addEventListener('input', updateCalc);
+    updateCalc();
+
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
+    }
+  </script>
+</body>
+</html>
