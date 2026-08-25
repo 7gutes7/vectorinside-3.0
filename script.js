@@ -766,6 +766,24 @@ function initHero3DModel() {
         }
       }
 
+      // 5b. Section 2 Optical Blur-to-Focus Portal Reveal Effect (28px -> 0px)
+      const secPortal = document.getElementById('seccion-portal-revelada');
+      if (secPortal) {
+        if (currentScrollLerp > 0.48) {
+          const pFocus = Math.min((currentScrollLerp - 0.48) / 0.45, 1.0);
+          const blurAmount = (1.0 - pFocus) * 28; // 28px -> 0px crisp focus
+          const opacityAmount = 0.15 + pFocus * 0.85; // 0.15 -> 1.0
+          const scaleAmount = 0.94 + pFocus * 0.06; // 0.94 -> 1.0
+          secPortal.style.filter = `blur(${blurAmount.toFixed(1)}px)`;
+          secPortal.style.opacity = opacityAmount.toFixed(2);
+          secPortal.style.transform = `scale(${scaleAmount.toFixed(3)})`;
+        } else {
+          secPortal.style.filter = 'blur(28px)';
+          secPortal.style.opacity = '0.15';
+          secPortal.style.transform = 'scale(0.94)';
+        }
+      }
+
       // 6. Materials & Eye Glow Shader Animation
       const targetHoverLerp = isHoveredOverModel ? 1.0 : 0.0;
       currentHoverLerp += (targetHoverLerp - currentHoverLerp) * 0.10;
