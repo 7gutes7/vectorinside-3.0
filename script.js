@@ -677,30 +677,107 @@ function initHero3DModel() {
     ro.observe(container);
   }
 
-  // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Yellow Eye Glow (hover)
+  // Register ScrollTrigger if available
+  let scrollProgress = 0;
+  const heroUi = document.getElementById('hero-ui-content');
+  const heroScrollHint = document.getElementById('hero-scroll-hint');
+  const portalOverlay = document.getElementById('eye-portal-overlay');
+  const portalRing = document.getElementById('eye-portal-ring');
+
+  if (typeof ScrollTrigger !== 'undefined' && typeof gsap !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+
+    ScrollTrigger.create({
+      trigger: '#hero-scroll-track',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.8,
+      onUpdate: (self) => {
+        scrollProgress = self.progress; // 0.0 -> 1.0
+      }
+    });
+  }
+
+  // Smooth scroll tracking variables
+  let currentScrollLerp = 0;
+  const eyeWorldPos = new THREE.Vector3(0.42, 0.22, 1.15); // Fallback right eye coordinate
+
+  // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Scroll Eye-Zoom
   function animate() {
     requestAnimationFrame(animate);
 
+    // Smoothly interpolate scroll progress for cinematic motion
+    currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
+
     if (modelGroup) {
-      currentRotY += (targetRotY - currentRotY) * 0.10;
-      currentRotX += (targetRotX - currentRotX) * 0.10;
+      // 1. Update eye coordinate dynamically once mesh is found
+      if (detectedEyeMeshes.length > 0) {
+        detectedEyeMeshes[0].getWorldPosition(eyeWorldPos);
+      }
+
+      // 2. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
+      const mouseDampen = Math.max(0, 1.0 - currentScrollLerp * 2.5);
+      currentRotY += (targetRotY * mouseDampen - currentRotY) * 0.10;
+      currentRotX += (targetRotX * mouseDampen - currentRotX) * 0.10;
 
       modelGroup.rotation.y = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotY));
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // Animate smooth lerp between Normal state (#A4A1FF, metalness 0.75, roughness 0.25) and Hover state (#3897cd, metalness 0.35, roughness 0.55)
-      const targetLerp = isHoveredOverModel ? 1.0 : 0.0;
-      currentHoverLerp += (targetLerp - currentHoverLerp) * 0.10;
+      // 3. Camera Eye Zoom: Lerp from (0, 0, 10) directly to eyeWorldPos
+      const baseCamPos = new THREE.Vector3(0, 0, 10);
+      const targetCamPos = new THREE.Vector3(
+        eyeWorldPos.x * 0.85,
+        eyeWorldPos.y * 0.85,
+        eyeWorldPos.z + 0.32
+      );
 
-      // 1. Head Mesh: Normal state is #A4A1FF (metalness 0.75, roughness 0.25), morphs to #3897cd on hover
+      // Camera position interpolation
+      camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
+      
+      // Camera lookAt interpolation
+      const baseLookAt = new THREE.Vector3(0, 0, 0);
+      const targetLookAt = new THREE.Vector3(eyeWorldPos.x, eyeWorldPos.y, eyeWorldPos.z);
+      const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
+      camera.lookAt(currentLookAt);
+
+      // 4. UI Layer Fade-out & Translation
+      if (heroUi) {
+        const uiOpacity = Math.max(0, 1.0 - currentScrollLerp * 3.0);
+        heroUi.style.opacity = uiOpacity.toFixed(3);
+        heroUi.style.transform = `translateY(${-currentScrollLerp * 80}px) scale(${1.0 + currentScrollLerp * 0.08})`;
+        heroUi.style.pointerEvents = uiOpacity < 0.1 ? 'none' : 'auto';
+      }
+
+      if (heroScrollHint) {
+        heroScrollHint.style.opacity = Math.max(0, 1.0 - currentScrollLerp * 4.0).toFixed(3);
+      }
+
+      // 5. Portal Iris Ring Expansion (From 50% to 100% scroll)
+      if (portalOverlay && portalRing) {
+        if (currentScrollLerp > 0.45) {
+          const pIris = Math.min((currentScrollLerp - 0.45) / 0.45, 1.0);
+          portalOverlay.style.opacity = Math.min(pIris * 1.6, 1.0).toFixed(3);
+          const scale = Math.pow(pIris, 3.2) * 80;
+          portalRing.style.transform = `scale(${scale.toFixed(2)})`;
+        } else {
+          portalOverlay.style.opacity = '0';
+          portalRing.style.transform = 'scale(0)';
+        }
+      }
+
+      // 6. Materials & Eye Glow Shader Animation
+      const targetHoverLerp = isHoveredOverModel ? 1.0 : 0.0;
+      currentHoverLerp += (targetHoverLerp - currentHoverLerp) * 0.10;
+
+      // Head mesh material
       detectedHeadMeshes.forEach((headMesh) => {
         if (headMesh.material) {
           headMesh.material.metalness = THREE.MathUtils.lerp(0.75, 0.35, currentHoverLerp);
           headMesh.material.roughness = THREE.MathUtils.lerp(0.25, 0.55, currentHoverLerp);
 
-          const defaultColor = new THREE.Color(0xA4A1FF);   // Normal state: #A4A1FF
-          const hoverColor = new THREE.Color(0x3897cd);     // Hover state: #3897cd (Blender Blue)
+          const defaultColor = new THREE.Color(0xA4A1FF);
+          const hoverColor = new THREE.Color(0x3897cd);
           headMesh.material.color.copy(defaultColor).lerp(hoverColor, currentHoverLerp);
 
           if (headMesh.material.emissive) {
@@ -710,19 +787,21 @@ function initHero3DModel() {
         }
       });
 
-      // 2. Eye Mesh: Normal state glowing #A4A1FF -> Hover state subtle #3897cd
+      // Eye mesh material: Intense Neon Iris Glow on Zoom
       detectedEyeMeshes.forEach((eyeMesh) => {
         if (eyeMesh.material) {
           const eyeNormal = new THREE.Color(0xA4A1FF);
-          const eyeHover = new THREE.Color(0x3897cd);
-          const currentEyeColor = eyeNormal.clone().lerp(eyeHover, currentHoverLerp);
+          const eyeHover = new THREE.Color(0xc3f400); // Neon Lime on scroll zoom
+          const currentEyeColor = eyeNormal.clone().lerp(eyeHover, Math.max(currentHoverLerp, currentScrollLerp));
 
           if (!eyeMesh.material.emissive) {
             eyeMesh.material.emissive = currentEyeColor;
           } else {
             eyeMesh.material.emissive.copy(currentEyeColor);
           }
-          eyeMesh.material.emissiveIntensity = THREE.MathUtils.lerp(3.5, 0.5, currentHoverLerp);
+          // Emissive intensity explodes as you get closer to the eye
+          const zoomIntensity = THREE.MathUtils.lerp(3.5, 30.0, currentScrollLerp);
+          eyeMesh.material.emissiveIntensity = zoomIntensity;
           eyeMesh.material.needsUpdate = true;
         }
       });
