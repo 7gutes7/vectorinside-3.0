@@ -741,20 +741,20 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // 2. Camera Eye Zoom: Trajectory passes straight through the eye into the interior
+      // 2. Camera Eye Zoom: Trajectory penetrates straight through the eye socket into the interior
       const baseCamPos = new THREE.Vector3(0, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
         targetEyePos.y,
-        targetEyePos.z - 0.20 // Penetrates and passes through the eye geometry
+        targetEyePos.z - 0.70 // Penetrates deep through the front shell of the head
       );
 
       // Camera position interpolation
-      camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.12, 1.0));
+      camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
       
       // Camera lookAt interpolation locked straight ahead along the zoom trajectory
       const baseLookAt = new THREE.Vector3(0, 0, 0);
-      const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 1.0);
+      const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 1.5);
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
       camera.lookAt(currentLookAt);
 
@@ -770,12 +770,12 @@ function initHero3DModel() {
         heroScrollHint.style.opacity = Math.max(0, 1.0 - currentScrollLerp * 4.0).toFixed(3);
       }
 
-      // 5. Portal Iris Ring Expansion (From 50% to 100% scroll)
+      // 5. Portal Iris Ring Flash (Triggers right at the shell threshold: 75% to 95% scroll)
       if (portalOverlay && portalRing) {
-        if (currentScrollLerp > 0.45) {
-          const pIris = Math.min((currentScrollLerp - 0.45) / 0.45, 1.0);
+        if (currentScrollLerp > 0.75 && currentScrollLerp < 0.98) {
+          const pIris = Math.min((currentScrollLerp - 0.75) / 0.18, 1.0);
           portalOverlay.style.opacity = Math.min(pIris * 1.6, 1.0).toFixed(3);
-          const scale = Math.pow(pIris, 3.2) * 80;
+          const scale = Math.pow(pIris, 3.2) * 90;
           portalRing.style.transform = `scale(${scale.toFixed(2)})`;
         } else {
           portalOverlay.style.opacity = '0';
@@ -783,18 +783,18 @@ function initHero3DModel() {
         }
       }
 
-      // 5b. Section 2 Strictly Fixed In-Place Blur-to-Focus Portal Reveal (32px -> 0px)
+      // 5b. Section 2 Delayed In-Place Blur-to-Focus Reveal (Only AFTER crossing front shell at >80% scroll)
       const secPortal = document.getElementById('seccion-portal-revelada');
       if (secPortal) {
-        if (currentScrollLerp > 0.45) {
-          const pFocus = Math.min((currentScrollLerp - 0.45) / 0.45, 1.0);
-          const blurAmount = (1.0 - pFocus) * 32; // 32px -> 0px crisp optical focus
-          const opacityAmount = Math.pow(pFocus, 1.5); // Smooth ease-in opacity
+        if (currentScrollLerp > 0.80) {
+          const pFocus = Math.min((currentScrollLerp - 0.80) / 0.18, 1.0);
+          const blurAmount = (1.0 - pFocus) * 35; // 35px -> 0px crisp focus
+          const opacityAmount = Math.pow(pFocus, 2.0); // Fast clean reveal once inside
           secPortal.style.filter = `blur(${blurAmount.toFixed(1)}px)`;
           secPortal.style.opacity = opacityAmount.toFixed(3);
-          secPortal.style.pointerEvents = pFocus > 0.80 ? 'auto' : 'none';
+          secPortal.style.pointerEvents = pFocus > 0.85 ? 'auto' : 'none';
         } else {
-          secPortal.style.filter = 'blur(32px)';
+          secPortal.style.filter = 'blur(35px)';
           secPortal.style.opacity = '0';
           secPortal.style.pointerEvents = 'none';
         }
