@@ -791,45 +791,7 @@ function initHero3DModel() {
         }
       }
 
-      // 6. Materials & Eye Glow Shader Animation
-      const targetHoverLerp = isHoveredOverModel ? 1.0 : 0.0;
-      currentHoverLerp += (targetHoverLerp - currentHoverLerp) * 0.10;
-
-      // Head mesh material
-      detectedHeadMeshes.forEach((headMesh) => {
-        if (headMesh.material) {
-          headMesh.material.metalness = THREE.MathUtils.lerp(0.75, 0.35, currentHoverLerp);
-          headMesh.material.roughness = THREE.MathUtils.lerp(0.25, 0.55, currentHoverLerp);
-
-          const defaultColor = new THREE.Color(0xA4A1FF);
-          const hoverColor = new THREE.Color(0x3897cd);
-          headMesh.material.color.copy(defaultColor).lerp(hoverColor, currentHoverLerp);
-
-          if (headMesh.material.emissive) {
-            headMesh.material.emissiveIntensity = 0;
-          }
-          headMesh.material.needsUpdate = true;
-        }
-      });
-
-      // Eye mesh material: Intense Neon Iris Glow on Zoom
-      detectedEyeMeshes.forEach((eyeMesh) => {
-        if (eyeMesh.material) {
-          const eyeNormal = new THREE.Color(0xA4A1FF);
-          const eyeHover = new THREE.Color(0xc3f400); // Neon Lime on scroll zoom
-          const currentEyeColor = eyeNormal.clone().lerp(eyeHover, Math.max(currentHoverLerp, currentScrollLerp));
-
-          if (!eyeMesh.material.emissive) {
-            eyeMesh.material.emissive = currentEyeColor;
-          } else {
-            eyeMesh.material.emissive.copy(currentEyeColor);
-          }
-          // Emissive intensity explodes as you get closer to the eye
-          const zoomIntensity = THREE.MathUtils.lerp(3.5, 30.0, currentScrollLerp);
-          eyeMesh.material.emissiveIntensity = zoomIntensity;
-          eyeMesh.material.needsUpdate = true;
-        }
-      });
+      // 6. Model maintains natural GLTF base material color permanently
     }
 
     renderer.render(scene, camera);
