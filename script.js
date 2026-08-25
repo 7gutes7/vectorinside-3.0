@@ -649,7 +649,7 @@ function initHero3DModel() {
 
         modelGroup.add(model);
         // Center vertically with slight Y offset (-0.05) and X shift (-0.15)
-        modelGroup.position.set(-0.15, -0.05, 0);
+        modelGroup.position.set(-0.45, -0.25, 0);
         modelGroup.rotation.set(0, 0, 0);
         modelGroup.updateMatrixWorld(true);
 
@@ -729,19 +729,22 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // 2. Camera Eye Zoom: Trajectory enters straight into the calibrated eye socket
-      const baseCamPos = new THREE.Vector3(0, 0, 10);
+      // 2. Camera Eye Zoom: Starts on the right side in Hero state, enters straight into targetEyePos on scroll
+      const isDesktop = window.innerWidth >= 1024;
+      const baseCamX = isDesktop ? -1.95 : 0;
+      const baseCamPos = new THREE.Vector3(baseCamX, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
         targetEyePos.y,
         targetEyePos.z - 0.85 // Traverses clean through the eye socket into the interior
       );
 
-      // Camera position interpolation
+      // Camera position interpolation (starts on right side -> centers and enters eye socket)
       camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
-      
-      // Camera lookAt interpolation locked straight ahead into the eye socket
-      const baseLookAt = new THREE.Vector3(0, 0, 0);
+
+      // Camera lookAt interpolation (from initial hero framing directly to eye socket tunnel)
+      const baseLookAtX = isDesktop ? -0.35 : 0;
+      const baseLookAt = new THREE.Vector3(baseLookAtX, 0, 0);
       const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 2.0);
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
       camera.lookAt(currentLookAt);
@@ -937,15 +940,15 @@ function triggerCurtainRevealEffect() {
       duration: 0.28,
       ease: "power3.in"
     })
-    // 3. Reveal text inside curtain
-    .set(curtainText, { opacity: 1 })
-    // 4. Fast Un-curtain to Right (scaleX 1 -> 0 in 0.32s)
-    .set(curtainOverlay, { transformOrigin: "right center" })
-    .to(curtainOverlay, {
-      scaleX: 0,
-      duration: 0.32,
-      ease: "power3.out"
-    });
+      // 3. Reveal text inside curtain
+      .set(curtainText, { opacity: 1 })
+      // 4. Fast Un-curtain to Right (scaleX 1 -> 0 in 0.32s)
+      .set(curtainOverlay, { transformOrigin: "right center" })
+      .to(curtainOverlay, {
+        scaleX: 0,
+        duration: 0.32,
+        ease: "power3.out"
+      });
   } else {
     // CSS Fallback
     curtainOverlay.style.transition = 'transform 0.28s cubic-bezier(0.7, 0, 0.3, 1)';
