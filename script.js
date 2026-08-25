@@ -471,7 +471,8 @@ function initHero3DModel() {
   }
 
   const dim = getContainerDimensions();
-  const camera = new THREE.PerspectiveCamera(45, dim.width / dim.height, 0.1, 1000);
+  // Near plane set to 0.001 to prevent geometry clipping/fading when camera gets inches from the mesh
+  const camera = new THREE.PerspectiveCamera(45, dim.width / dim.height, 0.001, 1000);
   camera.position.set(0, 0, 10);
 
   // WebGLRenderer configured for maximum multi-device & mobile compatibility
@@ -620,8 +621,11 @@ function initHero3DModel() {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+            child.frustumCulled = false; // Prevent premature culling during extreme close-ups
             if (child.material) {
               child.material = child.material.clone();
+              child.material.side = THREE.DoubleSide; // Render both interior & exterior polygon faces
+              child.material.depthWrite = true;
               child.material.needsUpdate = true;
             }
 
@@ -737,20 +741,21 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // 2. Camera Eye Zoom: Exact centering on targetEyePos
+      // 2. Camera Eye Zoom: Trajectory passes straight through the eye into the interior
       const baseCamPos = new THREE.Vector3(0, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
         targetEyePos.y,
-        targetEyePos.z + 0.40 // Direct close-up alignment in front of the eye
+        targetEyePos.z - 0.20 // Penetrates and passes through the eye geometry
       );
 
       // Camera position interpolation
       camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.12, 1.0));
       
-      // Camera lookAt interpolation directly locked onto the eye
+      // Camera lookAt interpolation locked straight ahead along the zoom trajectory
       const baseLookAt = new THREE.Vector3(0, 0, 0);
-      const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetEyePos, currentScrollLerp);
+      const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 1.0);
+      const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
       camera.lookAt(currentLookAt);
 
       // 4. UI Layer Fade-out & Translation
