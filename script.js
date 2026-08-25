@@ -731,7 +731,7 @@ function initHero3DModel() {
 
       // 2. Camera Eye Zoom: Starts on the right side in Hero state, enters straight into targetEyePos on scroll
       const isDesktop = window.innerWidth >= 1024;
-      const baseCamX = isDesktop ? -2.6 : 0;
+      const baseCamX = isDesktop ? -4.5 : 0;
       const baseCamPos = new THREE.Vector3(baseCamX, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
@@ -742,8 +742,8 @@ function initHero3DModel() {
       // Camera position interpolation (starts on right side -> centers and enters eye socket)
       camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
 
-      // Camera lookAt: starts looking straight ahead parallel (-2.6), projecting the wolf cleanly to the right side of the screen
-      const baseLookAtX = isDesktop ? -2.6 : 0;
+      // Camera lookAt: starts looking straight ahead parallel (-4.5), projecting the wolf cleanly to the right side of the screen
+      const baseLookAtX = isDesktop ? -4.5 : 0;
       const baseLookAt = new THREE.Vector3(baseLookAtX, 0, 0);
       const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 2.0);
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
