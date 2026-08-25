@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
   initPageVideoIntro();
 
+  // 0b. Initialize Hero Background HLS Video Component
+  initHeroHlsVideo();
+
   // 1. Initialize Three.js Gradient Waves Background Shader
   initGradientWavesShader();
 
@@ -88,6 +91,22 @@ function initPageVideoIntro() {
       dismissIntro();
     }
   });
+}
+
+/**
+ * BackgroundVideo Component Logic for Hero Background
+ */
+function initHeroHlsVideo() {
+  const video = document.getElementById('hero-bg-video');
+  if (!video) return;
+
+  const videoSrc = 'background.mp4';
+
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.src = videoSrc;
+  video.play().catch((err) => console.log("Autoplay background.mp4:", err));
 }
 
 /**
@@ -504,38 +523,67 @@ function initHero3DModel() {
   const detectedEyeMeshes = [];
   const detectedHeadMeshes = [];
 
-  // Max subtle tilt when cursor is directly over the 3D model box (14° = ~0.244 rad)
-  const SUBTLE_MAX_RAD = 14 * (Math.PI / 180);
+  // Max subtle tilt when cursor moves across Hero section (24° = ~0.418 rad)
+  const SUBTLE_MAX_RAD = 24 * (Math.PI / 180);
 
-  // Mouse & touch tracking attached EXCLUSIVELY to container (#hero-3d-container)
-  function handleContainerHover(e) {
-    isHoveredOverModel = true;
-    const rect = container.getBoundingClientRect();
-    const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+  // Authoritative Hero section element for full-hero tracking
+  const targetElement = container.closest('section') || document.querySelector('section') || container.closest('main') || document.body;
 
-    const relX = ((clientX - rect.left) / rect.width) - 0.5; // [-0.5, +0.5]
-    const relY = ((clientY - rect.top) / rect.height) - 0.5;  // [-0.5, +0.5]
+  function updateHeroTracking(clientX, clientY) {
+    if (!targetElement || !container) return;
+    const heroRect = targetElement.getBoundingClientRect();
+    const modelRect = container.getBoundingClientRect();
 
-    // Calculate subtle look-at angle
-    targetRotY = relX * (2 * SUBTLE_MAX_RAD);
-    targetRotX = relY * (2 * SUBTLE_MAX_RAD);
+    // 1. Check if cursor is strictly within the Hero section boundaries
+    const isInsideHero = (
+      clientX >= heroRect.left &&
+      clientX <= heroRect.right &&
+      clientY >= heroRect.top &&
+      clientY <= heroRect.bottom
+    );
+
+    if (isInsideHero) {
+      const relX = ((clientX - heroRect.left) / heroRect.width) - 0.5; // [-0.5, +0.5]
+      const relY = ((clientY - heroRect.top) / heroRect.height) - 0.5;  // [-0.5, +0.5]
+
+      // Rotate to follow cursor continuously across Hero section
+      targetRotY = relX * (2 * SUBTLE_MAX_RAD);
+      targetRotX = relY * (2 * SUBTLE_MAX_RAD);
+
+      // 2. Change color ONLY when cursor is directly OVER the 3D model container
+      const isDirectlyOverModel = (
+        clientX >= modelRect.left &&
+        clientX <= modelRect.right &&
+        clientY >= modelRect.top &&
+        clientY <= modelRect.bottom
+      );
+
+      isHoveredOverModel = isDirectlyOverModel;
+    } else {
+      resetModelToBasePosition();
+    }
   }
 
-  function handleContainerLeave() {
+  function resetModelToBasePosition() {
     isHoveredOverModel = false;
-    // Instantly deactivate tracking when cursor is no longer OVER the model box
+    // Smoothly return 3D model to base frontal position (0, 0)
     targetRotY = 0;
     targetRotX = 0;
   }
 
-  // Active listeners scoped EXCLUSIVELY to #hero-3d-container
-  container.addEventListener('mousemove', handleContainerHover);
-  container.addEventListener('touchmove', handleContainerHover, { passive: true });
-  container.addEventListener('mouseenter', handleContainerHover);
-  container.addEventListener('mouseleave', handleContainerLeave);
-  container.addEventListener('pointerleave', handleContainerLeave);
-  container.addEventListener('touchend', handleContainerLeave);
+  // Mouse & Touch listeners for full Hero cursor tracking
+  document.addEventListener('mousemove', (e) => {
+    updateHeroTracking(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 0) {
+      updateHeroTracking(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  window.addEventListener('mouseleave', resetModelToBasePosition);
+  document.addEventListener('mouseleave', resetModelToBasePosition);
 
   // Configurar el decodificador de Draco con respaldo multicloud
   if (typeof THREE.GLTFLoader !== 'undefined') {
@@ -702,52 +750,77 @@ function initHero3DModel() {
  * strokeColor="#A78BFA", fillColor="#F8FAFC", drawDuration=0.85s, fillDelay=0.1s, fillMode="wipe", ease="power2.out"
  */
 function triggerStrokeTextEffect() {
+  const wrapper = document.getElementById('stroke-text-wrapper');
   const strokePath = document.querySelector('.stroke-draw-path');
   const wipeRect = document.getElementById('stroke-wipe-rect');
   if (!strokePath || !wipeRect) return;
 
-  // Reset initial states
+  // Initial states: blur & opacity entrance
+  if (wrapper && typeof gsap !== 'undefined') {
+    gsap.set(wrapper, { filter: "blur(18px)", opacity: 0, y: 15 });
+  }
   strokePath.style.strokeDashoffset = '1800';
+  strokePath.style.stroke = '#FFFFFF';
   wipeRect.setAttribute('width', '0%');
 
   if (typeof gsap !== 'undefined') {
     const tl = gsap.timeline();
 
-    // 1. Accelerated Stroke Drawing Animation (drawDuration: 0.85s, ease: power2.out)
+    // 1. Smooth Blur & Fade-in Entrance + Stroke Drawing (duration: 0.9s, ease: power3.out)
+    if (wrapper) {
+      tl.to(wrapper, {
+        filter: "blur(0px)",
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: "power3.out"
+      }, 0);
+    }
+
     tl.to(strokePath, {
       strokeDashoffset: 0,
-      duration: 0.85,
-      ease: "power2.out"
-    })
-      // 2. Accelerated Wipe Fill Animation (duration: 0.6s)
+      duration: 0.9,
+      ease: "power3.out"
+    }, 0)
+      // 2. Smooth Wipe Fill Animation in White (#FFFFFF) (duration: 0.65s)
       .to(wipeRect, {
         attr: { width: "100%" },
-        duration: 0.6,
+        duration: 0.65,
         ease: "power2.inOut"
-      }, "+=0.1")
-      // 3. Trigger Curtain Reveal for "Tu marca el único destino." as wipe fill concludes
+      }, "+=0.15")
+      // 3. Trigger Curtain Reveal for "Tu marca el único destino." as wipe fill completes
       .add(() => {
         triggerCurtainRevealEffect();
       }, "-=0.2");
   } else {
     // CSS Fallback
-    strokePath.style.transition = 'stroke-dashoffset 0.85s cubic-bezier(0.16, 1, 0.3, 1)';
+    if (wrapper) {
+      wrapper.style.transition = 'filter 0.9s ease-out, opacity 0.9s ease-out, transform 0.9s ease-out';
+      wrapper.style.filter = 'blur(0px)';
+      wrapper.style.opacity = '1';
+      wrapper.style.transform = 'translateY(0px)';
+    }
+    strokePath.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
     strokePath.style.strokeDashoffset = '0';
     setTimeout(() => {
-      wipeRect.style.transition = 'width 0.6s cubic-bezier(0.65, 0, 0.35, 1)';
+      wipeRect.style.transition = 'width 0.65s cubic-bezier(0.65, 0, 0.35, 1)';
       wipeRect.setAttribute('width', '100%');
-      setTimeout(triggerCurtainRevealEffect, 450);
-    }, 950);
+      setTimeout(triggerCurtainRevealEffect, 500);
+    }, 1000);
   }
 }
 
 /**
- * High-Speed Left-to-Right Curtain Reveal Effect for "Tu marca el único destino."
+ * High-Speed Left-to-Right Green Curtain Reveal Effect for "Tu marca el único destino."
  */
 function triggerCurtainRevealEffect() {
   const curtainOverlay = document.getElementById('hero-curtain-overlay');
   const curtainText = document.getElementById('hero-curtain-text');
   if (!curtainOverlay || !curtainText) return;
+
+  // Ensure text has transparent fill and green stroke outline
+  curtainText.style.color = 'transparent';
+  curtainText.style.webkitTextStroke = '1.5px #c3f400';
 
   if (typeof gsap !== 'undefined') {
     const tl = gsap.timeline();

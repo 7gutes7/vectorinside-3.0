@@ -8,25 +8,17 @@ export default function BackgroundVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    const videoSrc = 'https://stream.mux.com/kimF2ha9zLrX64H00UgLGPflCzNtl1T0215MlAmeOztv8.m3u8';
+    const videoSrc = '/background.mp4';
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Soporte nativo para HLS (Safari / iOS)
-      video.src = videoSrc;
-    } else if (Hls.isSupported()) {
-      // Soporte mediante hls.js (Chrome, Firefox, Edge, etc.)
-      const hls = new Hls();
-      hls.loadSource(videoSrc);
-      hls.attachMedia(video);
-
-      return () => {
-        hls.destroy();
-      };
-    }
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.src = videoSrc;
+    video.play().catch(() => {});
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none bg-black w-full h-full z-0">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <video
         ref={videoRef}
         autoPlay
