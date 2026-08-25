@@ -778,21 +778,20 @@ function initHero3DModel() {
         }
       }
 
-      // 5b. Section 2 Optical Blur-to-Focus Portal Reveal Effect (28px -> 0px)
+      // 5b. Section 2 Strictly Fixed In-Place Blur-to-Focus Portal Reveal (32px -> 0px)
       const secPortal = document.getElementById('seccion-portal-revelada');
       if (secPortal) {
-        if (currentScrollLerp > 0.48) {
-          const pFocus = Math.min((currentScrollLerp - 0.48) / 0.45, 1.0);
-          const blurAmount = (1.0 - pFocus) * 28; // 28px -> 0px crisp focus
-          const opacityAmount = 0.15 + pFocus * 0.85; // 0.15 -> 1.0
-          const scaleAmount = 0.94 + pFocus * 0.06; // 0.94 -> 1.0
+        if (currentScrollLerp > 0.45) {
+          const pFocus = Math.min((currentScrollLerp - 0.45) / 0.45, 1.0);
+          const blurAmount = (1.0 - pFocus) * 32; // 32px -> 0px crisp optical focus
+          const opacityAmount = Math.pow(pFocus, 1.5); // Smooth ease-in opacity
           secPortal.style.filter = `blur(${blurAmount.toFixed(1)}px)`;
-          secPortal.style.opacity = opacityAmount.toFixed(2);
-          secPortal.style.transform = `scale(${scaleAmount.toFixed(3)})`;
+          secPortal.style.opacity = opacityAmount.toFixed(3);
+          secPortal.style.pointerEvents = pFocus > 0.80 ? 'auto' : 'none';
         } else {
-          secPortal.style.filter = 'blur(28px)';
-          secPortal.style.opacity = '0.15';
-          secPortal.style.transform = 'scale(0.94)';
+          secPortal.style.filter = 'blur(32px)';
+          secPortal.style.opacity = '0';
+          secPortal.style.pointerEvents = 'none';
         }
       }
 

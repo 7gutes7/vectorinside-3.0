@@ -71,7 +71,6 @@
   <!-- ==================== PAGE VIDEO INTRO & PRELOADER OVERLAY ==================== -->
   <div id="intro-screen"
     class="fixed inset-0 z-[9999] bg-vector-black flex items-center justify-center transition-opacity duration-700">
-    <!-- Intro Video INTRO.mp4 (Cloudinary CDN URL) -->
     <video id="intro-video" src="https://res.cloudinary.com/cci1klwx/video/upload/v1786506091/INTRO.mp4" autoplay muted
       playsinline class="w-full h-full object-cover object-center mx-auto"></video>
 
@@ -139,11 +138,11 @@
     </div>
   </header>
 
-  <!-- ==================== SCROLLYTELLING TRACK CONTAINER (PINNED 3D ZOOM) ==================== -->
+  <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
   <div id="hero-scroll-track" class="relative w-full h-[260vh] bg-black">
     
-    <!-- Sticky Viewport Window -->
-    <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-24 pb-8 px-6">
+    <!-- Pinned Sticky Viewport Window -->
+    <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-24 pb-6 px-6">
       
       <!-- Background Video Component -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -158,16 +157,16 @@
           class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)]"></canvas>
       </div>
 
-      <!-- Eye Portal Expanding Iris Transition Effect -->
+      <!-- Eye Portal Expanding Iris Ring -->
       <div id="eye-portal-overlay"
-        class="pointer-events-none fixed inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-200">
+        class="pointer-events-none fixed inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-200">
         <div id="eye-portal-ring"
           class="w-32 h-32 rounded-full border-4 border-vector-lime shadow-[0_0_120px_#c3f400] bg-vector-lime/10 transform scale-0 backdrop-blur-md"></div>
       </div>
 
       <!-- Hero UI Content Layer (Fades out with scroll zoom) -->
       <div id="hero-ui-content"
-        class="relative z-20 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 my-auto pointer-events-none">
+        class="relative z-20 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 my-auto pointer-events-none transition-all duration-300">
 
         <!-- Column 1: Headline Texts & CTAs (7 cols) -->
         <div class="lg:col-span-7 flex flex-col items-start text-left pointer-events-auto">
@@ -238,7 +237,7 @@
       </div>
 
       <!-- Scroll Interactive Prompt -->
-      <div id="hero-scroll-hint" class="relative z-20 flex items-center justify-between border-t border-white/10 pt-4 font-mono text-xs text-text-muted">
+      <div id="hero-scroll-hint" class="relative z-20 flex items-center justify-between border-t border-white/10 pt-3 font-mono text-xs text-text-muted">
         <div class="flex items-center gap-2">
           <span class="pulse-dot"></span>
           <span class="text-vector-lime tracking-widest uppercase font-bold">DESLIZA / SCROLL HACIA ABAJO</span>
@@ -249,127 +248,128 @@
         </div>
       </div>
 
+      <!-- ==================== LAYER 25: FIXED IN-PLACE SECTION 2 (BLUR-TO-FOCUS REVEAL) ==================== -->
+      <div id="seccion-portal-revelada"
+        class="absolute inset-0 z-25 w-full h-full overflow-y-auto pt-28 pb-8 px-6 flex flex-col justify-between bg-vector-black/95 backdrop-blur-xl opacity-0 pointer-events-none transition-all">
+        
+        <div class="max-w-7xl w-full mx-auto my-auto">
+          
+          <!-- Top Meta Badge -->
+          <div class="flex items-center justify-between border-b border-white/15 pb-4 mb-8">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+                01 // MANIFIESTO NUCLEO
+              </span>
+              <span class="text-text-muted font-mono text-xs">// DENTRO DE LA VISIÓN VECTOR</span>
+            </div>
+            <a href="manifiesto/index.html" class="font-mono text-xs text-vector-lime hover:underline flex items-center gap-1">
+              <span>VER EXPERIENCIA COMPLETA</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+          </div>
+
+          <!-- Main Brutalist Statement Card -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-white/20 bg-surface-dark mb-10 overflow-hidden shadow-2xl">
+            
+            <!-- Left Visual Column -->
+            <div class="lg:col-span-4 relative min-h-[260px] lg:min-h-full border-b lg:border-b-0 lg:border-r border-white/20 overflow-hidden group">
+              <img src="arqui.jpeg" alt="Arquitectura Vector Inside" class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" />
+              <div class="absolute inset-0 bg-gradient-to-t from-vector-black/80 via-transparent to-transparent"></div>
+              <div class="absolute bottom-6 left-6 right-6">
+                <p class="font-mono text-xs text-vector-lime tracking-widest uppercase">COORDENADA NUCLEO</p>
+                <p class="font-display font-black text-xl uppercase text-white">Convertimos el Caos en Estructura</p>
+              </div>
+            </div>
+
+            <!-- Right Kinetic Manifesto -->
+            <div class="lg:col-span-8 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white text-vector-black">
+              <div>
+                <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-3 block">// DECLARACIÓN FUNDACIONAL</span>
+                <h2 class="font-display font-black text-xl sm:text-3xl lg:text-4xl uppercase leading-tight tracking-tight mb-6">
+                  Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no método; presupuesto publicitario, pero no tracción predecible.
+                </h2>
+              </div>
+
+              <div class="p-5 bg-vector-black text-white border-l-4 border-vector-lime">
+                <p class="font-display font-black text-lg sm:text-xl text-vector-lime uppercase tracking-tight mb-1">
+                  No agregamos parches: rediseñamos la arquitectura desde el núcleo.
+                </p>
+                <p class="font-mono text-xs text-text-muted">
+                  La aceleración real no es aumentar el volumen de ruido, sino eliminar la fricción estructural que frena la conversión.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== COMMAND DOCK: 6 INDEPENDENT EXPERIENCES ==================== -->
+          <div class="border-t border-white/15 pt-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs text-text-muted uppercase tracking-widest">// ECOSISTEMA MODULAR VECTOR 3.0:</span>
+              <span class="font-mono text-xs text-vector-lime">6 EXPERIENCIAS INTERACTIVAS</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              
+              <!-- 01 Manifiesto -->
+              <a href="manifiesto/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+                <span class="font-mono text-[10px] text-vector-lime block mb-1">01 //</span>
+                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Manifiesto</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">Fricción & Núcleo</p>
+              </a>
+
+              <!-- 02 Ecosistema -->
+              <a href="ecosistema/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+                <span class="font-mono text-[10px] text-vector-lime block mb-1">02 //</span>
+                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Ecosistema</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">3 Vectores + ROI</p>
+              </a>
+
+              <!-- 03 Ejecución -->
+              <a href="ejecucion/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-operative-purple transition-all group block">
+                <span class="font-mono text-[10px] text-operative-purple block mb-1">03 //</span>
+                <p class="font-display font-black text-xs uppercase text-white group-hover:text-operative-purple transition-colors">Ejecución</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">Matriz 40 Bloques</p>
+              </a>
+
+              <!-- 04 Evidencia -->
+              <a href="evidencia/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-cognitive-blue transition-all group block">
+                <span class="font-mono text-[10px] text-cognitive-blue block mb-1">04 //</span>
+                <p class="font-display font-black text-xs uppercase text-white group-hover:text-cognitive-blue transition-colors">Evidencia</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">Antes vs Después</p>
+              </a>
+
+              <!-- 05 Metodología -->
+              <a href="metodologia/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+                <span class="font-mono text-[10px] text-vector-lime block mb-1">05 //</span>
+                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Metodología</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">Pipeline 4 Fases</p>
+              </a>
+
+              <!-- 06 Diagnóstico -->
+              <a href="diagnostico/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime bg-vector-lime/5 transition-all group block">
+                <span class="font-mono text-[10px] text-vector-lime block mb-1">06 //</span>
+                <p class="font-display font-black text-xs uppercase text-vector-lime">Diagnóstico</p>
+                <p class="font-mono text-[9px] text-text-muted mt-0.5">Test en Tiempo Real</p>
+              </a>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section 2 Footer inside fixed layer -->
+        <div class="border-t border-white/10 pt-4 text-center font-mono text-[11px] text-text-muted max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
+          <span>SYS_V.3.0.34</span>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
-  <!-- ==================== SECCIÓN 2: PORTAL REVEAL // MANIFIESTO & NÚCLEO ==================== -->
-  <section id="seccion-portal-revelada" class="relative z-30 bg-vector-black py-28 px-6 border-t-4 border-vector-lime">
-    <div class="max-w-7xl mx-auto">
-      
-      <!-- Top Meta Badge -->
-      <div class="flex items-center justify-between border-b border-white/15 pb-6 mb-12">
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
-            01 // MANIFIESTO NUCLEO
-          </span>
-          <span class="text-text-muted font-mono text-xs">// DENTRO DE LA VISIÓN VECTOR</span>
-        </div>
-        <a href="manifiesto/index.html" class="font-mono text-xs text-vector-lime hover:underline flex items-center gap-1">
-          <span>VER EXPERIENCIA COMPLETA</span>
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </a>
-      </div>
-
-      <!-- Main Brutalist Statement Card -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-white/20 bg-surface-dark mb-16 overflow-hidden">
-        
-        <!-- Left Visual Column -->
-        <div class="lg:col-span-4 relative min-h-[360px] lg:min-h-full border-b lg:border-b-0 lg:border-r border-white/20 overflow-hidden group">
-          <img src="arqui.jpeg" alt="Arquitectura Vector Inside" class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" />
-          <div class="absolute inset-0 bg-gradient-to-t from-vector-black/80 via-transparent to-transparent"></div>
-          <div class="absolute bottom-6 left-6 right-6">
-            <p class="font-mono text-xs text-vector-lime tracking-widest uppercase">COORDENADA NUCLEO</p>
-            <p class="font-display font-black text-xl uppercase text-white">Convertimos el Caos en Estructura</p>
-          </div>
-        </div>
-
-        <!-- Right Kinetic Manifesto -->
-        <div class="lg:col-span-8 p-8 sm:p-12 lg:p-16 flex flex-col justify-between bg-white text-vector-black">
-          <div>
-            <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-4 block">// DECLARACIÓN FUNDACIONAL</span>
-            <h2 class="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase leading-tight tracking-tight mb-8">
-              Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no método; presupuesto publicitario, pero no tracción predecible.
-            </h2>
-          </div>
-
-          <div class="p-6 bg-vector-black text-white border-l-4 border-vector-lime">
-            <p class="font-display font-black text-xl sm:text-2xl text-vector-lime uppercase tracking-tight mb-2">
-              No agregamos parches: rediseñamos la arquitectura desde el núcleo.
-            </p>
-            <p class="font-mono text-xs text-text-muted">
-              La aceleración real no es aumentar el volumen de ruido, sino eliminar la fricción estructural que frena la conversión.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== COMMAND DOCK: 6 INDEPENDENT EXPERIENCES ==================== -->
-      <div class="mt-20 border-t border-white/15 pt-8">
-        <div class="flex items-center justify-between mb-6">
-          <span class="font-mono text-xs text-text-muted uppercase tracking-widest">// ECOSISTEMA MODULAR VECTOR 3.0:</span>
-          <span class="font-mono text-xs text-vector-lime">6 EXPERIENCIAS INTERACTIVAS</span>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          
-          <!-- 01 Manifiesto -->
-          <a href="manifiesto/index.html" class="glass-panel p-4 border border-white/10 hover:border-vector-lime transition-all group block">
-            <span class="font-mono text-[10px] text-vector-lime block mb-1">01 //</span>
-            <p class="font-display font-black text-sm uppercase text-white group-hover:text-vector-lime transition-colors">Manifiesto</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">Fricción & Núcleo</p>
-          </a>
-
-          <!-- 02 Ecosistema -->
-          <a href="ecosistema/index.html" class="glass-panel p-4 border border-white/10 hover:border-vector-lime transition-all group block">
-            <span class="font-mono text-[10px] text-vector-lime block mb-1">02 //</span>
-            <p class="font-display font-black text-sm uppercase text-white group-hover:text-vector-lime transition-colors">Ecosistema</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">3 Vectores + ROI</p>
-          </a>
-
-          <!-- 03 Ejecución -->
-          <a href="ejecucion/index.html" class="glass-panel p-4 border border-white/10 hover:border-operative-purple transition-all group block">
-            <span class="font-mono text-[10px] text-operative-purple block mb-1">03 //</span>
-            <p class="font-display font-black text-sm uppercase text-white group-hover:text-operative-purple transition-colors">Ejecución</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">Matriz 40 Bloques</p>
-          </a>
-
-          <!-- 04 Evidencia -->
-          <a href="evidencia/index.html" class="glass-panel p-4 border border-white/10 hover:border-cognitive-blue transition-all group block">
-            <span class="font-mono text-[10px] text-cognitive-blue block mb-1">04 //</span>
-            <p class="font-display font-black text-sm uppercase text-white group-hover:text-cognitive-blue transition-colors">Evidencia</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">Antes vs Después</p>
-          </a>
-
-          <!-- 05 Metodología -->
-          <a href="metodologia/index.html" class="glass-panel p-4 border border-white/10 hover:border-vector-lime transition-all group block">
-            <span class="font-mono text-[10px] text-vector-lime block mb-1">05 //</span>
-            <p class="font-display font-black text-sm uppercase text-white group-hover:text-vector-lime transition-colors">Metodología</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">Pipeline 4 Fases</p>
-          </a>
-
-          <!-- 06 Diagnóstico -->
-          <a href="diagnostico/index.html" class="glass-panel p-4 border border-white/10 hover:border-vector-lime bg-vector-lime/5 transition-all group block">
-            <span class="font-mono text-[10px] text-vector-lime block mb-1">06 //</span>
-            <p class="font-display font-black text-sm uppercase text-vector-lime">Diagnóstico</p>
-            <p class="font-mono text-[9px] text-text-muted mt-1">Test en Tiempo Real</p>
-          </a>
-
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="border-t border-white/10 bg-surface-dark py-6 px-6 text-center font-mono text-xs text-text-muted">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
-      <span>SYS_V.3.0.31</span>
-    </div>
-  </footer>
-
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.33) -->
-  <script src="script.js?v=3.0.33"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.35) -->
+  <script src="script.js?v=3.0.35"></script>
 </body>
 
 </html>
