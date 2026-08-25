@@ -626,6 +626,9 @@ function initHero3DModel() {
               child.material = child.material.clone();
               child.material.side = THREE.DoubleSide; // Render both interior & exterior polygon faces
               child.material.depthWrite = true;
+              child.material.metalness = 0.75;
+              child.material.roughness = 0.25;
+              child.material.color.set(0xA4A1FF); // Iconic Blender Cyber-Lavender Base Color (#A4A1FF)
               child.material.needsUpdate = true;
             }
 
