@@ -595,11 +595,12 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // Single Authoritative Model at all times: poligonalFINAL-optimized.glb
+    // Single Authoritative Model at all times: Cloudinary CDN (5.2MB optimized)
+    const modelUrl = 'https://res.cloudinary.com/cci1klwx/image/upload/v1786507830/poligonalFINAL-optimized.glb';
     loader.load(
-      'poligonalFINAL-optimized.glb?v=3.0.20',
+      modelUrl,
       (gltf) => {
-        console.log("¡Modelo 3D (poligonalFINAL-optimized.glb) cargado con éxito!", gltf);
+        console.log("¡Modelo 3D (Cloudinary CDN) cargado con éxito!", gltf);
         const model = gltf.scene;
 
         const box = new THREE.Box3().setFromObject(model);
