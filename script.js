@@ -648,26 +648,14 @@ function initHero3DModel() {
         }
 
         modelGroup.add(model);
-        // Center vertically with slight Y offset (-0.15) so ears fit 100% inside viewport
-        modelGroup.position.set(0, -0.15, 0);
+        // Center vertically with slight Y offset (-0.15) and slight left shift (-0.22) to align the right eye socket
+        modelGroup.position.set(-0.22, -0.15, 0);
         modelGroup.rotation.set(0, 0, 0);
         modelGroup.updateMatrixWorld(true);
 
-        // Compute exact eye world coordinates from detected eye mesh
-        if (detectedEyeMeshes.length > 0) {
-          const eyeMesh = detectedEyeMeshes[0];
-          eyeMesh.updateMatrixWorld(true);
-          const eyeBox = new THREE.Box3().setFromObject(eyeMesh);
-          const eyeCenter = eyeBox.getCenter(new THREE.Vector3());
-
-          // If mesh spans both eyes (symmetric X), focus on the right eye
-          if (eyeBox.max.x > 0.08 && eyeBox.min.x < -0.08) {
-            targetEyePos.set(eyeBox.max.x * 0.65, eyeCenter.y, eyeCenter.z);
-          } else {
-            targetEyePos.copy(eyeCenter);
-          }
-          console.log("--> EXACT EYE WORLD TARGET COMPUTED:", targetEyePos);
-        }
+        // Calibrated exact Eye Socket World Target (matches the upper-right eye cavity)
+        targetEyePos.set(0.98, 0.82, 0.95);
+        console.log("--> CALIBRATED EYE SOCKET TARGET:", targetEyePos);
 
         syncSize();
       },
@@ -720,9 +708,9 @@ function initHero3DModel() {
     });
   }
 
-  // Smooth scroll tracking variables & Eye Target (Right eye of wolf)
+  // Smooth scroll tracking variables & Calibrated Eye Target
   let currentScrollLerp = 0;
-  const targetEyePos = new THREE.Vector3(0.38, 0.22, 1.15); // Fallback right eye coordinate
+  const targetEyePos = new THREE.Vector3(0.98, 0.82, 0.95); // Exact upper-right eye socket coordinates
 
   // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Scroll Eye-Zoom
   function animate() {
@@ -741,20 +729,20 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // 2. Camera Eye Zoom: Trajectory penetrates straight through the eye socket into the interior
+      // 2. Camera Eye Zoom: Trajectory enters straight into the calibrated eye socket
       const baseCamPos = new THREE.Vector3(0, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
         targetEyePos.y,
-        targetEyePos.z - 0.70 // Penetrates deep through the front shell of the head
+        targetEyePos.z - 0.85 // Traverses clean through the eye socket into the interior
       );
 
       // Camera position interpolation
       camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
       
-      // Camera lookAt interpolation locked straight ahead along the zoom trajectory
+      // Camera lookAt interpolation locked straight ahead into the eye socket
       const baseLookAt = new THREE.Vector3(0, 0, 0);
-      const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 1.5);
+      const targetLookAt = new THREE.Vector3(targetEyePos.x, targetEyePos.y, targetEyePos.z - 2.0);
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
       camera.lookAt(currentLookAt);
 
