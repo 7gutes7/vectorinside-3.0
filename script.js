@@ -648,14 +648,14 @@ function initHero3DModel() {
         }
 
         modelGroup.add(model);
-        // Center vertically with slight Y offset (-0.15) and slight left shift (-0.22) to align the right eye socket
-        modelGroup.position.set(-0.22, -0.15, 0);
+        // Center vertically with Y adjustment (+0.05) and slight left shift (-0.24) to frame the upper-right eye socket
+        modelGroup.position.set(-0.24, 0.05, 0);
         modelGroup.rotation.set(0, 0, 0);
         modelGroup.updateMatrixWorld(true);
 
-        // Calibrated exact Eye Socket World Target (matches the upper-right eye cavity)
-        targetEyePos.set(0.98, 0.82, 0.95);
-        console.log("--> CALIBRATED EYE SOCKET TARGET:", targetEyePos);
+        // Calibrated exact Eye Socket World Target (recalibrated upwards to match screenshot)
+        targetEyePos.set(1.15, 1.28, 0.95);
+        console.log("--> RECALIBRATED UPPER-RIGHT EYE SOCKET TARGET:", targetEyePos);
 
         syncSize();
       },
@@ -708,9 +708,9 @@ function initHero3DModel() {
     });
   }
 
-  // Smooth scroll tracking variables & Calibrated Eye Target
+  // Smooth scroll tracking variables & Calibrated Eye Target (Upper-right socket)
   let currentScrollLerp = 0;
-  const targetEyePos = new THREE.Vector3(0.98, 0.82, 0.95); // Exact upper-right eye socket coordinates
+  const targetEyePos = new THREE.Vector3(1.15, 1.28, 0.95); // Exact upper-right eye socket coordinates
 
   // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Scroll Eye-Zoom
   function animate() {
