@@ -647,6 +647,24 @@ function initHero3DModel() {
         // Center vertically with slight Y offset (-0.15) so ears fit 100% inside viewport
         modelGroup.position.set(0, -0.15, 0);
         modelGroup.rotation.set(0, 0, 0);
+        modelGroup.updateMatrixWorld(true);
+
+        // Compute exact eye world coordinates from detected eye mesh
+        if (detectedEyeMeshes.length > 0) {
+          const eyeMesh = detectedEyeMeshes[0];
+          eyeMesh.updateMatrixWorld(true);
+          const eyeBox = new THREE.Box3().setFromObject(eyeMesh);
+          const eyeCenter = eyeBox.getCenter(new THREE.Vector3());
+
+          // If mesh spans both eyes (symmetric X), focus on the right eye
+          if (eyeBox.max.x > 0.08 && eyeBox.min.x < -0.08) {
+            targetEyePos.set(eyeBox.max.x * 0.65, eyeCenter.y, eyeCenter.z);
+          } else {
+            targetEyePos.copy(eyeCenter);
+          }
+          console.log("--> EXACT EYE WORLD TARGET COMPUTED:", targetEyePos);
+        }
+
         syncSize();
       },
       (xhr) => {
@@ -698,9 +716,9 @@ function initHero3DModel() {
     });
   }
 
-  // Smooth scroll tracking variables
+  // Smooth scroll tracking variables & Eye Target (Right eye of wolf)
   let currentScrollLerp = 0;
-  const eyeWorldPos = new THREE.Vector3(0.42, 0.22, 1.15); // Fallback right eye coordinate
+  const targetEyePos = new THREE.Vector3(0.38, 0.22, 1.15); // Fallback right eye coordinate
 
   // Render loop: Smooth transition between Blender Blue (default) & Iridescent Green + Scroll Eye-Zoom
   function animate() {
@@ -710,13 +728,8 @@ function initHero3DModel() {
     currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
 
     if (modelGroup) {
-      // 1. Update eye coordinate dynamically once mesh is found
-      if (detectedEyeMeshes.length > 0) {
-        detectedEyeMeshes[0].getWorldPosition(eyeWorldPos);
-      }
-
-      // 2. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
-      const mouseDampen = Math.max(0, 1.0 - currentScrollLerp * 2.5);
+      // 1. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
+      const mouseDampen = Math.max(0, 1.0 - currentScrollLerp * 3.0);
       currentRotY += (targetRotY * mouseDampen - currentRotY) * 0.10;
       currentRotX += (targetRotX * mouseDampen - currentRotX) * 0.10;
 
@@ -724,21 +737,20 @@ function initHero3DModel() {
       modelGroup.rotation.x = Math.max(-SUBTLE_MAX_RAD, Math.min(SUBTLE_MAX_RAD, currentRotX));
       modelGroup.rotation.z = 0;
 
-      // 3. Camera Eye Zoom: Lerp from (0, 0, 10) directly to eyeWorldPos
+      // 2. Camera Eye Zoom: Exact centering on targetEyePos
       const baseCamPos = new THREE.Vector3(0, 0, 10);
       const targetCamPos = new THREE.Vector3(
-        eyeWorldPos.x * 0.85,
-        eyeWorldPos.y * 0.85,
-        eyeWorldPos.z + 0.32
+        targetEyePos.x,
+        targetEyePos.y,
+        targetEyePos.z + 0.40 // Direct close-up alignment in front of the eye
       );
 
       // Camera position interpolation
-      camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.15, 1.0));
+      camera.position.lerpVectors(baseCamPos, targetCamPos, Math.min(currentScrollLerp * 1.12, 1.0));
       
-      // Camera lookAt interpolation
+      // Camera lookAt interpolation directly locked onto the eye
       const baseLookAt = new THREE.Vector3(0, 0, 0);
-      const targetLookAt = new THREE.Vector3(eyeWorldPos.x, eyeWorldPos.y, eyeWorldPos.z);
-      const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, currentScrollLerp);
+      const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetEyePos, currentScrollLerp);
       camera.lookAt(currentLookAt);
 
       // 4. UI Layer Fade-out & Translation
