@@ -1545,9 +1545,10 @@ function initHero3DModel() {
     const T_EXIT_START = 0.35;          // 35% -> Curtains start closing (Plano -> Línea)
     const T_PHONE_ZOOM_START = 0.40;    // 40% -> Vertical line is formed & Smartphone starts Zoom Out!
     const T_EXIT_END = 0.46;            // 46% -> Line collapses to center PUNTO
-    const T_PHONE_ZOOM_END = 0.64;      // 64% -> Smartphone fully centered
-    const T_SPIN_START = 0.64;          // 64% -> 360° rotation begins with scroll
-    const T_SPIN_END = 0.88;            // 88% -> 360° spin completes, screen displays Section 3
+    const T_PHONE_ZOOM_END = 0.60;      // 60% -> Smartphone fully centered
+    const T_SPIN_START = 0.60;          // 60% -> 360° rotation begins with scroll
+    const T_SPIN_END = 0.80;            // 80% -> 360° spin completes
+    // 80% -> 100%: Smartphone shifts upwards & Kinetic Text Background fades in blur!
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
       // El modelo se mantiene 100% sólido durante todo el zoom y comienza a desvanecerse a partir de que aparece el punto
@@ -1570,10 +1571,21 @@ function initHero3DModel() {
       smartphoneGroup.visible = false;
 
       // Full Iconic Hero Lighting for Wolf Head (Vibrant Cyber-Lavender + Lime & Purple Specular Highlights)
-      ambientLight.intensity = 1.2;
+      dirLightLime.color.set(0xc3f400);
+      dirLightLime.position.set(5, 10, 7);
       dirLightLime.intensity = 2.5;
+
+      dirLightPurple.color.set(0x64b5f6);
+      dirLightPurple.position.set(-5, -5, -5);
       dirLightPurple.intensity = 2.0;
+
+      pointLight.color.set(0xffffff);
+      pointLight.position.set(0, 5, 5);
       pointLight.intensity = 2.0;
+
+      ambientLight.color.set(0xffffff);
+      ambientLight.intensity = 1.2;
+      phoneFrontLight.position.set(0, 2, 10);
       phoneFrontLight.intensity = 0.0;
 
       const hero3dContainer = document.getElementById('hero-3d-container');
@@ -1584,6 +1596,7 @@ function initHero3DModel() {
       const kineticBg = document.getElementById('kinetic-text-bg');
       if (kineticBg) {
         kineticBg.style.opacity = '0';
+        kineticBg.style.filter = 'blur(0px)';
       }
 
       // 1. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
@@ -1769,25 +1782,31 @@ function initHero3DModel() {
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
 
-      // Elevate 3D Canvas Layer in front of all backgrounds and closed sections (z-index: 34)
+      // Elevate 3D Canvas Layer in front of all backgrounds and closed sections (z-index: 50)
       const hero3dContainer = document.getElementById('hero-3d-container');
       if (hero3dContainer) {
-        hero3dContainer.style.zIndex = '34';
+        hero3dContainer.style.zIndex = '50';
       }
 
       // Kinetic Text Background (Originkit) emerges behind the smartphone (z-index: 32)
       const kineticBg = document.getElementById('kinetic-text-bg');
-      if (kineticBg) {
+      if (kineticBg && currentScrollLerp < T_SPIN_END) {
         const pKinetic = Math.min(1.0, (currentScrollLerp - T_PHONE_ZOOM_START) / 0.03);
         kineticBg.style.opacity = pKinetic.toFixed(3);
+        kineticBg.style.filter = 'blur(0px)';
       }
 
       // Calibrated Soft Lighting for Smartphone (Crisp Text & Dark Rat-Gray Chassis Contrast)
-      ambientLight.intensity = 0.8;
-      dirLightLime.intensity = 1.6;
-      dirLightPurple.intensity = 1.4;
-      pointLight.intensity = 0.5;
-      phoneFrontLight.intensity = 0.35;
+      dirLightLime.color.set(0xffffff);
+      dirLightPurple.color.set(0x64b5f6);
+      pointLight.color.set(0xffffff);
+      ambientLight.intensity = 1.0;
+      dirLightLime.intensity = 0.8;
+      dirLightPurple.intensity = 1.0;
+      pointLight.intensity = 0.35;
+      pointLight.position.set(-8.0, 3.0, 5.0);
+      phoneFrontLight.intensity = 0.30;
+      phoneFrontLight.position.set(-8.0, 2.0, 6.0);
 
       const secPortal = document.getElementById('seccion-portal-revelada');
       const portalDot = document.getElementById('portal-reveal-dot');
@@ -1834,7 +1853,7 @@ function initHero3DModel() {
       const hero3dCanvas = document.getElementById('hero-3d-canvas');
 
       if (currentScrollLerp < T_PHONE_ZOOM_END) {
-        // B.1 Emergence & Continuous Zoom Out to Center (0.40 -> 0.64)
+        // B.1 Emergence & Continuous Zoom Out to Center (0.40 -> 0.60)
         const pZoom = (currentScrollLerp - T_PHONE_ZOOM_START) / (T_PHONE_ZOOM_END - T_PHONE_ZOOM_START);
         const pZoomEased = Math.sin((pZoom * Math.PI) / 2);
 
@@ -1844,29 +1863,22 @@ function initHero3DModel() {
           portalDot.style.opacity = Math.max(0, 1.0 - pDotFade * 2.0).toFixed(3);
         }
 
-        const phoneScale = 2.4 - (pZoomEased * 1.4); // 2.4 -> 1.0
+        // Starts extra large (5.0x) covering beyond viewport, smoothly zooms out to center (1.0x)
+        const phoneScale = 5.0 - (pZoomEased * 4.0);
         smartphoneGroup.scale.set(phoneScale, phoneScale, phoneScale);
         smartphoneGroup.position.set(0, 0, 0);
         smartphoneGroup.rotation.set(
-          0.12 * (1.0 - pZoomEased),
-          -0.30 * (1.0 - pZoomEased),
+          0.06 * (1.0 - pZoomEased),
+          -0.12 * (1.0 - pZoomEased),
           0
         );
-
-        if (phoneScreenMesh && defaultScreenMap) {
-          if (phoneScreenMesh.material.map !== defaultScreenMap) {
-            phoneScreenMesh.material.map = defaultScreenMap;
-            phoneScreenMesh.material.emissiveMap = defaultScreenMap;
-            phoneScreenMesh.material.needsUpdate = true;
-          }
-        }
 
         if (hero3dCanvas) {
           hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
         }
 
       } else if (currentScrollLerp < T_SPIN_END) {
-        // B.2 360° Horizontal Spin with Scroll (0.64 -> 0.88)
+        // B.2 360° Horizontal Spin with Scroll (0.60 -> 0.80)
         if (portalDot) portalDot.style.opacity = '0';
         if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
@@ -1878,64 +1890,67 @@ function initHero3DModel() {
         smartphoneGroup.position.set(0, 0, 0);
         smartphoneGroup.rotation.set(0, pSpin * Math.PI * 2, 0); // Full 360° Spin!
 
-        // Screen switches to Section 3 when facing away (at 180° / 0.45 spin)
-        if (phoneScreenMesh) {
-          const targetMap = (pSpin >= 0.45) ? section3ScreenTexture : (defaultScreenMap || section3ScreenTexture);
-          if (phoneScreenMesh.material.map !== targetMap) {
-            phoneScreenMesh.material.map = targetMap;
-            phoneScreenMesh.material.emissiveMap = targetMap;
-            phoneScreenMesh.material.needsUpdate = true;
-          }
-        }
-
       } else {
-        // B.3 Section 3 Complete & Active (0.88 -> 1.00)
+        // B.3 Desplazamiento hacia arriba con scroll y desvanecimiento en blur del fondo (0.80 -> 1.00)
         if (portalDot) portalDot.style.opacity = '0';
         if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
         camera.position.set(0, 0, 8.5);
         camera.lookAt(0, 0, 0);
 
-        smartphoneGroup.scale.set(1.0, 1.0, 1.0);
-        smartphoneGroup.position.set(0, 0, 0);
-        smartphoneGroup.rotation.set(0, Math.PI * 2, 0); // Faced front
+        const pUp = (currentScrollLerp - T_SPIN_END) / (1.0 - T_SPIN_END);
+        const pUpEased = Math.sin((pUp * Math.PI) / 2);
 
-        if (phoneScreenMesh && phoneScreenMesh.material.map !== section3ScreenTexture) {
-          phoneScreenMesh.material.map = section3ScreenTexture;
-          phoneScreenMesh.material.emissiveMap = section3ScreenTexture;
-          phoneScreenMesh.material.needsUpdate = true;
+        // Smartphone se desplaza hacia arriba suavemente
+        smartphoneGroup.scale.set(1.0, 1.0, 1.0);
+        smartphoneGroup.position.set(0, pUpEased * 9.0, 0);
+        smartphoneGroup.rotation.set(0, Math.PI * 2, 0); // Frontal
+
+        // Fondo con letras se desvanece en blur progresivo
+        if (kineticBg) {
+          const blurAmount = (pUpEased * 28).toFixed(1);
+          const bgOpacity = Math.max(0, 1.0 - pUpEased * 1.3).toFixed(3);
+          kineticBg.style.filter = `blur(${blurAmount}px)`;
+          kineticBg.style.opacity = bgOpacity;
         }
       }
     }
 
-    // ==================== SECTION 3 HUD OVERLAY VISIBILITY ====================
+    // ==================== SECTION 3 CASCADING DUAL-COLUMN STREAM ====================
     const sec3Container = document.getElementById('seccion-3-ecosistema');
-    const sec3Left = document.getElementById('sec3-hud-left');
-    const sec3Right = document.getElementById('sec3-hud-right');
-
     if (sec3Container) {
       if (currentScrollLerp >= T_SPIN_END) {
-        const pHud = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / (1.0 - T_SPIN_END));
         sec3Container.style.opacity = '1';
         sec3Container.style.pointerEvents = 'auto';
-        if (sec3Left) {
-          sec3Left.style.opacity = '1';
-          sec3Left.style.transform = `translateX(${(-20 + pHud * 20)}px)`;
-        }
-        if (sec3Right) {
-          sec3Right.style.opacity = '1';
-          sec3Right.style.transform = `translateX(${(20 - pHud * 20)}px)`;
+
+        // Escalonamiento secuencial: Cada tarjeta (k+1) empieza a subir cuando la anterior (k) alcanza el 60% de visibilidad
+        const cardStarts = [0.80, 0.84, 0.88, 0.92];
+        const cardDuration = 0.07;
+
+        for (let k = 0; k < 4; k++) {
+          const card = document.getElementById(`sec3-card-${k}`);
+          if (card) {
+            const start = cardStarts[k];
+            if (currentScrollLerp < start) {
+              card.style.opacity = '0';
+              card.style.transform = 'translateY(120px)';
+            } else {
+              const pCard = Math.min(1.0, (currentScrollLerp - start) / cardDuration);
+              const pCardEased = Math.sin((pCard * Math.PI) / 2);
+              card.style.opacity = pCardEased.toFixed(3);
+              card.style.transform = `translateY(${((1.0 - pCardEased) * 120).toFixed(1)}px)`;
+            }
+          }
         }
       } else {
         sec3Container.style.opacity = '0';
         sec3Container.style.pointerEvents = 'none';
-        if (sec3Left) {
-          sec3Left.style.opacity = '0';
-          sec3Left.style.transform = 'translateX(-20px)';
-        }
-        if (sec3Right) {
-          sec3Right.style.opacity = '0';
-          sec3Right.style.transform = 'translateX(20px)';
+        for (let k = 0; k < 4; k++) {
+          const card = document.getElementById(`sec3-card-${k}`);
+          if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(120px)';
+          }
         }
       }
     }

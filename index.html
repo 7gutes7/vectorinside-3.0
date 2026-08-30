@@ -437,48 +437,101 @@
           </span>
         </div>
 
-        <!-- Floating Side HUD Panels around the Centered Smartphone -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center justify-between my-auto pointer-events-none">
+        <!-- Section 3 Cascading Dual-Column Stream (Emerges below the smartphone) -->
+        <div id="sec3-cards-stream" class="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 my-auto pointer-events-auto overflow-visible py-4">
+          
+          <!-- Column 1 (Left / Centered Stream) -->
+          <div class="flex flex-col gap-6 lg:gap-8">
+            
+            <!-- Card 01 (Col 1, Item 0) -->
+            <div id="sec3-card-0" class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 bg-vector-lime"></span>
+                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-vector-lime">01 // NÚCLEO ESTRUCTURAL</span>
+                </div>
+                <span class="font-mono text-[10px] text-text-muted">LATENCIA 0.02s</span>
+              </div>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
+                ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
+              </h3>
+              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
+                Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a cliente de alto valor.
+              </p>
+              <div class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
+                <span>EFICIENCIA OPERATIVA</span>
+                <span class="text-vector-lime font-bold">99.8%</span>
+              </div>
+            </div>
 
-          <!-- Left Info HUD Card -->
-          <div id="sec3-hud-left"
-            class="bg-vector-black/80 backdrop-blur-xl border border-white/15 p-6 rounded-none max-w-md shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-500 translate-x-[-20px] opacity-0">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-1.5 h-1.5 bg-vector-lime"></span>
-              <span class="font-mono text-[11px] uppercase tracking-widest text-text-muted">NÚCLEO ESTRUCTURAL</span>
+            <!-- Card 03 (Col 1, Item 2) -->
+            <div id="sec3-card-2" class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 bg-vector-lime"></span>
+                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-vector-lime">03 // MOTOR DE CONVERSIÓN</span>
+                </div>
+                <span class="font-mono text-[10px] text-text-muted">TIEMPO REAL</span>
+              </div>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
+                FUNNELS <span class="text-vector-lime">DE ALTA RETENCIÓN</span>
+              </h3>
+              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
+                Arquitectura de captura y cierre adaptativo que califica y enruta automáticamente las oportunidades de negocio en segundos.
+              </p>
+              <div class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
+                <span>INCREMENTO PROMEDIO</span>
+                <span class="text-vector-lime font-bold">+340%</span>
+              </div>
             </div>
-            <h3 class="font-display font-black text-2xl uppercase tracking-tight text-white mb-2">
-              ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
-            </h3>
-            <p class="font-body text-xs text-text-muted leading-relaxed mb-4">
-              Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a
-              cliente de alto valor.
-            </p>
-            <div class="flex items-center gap-3 pt-3 border-t border-white/10 font-mono text-[10px] text-vector-lime">
-              <span>LATENCIA // 0.02s</span>
-              <span>•</span>
-              <span>EFICIENCIA // 99.8%</span>
-            </div>
+
           </div>
 
-          <!-- Right Info HUD Card -->
-          <div id="sec3-hud-right"
-            class="bg-vector-black/80 backdrop-blur-xl border border-white/15 p-6 rounded-none max-w-md ml-auto shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-500 translate-x-[20px] opacity-0">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-1.5 h-1.5 bg-operative-purple"></span>
-              <span class="font-mono text-[11px] uppercase tracking-widest text-text-muted">SINCRONIZACIÓN TOTAL</span>
+          <!-- Column 2 (Right / Centered Stream - Staggered Offset) -->
+          <div class="flex flex-col gap-6 lg:gap-8 md:mt-12">
+            
+            <!-- Card 02 (Col 2, Item 1) -->
+            <div id="sec3-card-1" class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 bg-operative-purple"></span>
+                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-operative-purple">02 // SINCRONIZACIÓN TOTAL</span>
+                </div>
+                <span class="font-mono text-[10px] text-text-muted">OMNICANAL</span>
+              </div>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
+                RESPUESTA <span class="text-operative-purple">NEURONAL</span>
+              </h3>
+              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
+                Automatización inteligente que conecta WhatsApp, CRM y analítica predictiva en un único flujo continuo sin intervención manual.
+              </p>
+              <div class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
+                <span>CANALES ACTIVOS</span>
+                <span class="text-operative-purple font-bold">100% UNIFICADOS</span>
+              </div>
             </div>
-            <h3 class="font-display font-black text-2xl uppercase tracking-tight text-white mb-2">
-              RESPUESTA <span class="text-operative-purple">NEURONAL</span>
-            </h3>
-            <p class="font-body text-xs text-text-muted leading-relaxed mb-4">
-              Automatización inteligente omnicanal que conecta WhatsApp, CRM y analítica predictiva en un único flujo
-              continuo.
-            </p>
-            <div
-              class="flex items-center gap-3 pt-3 border-t border-white/10 font-mono text-[10px] text-operative-purple">
-              <span>CANALES // 100% UNIFICADOS</span>
+
+            <!-- Card 04 (Col 2, Item 3) -->
+            <div id="sec3-card-3" class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 bg-operative-purple"></span>
+                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-operative-purple">04 // INTELIGENCIA OPERATIVA</span>
+                </div>
+                <span class="font-mono text-[10px] text-text-muted">TELEMETRÍA 24/7</span>
+              </div>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
+                DIAGNÓSTICO <span class="text-operative-purple">NUCLEAR CONTINUO</span>
+              </h3>
+              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
+                Monitoreo permanente de salud estructural, cuellos de botella y rendimiento de conversión con reportes accionables.
+              </p>
+              <div class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
+                <span>ESTADO DEL SISTEMA</span>
+                <span class="text-vector-lime font-bold">ACTIVO // SIN ERRORES</span>
+              </div>
             </div>
+
           </div>
 
         </div>
@@ -586,8 +639,8 @@
 
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.124) -->
-  <script src="script.js?v=3.0.124"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.130) -->
+  <script src="script.js?v=3.0.130"></script>
 </body>
 
 </html>
