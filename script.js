@@ -964,6 +964,7 @@ function initHero3DModel() {
   }
 
   renderer.setSize(dim.width, dim.height);
+  renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
@@ -1109,9 +1110,7 @@ function initHero3DModel() {
   });
 
   const topoMesh = new THREE.Mesh(topoGeo, topoMaterial);
-  topoMesh.rotation.x = -Math.PI / 2 + 0.38;
-  topoMesh.position.set(0, -6.5, -6);
-  scene.add(topoMesh);
+  topoMesh.visible = false;
 
   let targetRotY = 0;
   let targetRotX = 0;
@@ -1417,6 +1416,45 @@ function initHero3DModel() {
         smartphoneGroup.add(phone);
         smartphoneGroup.position.set(0, 0, 0);
         smartphoneGroup.visible = false;
+
+        // Grabado láser sutil del isotipo Vector Inside en la parte trasera del smartphone
+        const logoCanvas = document.createElement('canvas');
+        logoCanvas.width = 512;
+        logoCanvas.height = 732;
+        const ctx = logoCanvas.getContext('2d');
+        const p = new Path2D("M288.16,247.33L345.68,0h-104.05l-44.02,191.85h18.56v21.49h-18.88v68.37h-12.98v68.09h-30.91v-46.52h-11.15v-89.94h-38.01v-21.49h43.83L104.05,0H0l102.41,440.35h36.89v21.49h-31.89l7.63,32.82h125.76v-85.31h40.18v-48.98h-22.25v-21.49h29.43v-91.55M169.02,191.85h-26.78v21.49h26.78v-21.49Z");
+        ctx.save();
+        ctx.scale(512 / 345.68, 732 / 494.65);
+        ctx.fillStyle = '#cbd5e1'; // Gris plata / platino más claro para simular grabado láser brillante
+        ctx.fill(p, 'evenodd');
+        ctx.restore();
+
+        const logoTexture = new THREE.CanvasTexture(logoCanvas);
+        logoTexture.minFilter = THREE.LinearFilter;
+        logoTexture.magFilter = THREE.LinearFilter;
+
+        // Bounding box exacto del teléfono para centrado perfecto horizontal y vertical
+        const groupLocalBox = new THREE.Box3().setFromObject(smartphoneGroup);
+        const groupCenter = groupLocalBox.getCenter(new THREE.Vector3());
+        const backZ = groupLocalBox.min.z;
+
+        // Tamaño reducido un 40% (0.43 x 0.62)
+        const logoGeo = new THREE.PlaneGeometry(0.43, 0.62);
+        const logoMat = new THREE.MeshStandardMaterial({
+          map: logoTexture,
+          transparent: true,
+          opacity: 0.92,
+          roughness: 0.18,
+          metalness: 0.88,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const logoMesh = new THREE.Mesh(logoGeo, logoMat);
+        // Centrado exacto horizontal (X) y vertical (Y) anclado en la tapa trasera (-Z)
+        logoMesh.position.set(groupCenter.x, groupCenter.y, backZ - 0.003);
+        logoMesh.rotation.set(0, Math.PI, 0);
+        logoMesh.renderOrder = 2;
+        smartphoneGroup.add(logoMesh);
       },
       undefined,
       (err) => {
@@ -1532,14 +1570,13 @@ function initHero3DModel() {
   function animate() {
     requestAnimationFrame(animate);
 
-    // 0. Update Native 3D Topographical Terrain Animation (120 FPS hardware accelerated)
-    if (topoMaterial && topoMaterial.uniforms) {
-      topoMaterial.uniforms.u_time.value = performance.now() * 0.001;
-      // Opacidad base reducida (0.72) para dar mayor jerarquía y contraste al lobo 3D
-      const pTopoFade = Math.max(0, (currentScrollLerp - 0.065) / 0.035);
-      const topoOpacity = Math.max(0, 1.0 - Math.min(1.0, pTopoFade)) * 0.72;
-      topoMaterial.uniforms.u_opacity.value = topoOpacity;
-      topoMesh.visible = topoOpacity > 0.001;
+    // 0. Update Hero Background Video (Silver Silk Cloth Billowing) Fade with Scroll
+    const heroBgVideo = document.getElementById('hero-bg-video-wrapper');
+    if (heroBgVideo) {
+      const pBgFade = Math.max(0, (currentScrollLerp - 0.055) / 0.045);
+      const bgOpacity = Math.max(0, 1.0 - Math.min(1.0, pBgFade));
+      heroBgVideo.style.opacity = bgOpacity.toFixed(3);
+      heroBgVideo.style.visibility = bgOpacity > 0.001 ? 'visible' : 'hidden';
     }
 
     // Smoothly interpolate scroll progress for cinematic motion
@@ -2033,6 +2070,7 @@ function triggerStrokeTextEffect() {
   const wrapper = document.getElementById('stroke-text-wrapper');
   const strokePath = document.querySelector('.stroke-draw-path');
   const wipeRect = document.getElementById('stroke-wipe-rect');
+  const wipeRect2 = document.getElementById('stroke-wipe-rect-2');
   if (!strokePath || !wipeRect) return;
 
   // Initial states: blur & opacity entrance
@@ -2042,6 +2080,13 @@ function triggerStrokeTextEffect() {
   strokePath.style.strokeDashoffset = '4500';
   strokePath.style.stroke = '#FFFFFF';
   wipeRect.setAttribute('width', '0%');
+  wipeRect.setAttribute('height', '56');
+  if (wipeRect2) {
+    wipeRect2.setAttribute('width', '0%');
+    wipeRect2.setAttribute('height', '66');
+  }
+
+  const animWipes = wipeRect2 ? [wipeRect, wipeRect2] : wipeRect;
 
   if (typeof gsap !== 'undefined') {
     const tl = gsap.timeline();
@@ -2062,9 +2107,9 @@ function triggerStrokeTextEffect() {
       duration: 0.9,
       ease: "power3.out"
     }, 0)
-      // 2. Smooth Wipe Fill Animation with Incomplete Fill (width: 55%)
-      .to(wipeRect, {
-        attr: { width: "55%" },
+      // 2. Smooth Wipe Fill Animation in White (#FFFFFF) (ambas líneas con corte brutalista invertido)
+      .to(animWipes, {
+        attr: { width: "100%" },
         duration: 0.65,
         ease: "power2.inOut"
       }, "+=0.10")
@@ -2084,7 +2129,11 @@ function triggerStrokeTextEffect() {
     strokePath.style.strokeDashoffset = '0';
     setTimeout(() => {
       wipeRect.style.transition = 'width 0.65s cubic-bezier(0.65, 0, 0.35, 1)';
-      wipeRect.setAttribute('width', '55%');
+      wipeRect.setAttribute('width', '100%');
+      if (wipeRect2) {
+        wipeRect2.style.transition = 'width 0.65s cubic-bezier(0.65, 0, 0.35, 1)';
+        wipeRect2.setAttribute('width', '100%');
+      }
       setTimeout(triggerCurtainRevealEffect, 450);
     }, 950);
   }
@@ -2110,10 +2159,9 @@ function triggerCurtainRevealEffect() {
       }, 0);
     }
     if (right) {
-      gsap.set(right, { opacity: 0, y: 15 });
+      gsap.set(right, { opacity: 0 });
       tl.to(right, {
         opacity: 1,
-        y: 0,
         duration: 0.7,
         ease: "power3.out"
       }, 0.12);

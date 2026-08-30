@@ -96,11 +96,8 @@
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
       <!-- Brand Logo -->
       <a href="index.html" class="flex items-center gap-3 group z-10">
-        <img src="headerlogo.png" alt="Vector Inside Logo"
-          class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
-        <span
-          class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">PORTAL
-          3D</span>
+        <img src="Vector%20Inside%20imagotipo.svg" alt="Vector Inside Logo"
+          class="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105" />
       </a>
 
       <!-- Center Headline in Header (Centrado) -->
@@ -144,6 +141,17 @@
     <!-- Pinned Sticky Viewport Window -->
     <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-20 px-6">
 
+      <!-- ==================== HERO BACKGROUND VIDEO: Silver Silk Cloth Billowing ==================== -->
+      <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <video id="hero-bg-video"
+          src="./Silver_silk_cloth_billowing_1080p_202608301525.mp4"
+          autoplay loop muted playsinline
+          class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
+        </video>
+        <!-- Dark gradient vignette overlay for depth & typography contrast -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none"></div>
+      </div>
+
       <!-- Background 3D Canvas Layer -->
       <div id="hero-3d-container"
         class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto translate-y-[20px]">
@@ -153,37 +161,46 @@
 
       <!-- ==================== LAYER 10: HERO CONTENT & 3D STAGE ==================== -->
       <div id="hero-ui-content"
-        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-between items-start text-left flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
+        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-center items-start text-left flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
 
-        <!-- Top: DISEÑAMOS INSTINTO. (En una sola línea con relleno incompleto) -->
-        <div class="w-full flex items-start justify-start pointer-events-auto">
-          <h1
-            class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-left text-slate-900 flex flex-col items-start">
-            <div id="stroke-text-wrapper"
-              class="relative w-[300px] sm:w-[400px] md:w-[480px] max-w-full overflow-visible mb-0 select-none leading-none mr-auto flex justify-start">
-              <svg viewBox="0 18 1220 80" class="w-full h-auto block overflow-visible">
-                <defs>
-                  <clipPath id="stroke-text-clip">
-                    <rect id="stroke-wipe-rect" x="0" y="0" width="0%" height="100%" />
-                  </clipPath>
-                </defs>
-                <text x="0" y="95" text-anchor="start" class="stroke-draw-path font-display font-black"
-                  font-size="105" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF"
-                  stroke-width="3.5" stroke-dasharray="3500" stroke-dashoffset="3500">
-                  DISEÑAMOS INSTINTO.
-                </text>
-                <text x="0" y="95" text-anchor="start" class="stroke-fill-path font-display font-black"
-                  font-size="105" font-weight="900" letter-spacing="-3.5" fill="#FFFFFF"
-                  clip-path="url(#stroke-text-clip)">
-                  DISEÑAMOS INSTINTO.
-                </text>
-              </svg>
-            </div>
-          </h1>
-        </div>
+        <!-- Vertically Centered Row: Left (DISEÑAMOS INSTINTO) & Right (LA MARCA // EL DESTINO) -->
+        <div class="w-full flex items-center justify-between my-auto pointer-events-none">
 
-        <!-- Center Right Flank: LA MARCA // EL DESTINO (Al costado derecho del modelo 3D del Hero) -->
-        <div class="w-full flex items-center justify-end my-auto pointer-events-none">
+          <!-- Left: DISEÑAMOS INSTINTO. (Centrado verticalmente sobre el margen izquierdo) -->
+          <div class="flex flex-col items-start justify-start text-left pointer-events-auto">
+            <h1
+              class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-left text-slate-900 flex flex-col items-start">
+              <div id="stroke-text-wrapper"
+                class="relative w-[235px] sm:w-[315px] md:w-[390px] lg:w-[420px] max-w-full overflow-visible mb-0 select-none leading-none mr-auto flex justify-start">
+                <svg viewBox="0 0 760 180" class="w-full h-auto block overflow-visible">
+                  <defs>
+                    <clipPath id="stroke-text-clip">
+                      <!-- DISEÑAMOS: Relleno al 70% superior (y: 0 a 56) -->
+                      <rect id="stroke-wipe-rect" class="stroke-wipe-anim" x="0" y="0" width="0%" height="56" />
+                      <!-- INSTINTO.: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
+                      <rect id="stroke-wipe-rect-2" class="stroke-wipe-anim" x="0" y="114" width="0%" height="66" />
+                    </clipPath>
+                  </defs>
+                  <!-- Outline stroke layer for both words -->
+                  <text x="0" y="75" text-anchor="start" class="stroke-draw-path font-display font-black"
+                    font-size="95" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF"
+                    stroke-width="3.5" stroke-dasharray="3500" stroke-dashoffset="3500">
+                    <tspan x="0" y="75">DISEÑAMOS</tspan>
+                    <tspan x="0" y="155">INSTINTO.</tspan>
+                  </text>
+                  <!-- Fill layer for both words with inverted split clip -->
+                  <text x="0" y="75" text-anchor="start" class="stroke-fill-path font-display font-black"
+                    font-size="95" font-weight="900" letter-spacing="-3.5" fill="#FFFFFF"
+                    clip-path="url(#stroke-text-clip)">
+                    <tspan x="0" y="75">DISEÑAMOS</tspan>
+                    <tspan x="0" y="155">INSTINTO.</tspan>
+                  </text>
+                </svg>
+              </div>
+            </h1>
+          </div>
+
+          <!-- Center Right Flank: LA MARCA // EL DESTINO (Al costado derecho del modelo 3D del Hero) -->
           <div id="hero-curtain-right"
             class="pointer-events-auto select-none cursor-pointer flex items-center justify-end text-right ml-auto opacity-0 w-[300px] sm:w-[400px] md:w-[480px] max-w-full">
             <svg viewBox="0 18 1380 80" class="w-full h-auto block overflow-visible">
@@ -193,6 +210,7 @@
               </text>
             </svg>
           </div>
+
         </div>
 
       </div>
@@ -648,8 +666,8 @@
 
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.144) -->
-  <script src="script.js?v=3.0.144"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.159) -->
+  <script src="script.js?v=3.0.159"></script>
 </body>
 
 </html>
