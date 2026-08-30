@@ -21,7 +21,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3.0.167" />
 
   <!-- Three.js, DRACOLoader, GLTFLoader, GSAP & ScrollTrigger -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -124,8 +124,8 @@
     class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-mono text-[11px] sm:text-xs tracking-wider uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
     <a href="javascript:void(0)" onclick="scrollToSection2()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // Manifiesto</a>
-    <a href="javascript:void(0)"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">02 // Ecosistema</a>
+    <a href="javascript:void(0)" onclick="scrollToSection3()"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // Ecosistema</a>
     <a href="javascript:void(0)"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">03 // Ejecución</a>
     <a href="javascript:void(0)"
@@ -202,7 +202,7 @@
 
           <!-- Center Right Flank: LA MARCA // EL DESTINO (Al costado derecho del modelo 3D del Hero) -->
           <div id="hero-curtain-right"
-            class="pointer-events-auto select-none cursor-pointer flex items-center justify-end text-right ml-auto opacity-0 w-[300px] sm:w-[400px] md:w-[480px] max-w-full">
+            class="pointer-events-auto select-none cursor-pointer flex items-center justify-end text-right ml-auto opacity-0 origin-right w-[300px] sm:w-[400px] md:w-[480px] max-w-full">
             <svg viewBox="0 18 1380 80" class="w-full h-auto block overflow-visible">
               <text x="100%" y="95" text-anchor="end" class="font-display font-black" font-size="105" font-weight="900"
                 letter-spacing="-3.5" fill="none" stroke="#c3f400" stroke-width="3.5">
@@ -213,6 +213,11 @@
 
         </div>
 
+      </div>
+
+      <!-- ==================== LAYER 25: HERO RIPPLE DISTORTION (REACT BITS) ==================== -->
+      <div id="hero-ripple-distortion"
+        class="absolute inset-0 w-full h-full pointer-events-none z-[25] overflow-hidden">
       </div>
 
       <!-- Kinetic Slit / Laser Reveal Elements for Section 2 -->
@@ -666,8 +671,10 @@
 
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.159) -->
-  <script src="script.js?v=3.0.159"></script>
+  <!-- RippleDistortion Component (React Bits WebGL) -->
+  <script src="RippleDistortion.js?v=3.0.170"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.170) -->
+  <script src="script.js?v=3.0.170"></script>
 </body>
 
 </html>

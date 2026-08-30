@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize 3D Wolf Head Model & Native Hardware-Accelerated 3D Topography
   initHero3DModel();
 
+  // 2. Initialize React Bits RippleDistortion on Hero Stage
+  initHeroRippleDistortion();
+
   // 3. Setup Intersection Observer for Scroll Animations
   initScrollAnimations();
 
@@ -1579,6 +1582,15 @@ function initHero3DModel() {
       heroBgVideo.style.visibility = bgOpacity > 0.001 ? 'visible' : 'hidden';
     }
 
+    // Update Hero RippleDistortion Fade with Scroll
+    const heroRipple = document.getElementById('hero-ripple-distortion');
+    if (heroRipple) {
+      const pRipFade = Math.max(0, (currentScrollLerp - 0.055) / 0.045);
+      const ripOpacity = Math.max(0, 1.0 - Math.min(1.0, pRipFade));
+      heroRipple.style.opacity = ripOpacity.toFixed(3);
+      heroRipple.style.visibility = ripOpacity > 0.001 ? 'visible' : 'hidden';
+    }
+
     // Smoothly interpolate scroll progress for cinematic motion
     currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
 
@@ -1675,7 +1687,17 @@ function initHero3DModel() {
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, pHead);
       camera.lookAt(currentLookAt);
 
-      // 4. UI Layer Fade-out
+      // 4. UI Layer Fade-out & Hero Curtain Right Dynamic Scale & Shift (+25px inicial -> 0px final con scroll)
+      const curtainRight = document.getElementById('hero-curtain-right');
+      if (curtainRight) {
+        curtainRight.style.transformOrigin = 'right center';
+        const pScale = Math.min(1.0, currentScrollLerp / 0.08);
+        const pScaleEased = Math.sin((pScale * Math.PI) / 2);
+        const currentScale = 0.85 + 0.15 * pScaleEased;
+        const currentX = (1.0 - pScaleEased) * 25; // +25px a la derecha inicial -> 0px final
+        curtainRight.style.transform = `translateX(${currentX.toFixed(1)}px) scale(${currentScale.toFixed(3)})`;
+      }
+
       if (heroUi) {
         const uiOpacity = Math.max(0, 1.0 - currentScrollLerp * 8.0);
         heroUi.style.opacity = uiOpacity.toFixed(3);
@@ -2296,7 +2318,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 ====================
+// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 (MANIFIESTO) ====================
 function scrollToSection2() {
   const track = document.getElementById('hero-scroll-track');
   if (!track) return;
@@ -2330,3 +2352,68 @@ function scrollToSection2() {
   requestAnimationFrame(step);
 }
 window.scrollToSection2 = scrollToSection2;
+
+// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 3 (ECOSISTEMA) ====================
+function scrollToSection3() {
+  const track = document.getElementById('hero-scroll-track');
+  if (!track) return;
+  const trackRect = track.getBoundingClientRect();
+  const trackTop = window.scrollY + trackRect.top;
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  // Posición al 78%: Justo antes de completar el giro de 360° del smartphone con el fondo cinético
+  const targetY = trackTop + maxScroll * 0.78;
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const duration = 1800; // 1.8s smooth cinematic glide
+  let startTime = null;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function step(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1.0);
+    const easeProgress = easeInOutCubic(progress);
+
+    window.scrollTo(0, startY + distance * easeProgress);
+
+    if (progress < 1.0) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+window.scrollToSection3 = scrollToSection3;
+
+// ==================== INITIALIZE HERO RIPPLE DISTORTION (REACT BITS) ====================
+function initHeroRippleDistortion() {
+  const container = document.getElementById('hero-ripple-distortion');
+  if (!container || typeof window.RippleDistortion === 'undefined') return;
+
+  window.heroRippleInstance = new window.RippleDistortion(container, {
+    src: null,
+    brushSize: 70,
+    strength: 0.2,
+    swirl: 1,
+    rings: 4,
+    spread: 2,
+    fade: 3,
+    spacing: 15,
+    dispersion: 0,
+    glint: 0,
+    tint: '#a855f7',
+    tintAmount: 0.1,
+    grayscale: true,
+    highlightColor: '#ffffff',
+    trigger: 'hover',
+    clickStrength: 2,
+    quality: 'low',
+    enabled: true
+  });
+}
+window.initHeroRippleDistortion = initHeroRippleDistortion;
+
