@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap"
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
@@ -125,18 +125,18 @@
   <!-- ==================== FIXED BOTTOM NAVIGATION DOCK (01 - 06) ==================== -->
   <nav id="bottom-dock-nav"
     class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-mono text-[11px] sm:text-xs tracking-wider uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
-    <a href="manifiesto/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">01 //
-      Manifiesto</a>
-    <a href="ecosistema/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">02 //
-      Ecosistema</a>
-    <a href="ejecucion/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">03 //
-      Ejecución</a>
-    <a href="evidencia/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">04 //
-      Evidencia</a>
-    <a href="metodologia/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">05 //
-      Metodología</a>
-    <a href="diagnostico/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">06 //
-      Diagnóstico</a>
+    <a href="javascript:void(0)" onclick="scrollToSection2()"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // Manifiesto</a>
+    <a href="javascript:void(0)"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">02 // Ecosistema</a>
+    <a href="javascript:void(0)"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">03 // Ejecución</a>
+    <a href="javascript:void(0)"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">04 // Evidencia</a>
+    <a href="javascript:void(0)"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">05 // Metodología</a>
+    <a href="javascript:void(0)"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">06 // Diagnóstico</a>
   </nav>
 
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
@@ -371,6 +371,52 @@
 
       </div>
 
+      <!-- ==================== LAYER 32: KINETIC TEXT GRID BACKGROUND (APPEAR TEXT - ORIGINKIT) ==================== -->
+      <div id="kinetic-text-bg" aria-hidden="true">
+        <div class="kinetic-text-wrapper">
+          <!-- Row 0 (Drift Right, Wipe LTR) -->
+          <div class="kinetic-text-row kinetic-row-0">
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+          </div>
+          <!-- Row 1 (Drift Left, Wipe RTL) -->
+          <div class="kinetic-text-row kinetic-row-1">
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+          </div>
+          <!-- Row 2 (Center Row: Center Word Survives) -->
+          <div class="kinetic-text-row kinetic-row-2">
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item font-black">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+          </div>
+          <!-- Row 3 (Drift Left, Wipe RTL) -->
+          <div class="kinetic-text-row kinetic-row-3">
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-rtl">Vector Inside / </span>
+          </div>
+          <!-- Row 4 (Drift Right, Wipe LTR) -->
+          <div class="kinetic-text-row kinetic-row-4">
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+            <span class="kinetic-text-item kinetic-word-wiping-ltr">Vector Inside / </span>
+          </div>
+        </div>
+      </div>
+
       <!-- ==================== LAYER 35: SECTION 3 ECOSISTEMA HUD OVERLAY ==================== -->
       <div id="seccion-3-ecosistema"
         class="absolute inset-0 z-[35] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-6 max-w-7xl mx-auto transition-opacity duration-300">
@@ -540,8 +586,8 @@
 
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.93) -->
-  <script src="script.js?v=3.0.93"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.115) -->
+  <script src="script.js?v=3.0.115"></script>
 </body>
 
 </html>

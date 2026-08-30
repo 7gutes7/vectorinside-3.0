@@ -975,15 +975,15 @@ function initHero3DModel() {
   dirLightLime.position.set(5, 10, 7);
   scene.add(dirLightLime);
 
-  const dirLightPurple = new THREE.DirectionalLight(0x9d4edd, 2.0);
+  const dirLightPurple = new THREE.DirectionalLight(0x64b5f6, 2.0);
   dirLightPurple.position.set(-5, -5, -5);
   scene.add(dirLightPurple);
 
-  const pointLight = new THREE.PointLight(0xffffff, 2, 50);
+  const pointLight = new THREE.PointLight(0xffffff, 2.0, 50);
   pointLight.position.set(0, 5, 5);
   scene.add(pointLight);
 
-  const phoneFrontLight = new THREE.DirectionalLight(0xffffff, 3.0);
+  const phoneFrontLight = new THREE.DirectionalLight(0xffffff, 0.35);
   phoneFrontLight.position.set(0, 2, 10);
   scene.add(phoneFrontLight);
 
@@ -1201,7 +1201,7 @@ function initHero3DModel() {
               child.material.depthWrite = true;
               child.material.metalness = 0.75;
               child.material.roughness = 0.25;
-              child.material.color.set(0xA4A1FF); // Iconic Blender Cyber-Lavender Base Color (#A4A1FF)
+              child.material.color.set(0x85AEE3); // Soft Sky / Pastel Blue Base Color (#85AEE3)
               child.material.needsUpdate = true;
             }
 
@@ -1246,16 +1246,16 @@ function initHero3DModel() {
       }
     );
 
-    // 3D Model 2: smartphone.glb (Section 3)
+    // 3D Model 2: smartphone2.glb (Section 3)
     let phoneScreenMesh = null;
     let defaultScreenMap = null;
     const section3ScreenTexture = createSection3ScreenTexture();
 
-    const phoneUrl = './smartphone.glb';
+    const phoneUrl = './smartphone2.glb';
     loader.load(
       phoneUrl,
       (gltf) => {
-        console.log("¡Modelo 3D (smartphone.glb) cargado con éxito!", gltf);
+        console.log("¡Modelo 3D (smartphone2.glb) cargado con éxito!", gltf);
         const phone = gltf.scene;
 
         const box = new THREE.Box3().setFromObject(phone);
@@ -1263,49 +1263,63 @@ function initHero3DModel() {
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
         
-        // Scale phone to look balanced and imposing (normalized scale)
-        const scale = 5.2 / maxDim;
+        // Scale phone to look balanced, sharp and imposing
+        const scale = 5.8 / maxDim;
         phone.scale.set(scale, scale, scale);
-        phone.position.sub(center.multiplyScalar(scale));
+        phone.position.sub(center.clone().multiplyScalar(scale));
 
         phone.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
             child.frustumCulled = false;
-            if (child.material) {
-              child.material = child.material.clone();
-              const matName = (child.material.name || '').trim();
-              const meshName = (child.name || '').trim();
 
-              if (matName === 'Lock_Screen' || meshName.includes('Object_0')) {
-                phoneScreenMesh = child;
-                defaultScreenMap = child.material.map;
-                child.material.transparent = false;
-                child.material.depthWrite = true;
-                child.material.roughness = 0.15;
-                child.material.metalness = 0.05;
-                // Live screen emissive map
-                child.material.map = defaultScreenMap || section3ScreenTexture;
-                child.material.emissiveMap = child.material.map;
-                child.material.emissive.set(0xffffff);
-                child.material.needsUpdate = true;
-                console.log("--> PANTALLA SMARTPHONE IDENTIFICADA PARA SECCIÓN 3:", child);
-              } else if (matName === 'Glass' || meshName.includes('Object_1') || meshName.includes('Object_12')) {
-                child.material.transparent = true;
-                child.material.opacity = 0.18;
-                child.material.depthWrite = false;
-                child.material.roughness = 0.05;
-                child.material.metalness = 0.9;
-                child.material.color.set(0xffffff);
-              } else {
-                // Titanium cyber chassis & bevels
-                child.material.transparent = false;
-                child.material.depthWrite = true;
-                child.material.color.set(0x383845);
-                child.material.metalness = 0.85;
-                child.material.roughness = 0.25;
-              }
+            const matName = (child.material ? child.material.name || '' : '').trim();
+            const meshName = (child.name || '').trim();
+
+            if (matName === 'Lock_Screen' || meshName.includes('Object_0')) {
+              // Pantalla Emisiva Nítida e Iluminada
+              phoneScreenMesh = child;
+              child.visible = true;
+              child.material = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                map: section3ScreenTexture,
+                emissiveMap: section3ScreenTexture,
+                emissive: new THREE.Color(0xffffff),
+                emissiveIntensity: 1.35,
+                roughness: 0.35,
+                metalness: 0.0,
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+              });
+            } else if (matName === 'Camera_Lens' || meshName.includes('Object_11')) {
+              child.visible = true;
+              child.material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0x0a0c10),
+                roughness: 0.10,
+                metalness: 0.95,
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true
+              });
+            } else if (meshName.includes('Object_1')) {
+              child.visible = false;
+            } else {
+              // Carcasa, biseles, marco de titanio y tapa trasera (Gris titanio sólido elegante)
+              child.visible = true;
+              child.material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0x525660), // Gris titanio sólido elegante
+                roughness: 0.32,
+                metalness: 0.75,
+                transparent: false,
+                opacity: 1.0,
+                depthWrite: true,
+                depthTest: true,
+                side: THREE.DoubleSide
+              });
             }
           }
         });
@@ -1320,7 +1334,7 @@ function initHero3DModel() {
       },
       undefined,
       (err) => {
-        console.error("Error cargando smartphone.glb:", err);
+        console.error("Error cargando smartphone2.glb:", err);
       }
     );
   }
@@ -1451,13 +1465,13 @@ function initHero3DModel() {
     const T_HEAD_ZOOM_END = 0.12;       // 0% -> 12%: 3D Head zooms into eye
     const T_REVEAL_START = 0.10;        // 10% -> Laser dot appears
     const T_REVEAL_END = 0.20;          // 20% -> Section 2 curtains 100% open & flat
-    const T_CONTENT_SCROLL_END = 0.44;  // 20% -> 44%: Section 2 content scrolls smoothly
-    const T_EXIT_START = 0.46;          // 46% -> Curtains start closing (Plano -> Línea -> Punto)
-    const T_EXIT_END = 0.58;            // 58% -> Line collapses to center PUNTO (punto queda!)
-    const T_PHONE_ZOOM_START = 0.58;    // 58% -> Smartphone emerges from center point & zooms out
-    const T_PHONE_ZOOM_END = 0.74;      // 74% -> Smartphone fully centered
-    const T_SPIN_START = 0.74;          // 74% -> 360° rotation begins with scroll
-    const T_SPIN_END = 0.94;            // 94% -> 360° spin completes, screen displays Section 3
+    const T_CONTENT_SCROLL_END = 0.34;  // 20% -> 34%: Section 2 content active
+    const T_EXIT_START = 0.35;          // 35% -> Curtains start closing (Plano -> Línea)
+    const T_PHONE_ZOOM_START = 0.40;    // 40% -> Vertical line is formed & Smartphone starts Zoom Out!
+    const T_EXIT_END = 0.46;            // 46% -> Line collapses to center PUNTO
+    const T_PHONE_ZOOM_END = 0.64;      // 64% -> Smartphone fully centered
+    const T_SPIN_START = 0.64;          // 64% -> 360° rotation begins with scroll
+    const T_SPIN_END = 0.88;            // 88% -> 360° spin completes, screen displays Section 3
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
       // El modelo se mantiene 100% sólido durante todo el zoom y comienza a desvanecerse a partir de que aparece el punto
@@ -1478,6 +1492,23 @@ function initHero3DModel() {
       });
       modelGroup.visible = headOpacity > 0.001;
       smartphoneGroup.visible = false;
+
+      // Full Iconic Hero Lighting for Wolf Head (Vibrant Cyber-Lavender + Lime & Purple Specular Highlights)
+      ambientLight.intensity = 1.2;
+      dirLightLime.intensity = 2.5;
+      dirLightPurple.intensity = 2.0;
+      pointLight.intensity = 2.0;
+      phoneFrontLight.intensity = 0.0;
+
+      const hero3dContainer = document.getElementById('hero-3d-container');
+      if (hero3dContainer) {
+        hero3dContainer.style.zIndex = '10';
+      }
+
+      const kineticBg = document.getElementById('kinetic-text-bg');
+      if (kineticBg) {
+        kineticBg.style.opacity = '0';
+      }
 
       // 1. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
       const mouseDampen = Math.max(0, 1.0 - currentScrollLerp * 3.0);
@@ -1547,7 +1578,7 @@ function initHero3DModel() {
               portalDot.style.top = '50%';
               portalDot.style.left = '50%';
               portalDot.style.transform = `translate(-50%, -50%) scale(${dotScale.toFixed(2)})`;
-              portalDot.style.opacity = Math.min(1.0, pDot * 2.0).toFixed(3);
+              portalDot.opacity = Math.min(1.0, pDot * 2.0).toFixed(3);
             }
             if (slitLeft) slitLeft.style.opacity = '0';
             if (slitRight) slitRight.style.opacity = '0';
@@ -1631,60 +1662,30 @@ function initHero3DModel() {
             secPortal.scrollTop = pContent * maxScroll;
           }
 
-        } else if (currentScrollLerp < T_EXIT_END) {
-          // -------------------- SALIDA: PLANO -> LÍNEA -> PUNTO --------------------
-          const exitP = (currentScrollLerp - T_EXIT_START) / (T_EXIT_END - T_EXIT_START);
+        } else {
+          // -------------------- SALIDA: PLANO -> LÍNEA (0.35 -> 0.40) --------------------
+          const hExit = (currentScrollLerp - T_EXIT_START) / (T_PHONE_ZOOM_START - T_EXIT_START);
+          const hExitEased = Math.sin((hExit * Math.PI) / 2);
+          const insetX = hExitEased * 50;
 
-          if (exitP < 0.48) {
-            // PLANO -> LÍNEA
-            const hExit = exitP / 0.48;
-            const hExitEased = Math.sin((hExit * Math.PI) / 2);
-            const insetX = hExitEased * 50;
+          secPortal.style.clipPath = `inset(0% ${insetX.toFixed(2)}% 0% ${insetX.toFixed(2)}%)`;
+          secPortal.style.opacity = '1.0';
+          secPortal.style.filter = `blur(${(hExit * 10).toFixed(1)}px)`;
+          secPortal.style.pointerEvents = 'none';
 
-            secPortal.style.clipPath = `inset(0% ${insetX.toFixed(2)}% 0% ${insetX.toFixed(2)}%)`;
-            secPortal.style.opacity = '1.0';
-            secPortal.style.filter = `blur(${(hExit * 10).toFixed(1)}px)`;
-            secPortal.style.pointerEvents = 'none';
-
-            if (slitLeft) {
-              slitLeft.style.left = insetX.toFixed(2) + '%';
-              slitLeft.style.top = '0%';
-              slitLeft.style.height = '100%';
-              slitLeft.style.opacity = Math.min(1.0, hExit * 1.5).toFixed(3);
-            }
-            if (slitRight) {
-              slitRight.style.left = (100 - insetX).toFixed(2) + '%';
-              slitRight.style.top = '0%';
-              slitRight.style.height = '100%';
-              slitRight.style.opacity = Math.min(1.0, hExit * 1.5).toFixed(3);
-            }
-            if (portalDot) portalDot.style.opacity = '0';
-
-          } else {
-            // LÍNEA -> PUNTO (Punto queda en el centro)
-            const vExit = (exitP - 0.48) / 0.52;
-            const beamHeight = (1.0 - vExit) * 100;
-            const beamTop = vExit * 50;
-
-            secPortal.style.clipPath = `inset(${beamTop.toFixed(2)}% 49.9% ${beamTop.toFixed(2)}% 49.9%)`;
-            secPortal.style.opacity = Math.max(0, 1.0 - vExit * 1.2).toFixed(3);
-            secPortal.style.pointerEvents = 'none';
-
-            if (slitLeft) {
-              slitLeft.style.left = '50%';
-              slitLeft.style.top = beamTop.toFixed(2) + '%';
-              slitLeft.style.height = beamHeight.toFixed(2) + '%';
-              slitLeft.style.opacity = Math.max(0, 1.0 - vExit).toFixed(3);
-            }
-            if (slitRight) slitRight.style.opacity = '0';
-
-            if (portalDot) {
-              portalDot.style.top = '50%';
-              portalDot.style.left = '50%';
-              portalDot.style.transform = 'translate(-50%, -50%) scale(1.0)';
-              portalDot.style.opacity = Math.min(1.0, vExit * 1.8).toFixed(3);
-            }
+          if (slitLeft) {
+            slitLeft.style.left = insetX.toFixed(2) + '%';
+            slitLeft.style.top = '0%';
+            slitLeft.style.height = '100%';
+            slitLeft.style.opacity = Math.min(1.0, hExit * 1.5).toFixed(3);
           }
+          if (slitRight) {
+            slitRight.style.left = (100 - insetX).toFixed(2) + '%';
+            slitRight.style.top = '0%';
+            slitRight.style.height = '100%';
+            slitRight.style.opacity = Math.min(1.0, hExit * 1.5).toFixed(3);
+          }
+          if (portalDot) portalDot.style.opacity = '0';
         }
       }
     } else {
@@ -1692,31 +1693,79 @@ function initHero3DModel() {
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
 
-      // Hide Section 2 completely and keep center dot
-      const secPortal = document.getElementById('seccion-portal-revelada');
-      if (secPortal) {
-        secPortal.style.opacity = '0';
-        secPortal.style.pointerEvents = 'none';
+      // Elevate 3D Canvas Layer in front of all backgrounds and closed sections (z-index: 34)
+      const hero3dContainer = document.getElementById('hero-3d-container');
+      if (hero3dContainer) {
+        hero3dContainer.style.zIndex = '34';
       }
 
+      // Kinetic Text Background (Originkit) emerges behind the smartphone (z-index: 32)
+      const kineticBg = document.getElementById('kinetic-text-bg');
+      if (kineticBg) {
+        const pKinetic = Math.min(1.0, (currentScrollLerp - T_PHONE_ZOOM_START) / 0.03);
+        kineticBg.style.opacity = pKinetic.toFixed(3);
+      }
+
+      // Calibrated Soft Lighting for Smartphone (Crisp Text & Dark Rat-Gray Chassis Contrast)
+      ambientLight.intensity = 0.8;
+      dirLightLime.intensity = 1.6;
+      dirLightPurple.intensity = 1.4;
+      pointLight.intensity = 0.5;
+      phoneFrontLight.intensity = 0.35;
+
+      const secPortal = document.getElementById('seccion-portal-revelada');
       const portalDot = document.getElementById('portal-reveal-dot');
       const slitLeft = document.getElementById('portal-reveal-slit-left');
       const slitRight = document.getElementById('portal-reveal-slit-right');
-      if (slitLeft) slitLeft.style.opacity = '0';
       if (slitRight) slitRight.style.opacity = '0';
 
-      // Camera stays locked centered on the smartphone
+      // Section 2 Line -> Point collapse (0.40 -> 0.46)
+      if (currentScrollLerp < T_EXIT_END) {
+        const vExit = (currentScrollLerp - T_PHONE_ZOOM_START) / (T_EXIT_END - T_PHONE_ZOOM_START);
+        const beamHeight = (1.0 - vExit) * 100;
+        const beamTop = vExit * 50;
+
+        if (secPortal) {
+          secPortal.style.clipPath = `inset(${beamTop.toFixed(2)}% 49.9% ${beamTop.toFixed(2)}% 49.9%)`;
+          secPortal.style.opacity = Math.max(0, 1.0 - vExit * 1.5).toFixed(3);
+          secPortal.style.pointerEvents = 'none';
+        }
+
+        if (slitLeft) {
+          slitLeft.style.left = '50%';
+          slitLeft.style.top = beamTop.toFixed(2) + '%';
+          slitLeft.style.height = beamHeight.toFixed(2) + '%';
+          slitLeft.style.opacity = Math.max(0, 1.0 - vExit).toFixed(3);
+        }
+
+        if (portalDot) {
+          portalDot.style.top = '50%';
+          portalDot.style.left = '50%';
+          portalDot.style.transform = 'translate(-50%, -50%) scale(1.0)';
+          portalDot.style.opacity = Math.min(1.0, vExit * 1.8).toFixed(3);
+        }
+      } else {
+        if (secPortal) {
+          secPortal.style.opacity = '0';
+          secPortal.style.pointerEvents = 'none';
+        }
+        if (slitLeft) slitLeft.style.opacity = '0';
+      }
+
       camera.position.set(0, 0, 8.5);
       camera.lookAt(0, 0, 0);
 
+      const hero3dCanvas = document.getElementById('hero-3d-canvas');
+
       if (currentScrollLerp < T_PHONE_ZOOM_END) {
-        // B.1 Emergence & Zoom Out to Center (0.58 -> 0.74)
+        // B.1 Emergence & Continuous Zoom Out to Center (0.40 -> 0.64)
         const pZoom = (currentScrollLerp - T_PHONE_ZOOM_START) / (T_PHONE_ZOOM_END - T_PHONE_ZOOM_START);
         const pZoomEased = Math.sin((pZoom * Math.PI) / 2);
 
-        // Center dot fades out as smartphone expands
-        if (portalDot) {
-          portalDot.style.opacity = Math.max(0, 1.0 - pZoomEased * 2.0).toFixed(3);
+        // Center dot fades out as smartphone finishes expanding
+        if (portalDot && currentScrollLerp >= T_EXIT_END) {
+          const pDotFade = (currentScrollLerp - T_EXIT_END) / (T_PHONE_ZOOM_END - T_EXIT_END);
+          portalDot.style.opacity = Math.max(0, 1.0 - pDotFade * 2.0).toFixed(3);
         }
 
         const phoneScale = 2.4 - (pZoomEased * 1.4); // 2.4 -> 1.0
@@ -1736,9 +1785,17 @@ function initHero3DModel() {
           }
         }
 
+        if (hero3dCanvas) {
+          hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+        }
+
       } else if (currentScrollLerp < T_SPIN_END) {
-        // B.2 360° Horizontal Spin with Scroll (0.74 -> 0.94)
+        // B.2 360° Horizontal Spin with Scroll (0.64 -> 0.88)
         if (portalDot) portalDot.style.opacity = '0';
+        if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+
+        camera.position.set(0, 0, 8.5);
+        camera.lookAt(0, 0, 0);
 
         const pSpin = (currentScrollLerp - T_SPIN_START) / (T_SPIN_END - T_SPIN_START);
         smartphoneGroup.scale.set(1.0, 1.0, 1.0);
@@ -1756,8 +1813,12 @@ function initHero3DModel() {
         }
 
       } else {
-        // B.3 Section 3 Screen Complete & Active (0.94 -> 1.00)
+        // B.3 Section 3 Complete & Active (0.88 -> 1.00)
         if (portalDot) portalDot.style.opacity = '0';
+        if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+
+        camera.position.set(0, 0, 8.5);
+        camera.lookAt(0, 0, 0);
 
         smartphoneGroup.scale.set(1.0, 1.0, 1.0);
         smartphoneGroup.position.set(0, 0, 0);
@@ -2079,3 +2140,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 ====================
+function scrollToSection2() {
+  const track = document.getElementById('hero-scroll-track');
+  if (!track) return;
+  const trackRect = track.getBoundingClientRect();
+  const trackTop = window.scrollY + trackRect.top;
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  const targetY = trackTop + maxScroll * 0.22;
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const duration = 1600; // 1.6s smooth cinematic glide
+  let startTime = null;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function step(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1.0);
+    const easeProgress = easeInOutCubic(progress);
+
+    window.scrollTo(0, startY + distance * easeProgress);
+
+    if (progress < 1.0) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+window.scrollToSection2 = scrollToSection2;
