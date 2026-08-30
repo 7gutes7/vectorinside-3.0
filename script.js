@@ -983,6 +983,16 @@ function initHero3DModel() {
   pointLight.position.set(0, 5, 5);
   scene.add(pointLight);
 
+  // Luz de rebote púrpura muy sutil en la parte inferior izquierda del modelo 3D Hero
+  const lowerLeftPurpleLight = new THREE.DirectionalLight(0x7928ca, 0.75);
+  lowerLeftPurpleLight.position.set(-4.5, -4.5, 3.5);
+  scene.add(lowerLeftPurpleLight);
+
+  // Luz de rebote rosa/rojo sutil en la parte superior derecha del modelo 3D Hero
+  const upperRightPinkLight = new THREE.DirectionalLight(0xff1443, 0.95);
+  upperRightPinkLight.position.set(4.5, 6.0, 3.5);
+  scene.add(upperRightPinkLight);
+
   const phoneFrontLight = new THREE.DirectionalLight(0xffffff, 0.35);
   phoneFrontLight.position.set(0, 2, 10);
   scene.add(phoneFrontLight);
@@ -1092,7 +1102,7 @@ function initHero3DModel() {
     fragmentShader: topoFragmentShader,
     uniforms: {
       u_time: { value: 0 },
-      u_opacity: { value: 0.90 }
+      u_opacity: { value: 0.72 }
     },
     transparent: true,
     depthWrite: false
@@ -1525,9 +1535,9 @@ function initHero3DModel() {
     // 0. Update Native 3D Topographical Terrain Animation (120 FPS hardware accelerated)
     if (topoMaterial && topoMaterial.uniforms) {
       topoMaterial.uniforms.u_time.value = performance.now() * 0.001;
-      // Retrasado: El fondo se mantiene visible durante más tiempo en el zoom y se desvanece suavemente entre 0.065 y 0.10
+      // Opacidad base reducida (0.72) para dar mayor jerarquía y contraste al lobo 3D
       const pTopoFade = Math.max(0, (currentScrollLerp - 0.065) / 0.035);
-      const topoOpacity = Math.max(0, 1.0 - Math.min(1.0, pTopoFade));
+      const topoOpacity = Math.max(0, 1.0 - Math.min(1.0, pTopoFade)) * 0.72;
       topoMaterial.uniforms.u_opacity.value = topoOpacity;
       topoMesh.visible = topoOpacity > 0.001;
     }
@@ -1582,6 +1592,10 @@ function initHero3DModel() {
       pointLight.color.set(0xffffff);
       pointLight.position.set(0, 5, 5);
       pointLight.intensity = 2.0;
+
+      lowerLeftPurpleLight.intensity = 0.75;
+      upperRightPinkLight.color.set(0xff1443);
+      upperRightPinkLight.intensity = 0.95;
 
       ambientLight.color.set(0xffffff);
       ambientLight.intensity = 1.2;
@@ -1805,6 +1819,8 @@ function initHero3DModel() {
       dirLightPurple.intensity = 1.0;
       pointLight.intensity = 0.35;
       pointLight.position.set(-8.0, 3.0, 5.0);
+      lowerLeftPurpleLight.intensity = 0.0;
+      upperRightPinkLight.intensity = 0.0;
       phoneFrontLight.intensity = 0.30;
       phoneFrontLight.position.set(-8.0, 2.0, 6.0);
 

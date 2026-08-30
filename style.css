@@ -432,6 +432,14 @@ body {
   pointer-events: auto !important;
 }
 
+/* Transparent Neon Lime Outline for LA MARCA // EL DESTINO */
+.lime-outline-text {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: 1.5px #c3f400;
+  text-shadow: 0 0 15px rgba(195, 244, 0, 0.4);
+}
+
 /* Solid Neon Lime Styling for TU MARCA & EL ÚNICO DESTINO (Static Glow, No Blinking) */
 .lime-shimmer-text {
   color: #c3f400;

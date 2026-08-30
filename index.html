@@ -93,9 +93,9 @@
 
   <!-- ==================== HEADER & NAVIGATION ==================== -->
   <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
       <!-- Brand Logo -->
-      <a href="index.html" class="flex items-center gap-3 group">
+      <a href="index.html" class="flex items-center gap-3 group z-10">
         <img src="headerlogo.png" alt="Vector Inside Logo"
           class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
         <span
@@ -103,14 +103,14 @@
           3D</span>
       </a>
 
-      <!-- Center Headline in Header -->
+      <!-- Center Headline in Header (Centrado) -->
       <div
-        class="hidden md:flex items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1">
+        class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1">
         <span>Aceleración Digital // Diseño desde el Núcleo</span>
       </div>
 
-      <!-- Header Right CTA Button (White Base -> Smooth Vector Lime Hover Sweep) -->
-      <div class="flex items-center gap-3">
+      <!-- Header Right CTA Button -->
+      <div class="flex items-center gap-3 ml-auto z-10">
         <a href="diagnostico/index.html" class="btn-pill-nuclear group" id="header-pill-nav-btn">
           <span class="btn-pill-bg"></span>
           <span class="btn-pill-label">
@@ -153,27 +153,26 @@
 
       <!-- ==================== LAYER 10: HERO CONTENT & 3D STAGE ==================== -->
       <div id="hero-ui-content"
-        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-between items-center text-center flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
+        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-between items-start text-left flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
 
-        <!-- Top Pinned Typography: DISEÑAMOS INSTINTO. -->
-        <div class="flex flex-col items-center justify-start text-center w-full max-w-4xl mx-auto pointer-events-auto">
+        <!-- Top: DISEÑAMOS INSTINTO. (Arriba a la izquierda) -->
+        <div class="w-full flex items-start justify-start pointer-events-auto">
           <h1
-            class="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-center w-full text-slate-900 flex flex-col items-center">
-            <!-- Line 1: StrokeText SVG Component for "Diseñamos instinto." (Reduced by 20% to 60% width) -->
+            class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-left text-slate-900 flex flex-col items-start">
             <div id="stroke-text-wrapper"
-              class="relative w-[60%] max-w-[60%] overflow-visible mb-0 select-none leading-none mx-auto flex justify-center">
+              class="relative w-[280px] sm:w-[380px] md:w-[460px] max-w-full overflow-visible mb-0 select-none leading-none mr-auto flex justify-start">
               <svg viewBox="0 18 1220 80" class="w-full h-auto block overflow-visible">
                 <defs>
                   <clipPath id="stroke-text-clip">
                     <rect id="stroke-wipe-rect" x="0" y="0" width="0%" height="100%" />
                   </clipPath>
                 </defs>
-                <text x="50%" y="95" text-anchor="middle" class="stroke-draw-path font-display font-black"
+                <text x="0" y="95" text-anchor="start" class="stroke-draw-path font-display font-black"
                   font-size="105" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF"
                   stroke-width="3.5" stroke-dasharray="3500" stroke-dashoffset="3500">
                   DISEÑAMOS INSTINTO.
                 </text>
-                <text x="50%" y="95" text-anchor="middle" class="stroke-fill-path font-display font-black"
+                <text x="0" y="95" text-anchor="start" class="stroke-fill-path font-display font-black"
                   font-size="105" font-weight="900" letter-spacing="-3.5" fill="#FFFFFF"
                   clip-path="url(#stroke-text-clip)">
                   DISEÑAMOS INSTINTO.
@@ -183,25 +182,17 @@
           </h1>
         </div>
 
-        <!-- Bottom Pinned Typography: Aligned precisely to the lateral margins drawn by the Fixed Bottom Dock -->
-        <div id="hero-flank-dock-wrapper"
-          class="w-full max-w-[830px] mx-auto flex items-center justify-between pointer-events-none mt-auto mb-2 px-1 transition-all">
-          <!-- Left Margin: LA MARCA (Aligned with 01 // Manifiesto left edge) -->
-          <div id="hero-curtain-left"
-            class="pointer-events-auto select-none cursor-pointer flex flex-col items-start text-left opacity-0">
-            <span id="shuffle-hero-left"
-              class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tighter uppercase leading-none whitespace-nowrap lime-shimmer-text transition-all">
-              LA MARCA
-            </span>
-          </div>
-
-          <!-- Right Margin: EL ÚNICO DESTINO. (Aligned with 06 // Diagnóstico right edge) -->
+        <!-- Center Right Flank: LA MARCA // EL DESTINO (Al costado derecho del modelo 3D del Hero) -->
+        <div class="w-full flex items-center justify-end my-auto pointer-events-none">
           <div id="hero-curtain-right"
-            class="pointer-events-auto select-none cursor-pointer flex flex-col items-end text-right opacity-0">
-            <span id="shuffle-hero-right"
-              class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tighter uppercase leading-none whitespace-nowrap lime-shimmer-text transition-all">
-              EL DESTINO
-            </span>
+            class="pointer-events-auto select-none cursor-pointer flex items-center justify-end text-right ml-auto opacity-0 w-[300px] sm:w-[400px] md:w-[480px] max-w-full">
+            <svg viewBox="0 18 1380 80" class="w-full h-auto block overflow-visible">
+              <text x="100%" y="95" text-anchor="end" class="font-display font-black"
+                font-size="105" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#c3f400"
+                stroke-width="3.5">
+                LA MARCA <tspan stroke="rgba(255,255,255,0.25)">//</tspan> EL DESTINO
+              </text>
+            </svg>
           </div>
         </div>
 
@@ -639,8 +630,8 @@
 
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.130) -->
-  <script src="script.js?v=3.0.130"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.141) -->
+  <script src="script.js?v=3.0.141"></script>
 </body>
 
 </html>
