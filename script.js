@@ -126,9 +126,20 @@ function initPageVideoIntro() {
     }
   });
 
+  // Skip intro when clicking on video or anywhere on the intro screen
+  video.style.cursor = 'pointer';
+  video.addEventListener('click', dismissIntro);
+  introScreen.style.cursor = 'pointer';
+  introScreen.addEventListener('click', (e) => {
+    dismissIntro();
+  });
+
   // Skip button click
   if (skipBtn) {
-    skipBtn.addEventListener('click', dismissIntro);
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissIntro();
+    });
   }
 
   // Escape key press to skip
@@ -1596,6 +1607,11 @@ function initHero3DModel() {
             const blurVal = (1.0 - hEased) * 10;
             secPortal.style.filter = blurVal > 0.4 ? `blur(${blurVal.toFixed(1)}px)` : 'none';
             secPortal.style.pointerEvents = h > 0.8 ? 'auto' : 'none';
+
+            const sec2Vid = document.getElementById('section2-manifesto-video');
+            if (sec2Vid && sec2Vid.paused) {
+              sec2Vid.play().catch(() => {});
+            }
           }
 
         } else if (currentScrollLerp < T_EXIT_START) {
