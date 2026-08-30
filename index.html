@@ -432,12 +432,27 @@
         </div>
       </div>
 
+      <!-- ==================== LAYER 39: SECTION 3 FLANKING ASSETS (POLYGONAL LEFT & LIQUID RIGHT) ==================== -->
+      <div id="sec3-flanks-wrapper" class="absolute inset-0 w-full h-full pointer-events-none z-[39] overflow-hidden">
+        <!-- Left Flank: poligonal02.png (Entra de izquierda a derecha, 50% visible) -->
+        <div id="sec3-flank-left"
+          class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
+          <img src="poligonal02.png?v=3.0.182" alt="Poligonal 02" class="w-full h-auto object-contain select-none" />
+        </div>
+
+        <!-- Right Flank: liquid01.png (Entra de derecha a izquierda, 50% visible) -->
+        <div id="sec3-flank-right"
+          class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
+          <img src="liquid01.png?v=3.0.182" alt="Liquid 01" class="w-full h-auto object-contain select-none" />
+        </div>
+      </div>
+
       <!-- ==================== LAYER 40: SECTION 3 ECOSISTEMA OVERLAY ==================== -->
       <div id="seccion-3-ecosistema"
-        class="absolute inset-0 z-[40] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-6 max-w-7xl mx-auto transition-opacity duration-300">
+        class="absolute inset-0 z-[40] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-4 sm:px-6 max-w-7xl mx-auto transition-opacity duration-300">
 
         <!-- Top Header for Section 3 -->
-        <div class="flex items-center justify-between border-b border-white/15 pb-4">
+        <div class="relative z-10 flex items-center justify-between border-b border-white/15 pb-4">
           <div class="flex items-center gap-3">
             <span
               class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
@@ -452,120 +467,171 @@
           </span>
         </div>
 
-        <!-- Section 3 Cascading Dual-Column Stream (Emerges below the smartphone) -->
-        <div id="sec3-cards-stream"
-          class="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 my-auto pointer-events-auto overflow-visible py-4">
+        <!-- Section 3 Cascading Dual-Column Stream with Internal Scroll (Horizontally Compressed) -->
+        <div id="sec3-cards-scroll-container"
+          class="relative z-10 w-full max-w-[760px] mx-auto my-auto overflow-y-hidden max-h-[calc(100vh-220px)] pointer-events-auto pr-3 pt-4 pb-20 custom-scrollbar">
 
-          <!-- Column 1 (Left / Centered Stream) -->
-          <div class="flex flex-col gap-6 lg:gap-8">
+          <div id="sec3-cards-stream" class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 overflow-visible">
 
-            <!-- Card 01 (Col 1, Item 0) -->
-            <div id="sec3-card-0"
-              class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-vector-lime"></span>
-                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-vector-lime">01 // NÚCLEO
-                    ESTRUCTURAL</span>
+            <!-- Column 1 (Left Stream - Generous Vertical Separation) -->
+            <div class="flex flex-col gap-8 sm:gap-10 lg:gap-12 pb-12">
+
+              <!-- Card 01 (Col 1, Item 0) -->
+              <div id="sec3-card-0"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-vector-lime"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">01 // NÚCLEO
+                      ESTRUCTURAL</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">LATENCIA 0.02s</span>
                 </div>
-                <span class="font-mono text-[10px] text-text-muted">LATENCIA 0.02s</span>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a
+                  cliente de alto valor.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>EFICIENCIA OPERATIVA</span>
+                  <span class="text-vector-lime font-bold">99.8%</span>
+                </div>
               </div>
-              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
-                ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
-              </h3>
-              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
-                Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a
-                cliente de alto valor.
-              </p>
-              <div
-                class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
-                <span>EFICIENCIA OPERATIVA</span>
-                <span class="text-vector-lime font-bold">99.8%</span>
+
+              <!-- Card 03 (Col 1, Item 2) -->
+              <div id="sec3-card-2"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-vector-lime"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">03 // MOTOR
+                      DE CONVERSIÓN</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">TIEMPO REAL</span>
+                </div>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  FUNNELS <span class="text-vector-lime">DE ALTA RETENCIÓN</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Arquitectura de captura y cierre adaptativo que califica y enruta automáticamente las oportunidades de
+                  negocio en segundos.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>INCREMENTO PROMEDIO</span>
+                  <span class="text-vector-lime font-bold">+340%</span>
+                </div>
               </div>
+
+              <!-- Card 05 (Col 1, Item 4) -->
+              <div id="sec3-card-4"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-vector-lime"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">05 //
+                      ORQUESTACIÓN DE DATOS</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">PIPELINES 24/7</span>
+                </div>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  PIPELINES <span class="text-vector-lime">& CRM PREDICTIVO</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Sincronización bidireccional continua entre marketing, ventas y analítica que reduce el trabajo manual en un 70%.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>REDUCCIÓN TRABAJO MANUAL</span>
+                  <span class="text-vector-lime font-bold">-70% TIEMPO</span>
+                </div>
+              </div>
+
             </div>
 
-            <!-- Card 03 (Col 1, Item 2) -->
-            <div id="sec3-card-2"
-              class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-vector-lime"></span>
-                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-vector-lime">03 // MOTOR
-                    DE CONVERSIÓN</span>
+            <!-- Column 2 (Right Stream - Staggered Offset & Generous Separation) -->
+            <div class="flex flex-col gap-8 sm:gap-10 lg:gap-12 md:mt-16 pb-12">
+
+              <!-- Card 02 (Col 2, Item 1) -->
+              <div id="sec3-card-1"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-operative-purple"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">02 //
+                      SINCRONIZACIÓN TOTAL</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">OMNICANAL</span>
                 </div>
-                <span class="font-mono text-[10px] text-text-muted">TIEMPO REAL</span>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  RESPUESTA <span class="text-operative-purple">NEURONAL</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Automatización inteligente que conecta WhatsApp, CRM y analítica predictiva en un único flujo continuo
+                  sin intervención manual.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>CANALES ACTIVOS</span>
+                  <span class="text-operative-purple font-bold">100% UNIFICADOS</span>
+                </div>
               </div>
-              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
-                FUNNELS <span class="text-vector-lime">DE ALTA RETENCIÓN</span>
-              </h3>
-              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
-                Arquitectura de captura y cierre adaptativo que califica y enruta automáticamente las oportunidades de
-                negocio en segundos.
-              </p>
-              <div
-                class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
-                <span>INCREMENTO PROMEDIO</span>
-                <span class="text-vector-lime font-bold">+340%</span>
+
+              <!-- Card 04 (Col 2, Item 3) -->
+              <div id="sec3-card-3"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-operative-purple"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">04 //
+                      INTELIGENCIA OPERATIVA</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">TELEMETRÍA 24/7</span>
+                </div>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  DIAGNÓSTICO <span class="text-operative-purple">NUCLEAR CONTINUO</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Monitoreo permanente de salud estructural, cuellos de botella y rendimiento de conversión con reportes
+                  accionables.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>ESTADO DEL SISTEMA</span>
+                  <span class="text-vector-lime font-bold">ACTIVO // SIN ERRORES</span>
+                </div>
               </div>
+
+              <!-- Card 06 (Col 2, Item 5) -->
+              <div id="sec3-card-5"
+                class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[80px] will-change-transform">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-operative-purple"></span>
+                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">06 //
+                      ESCALABILIDAD MODULAR</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-text-muted">EXPANSIÓN 3.4x</span>
+                </div>
+                <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
+                  CRECIMIENTO <span class="text-operative-purple">EXPONENCIAL</span>
+                </h3>
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                  Infraestructura tridimensional desacoplada que permite escalar el volumen transaccional sin fricción operativa.
+                </p>
+                <div
+                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
+                  <span>VELOCIDAD DE CIERRE</span>
+                  <span class="text-operative-purple font-bold">3.4x ACELERADA</span>
+                </div>
+              </div>
+
             </div>
 
           </div>
-
-          <!-- Column 2 (Right / Centered Stream - Staggered Offset) -->
-          <div class="flex flex-col gap-6 lg:gap-8 md:mt-12">
-
-            <!-- Card 02 (Col 2, Item 1) -->
-            <div id="sec3-card-1"
-              class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-operative-purple"></span>
-                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-operative-purple">02 //
-                    SINCRONIZACIÓN TOTAL</span>
-                </div>
-                <span class="font-mono text-[10px] text-text-muted">OMNICANAL</span>
-              </div>
-              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
-                RESPUESTA <span class="text-operative-purple">NEURONAL</span>
-              </h3>
-              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
-                Automatización inteligente que conecta WhatsApp, CRM y analítica predictiva en un único flujo continuo
-                sin intervención manual.
-              </p>
-              <div
-                class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
-                <span>CANALES ACTIVOS</span>
-                <span class="text-operative-purple font-bold">100% UNIFICADOS</span>
-              </div>
-            </div>
-
-            <!-- Card 04 (Col 2, Item 3) -->
-            <div id="sec3-card-3"
-              class="sec3-cascade-card bg-vector-black/90 backdrop-blur-2xl border border-white/15 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.9)] opacity-0 translate-y-[120px] will-change-transform">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-operative-purple"></span>
-                  <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-operative-purple">04 //
-                    INTELIGENCIA OPERATIVA</span>
-                </div>
-                <span class="font-mono text-[10px] text-text-muted">TELEMETRÍA 24/7</span>
-              </div>
-              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
-                DIAGNÓSTICO <span class="text-operative-purple">NUCLEAR CONTINUO</span>
-              </h3>
-              <p class="font-body text-xs sm:text-sm text-text-muted leading-relaxed mb-4">
-                Monitoreo permanente de salud estructural, cuellos de botella y rendimiento de conversión con reportes
-                accionables.
-              </p>
-              <div
-                class="flex items-center justify-between pt-3 border-t border-white/10 font-mono text-[11px] text-neutral-400">
-                <span>ESTADO DEL SISTEMA</span>
-                <span class="text-vector-lime font-bold">ACTIVO // SIN ERRORES</span>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
         <!-- Section 3 Footer -->
@@ -672,9 +738,11 @@
   </div>
 
   <!-- RippleDistortion Component (React Bits WebGL) -->
-  <script src="RippleDistortion.js?v=3.0.170"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.170) -->
-  <script src="script.js?v=3.0.170"></script>
+  <script src="RippleDistortion.js?v=3.0.171"></script>
+  <!-- Topography Component (React Bits WebGL) -->
+  <script src="Topography.js?v=3.0.171"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.186) -->
+  <script src="script.js?v=3.0.186"></script>
 </body>
 
 </html>

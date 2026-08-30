@@ -1569,6 +1569,10 @@ function initHero3DModel() {
     });
   }
 
+  // State variables for Section 3 internal scroll delayed activation (1 second delay after reaching position)
+  let sec3ScrollUnlockTimer = null;
+  let isSec3InternalScrollEnabled = false;
+
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
   function animate() {
     requestAnimationFrame(animate);
@@ -1980,51 +1984,112 @@ function initHero3DModel() {
         smartphoneGroup.scale.set(1.0, 1.0, 1.0);
         smartphoneGroup.position.set(0, pUpEased * 9.0, 0);
         smartphoneGroup.rotation.set(0, Math.PI * 2, 0); // Frontal
+        // Desactivar renderizado 3D del smartphone una vez fuera del visor
+        if (pUpEased > 0.85) {
+          smartphoneGroup.visible = false;
+        }
 
-        // Fondo con letras se desvanece en blur progresivo
+        // Fondo con letras se desvanece de forma limpia sin filtros pesados de blur
         if (kineticBg) {
-          const blurAmount = (pUpEased * 28).toFixed(1);
-          const bgOpacity = Math.max(0, 1.0 - pUpEased * 1.3).toFixed(3);
-          kineticBg.style.filter = `blur(${blurAmount}px)`;
-          kineticBg.style.opacity = bgOpacity;
+          if (pUpEased >= 0.85) {
+            kineticBg.style.display = 'none';
+            kineticBg.style.visibility = 'hidden';
+            kineticBg.style.opacity = '0';
+          } else {
+            kineticBg.style.display = 'block';
+            kineticBg.style.visibility = 'visible';
+            kineticBg.style.opacity = Math.max(0, 1.0 - pUpEased * 1.5).toFixed(3);
+          }
+          kineticBg.style.filter = 'none';
         }
       }
     }
 
-    // ==================== SECTION 3 CASCADING DUAL-COLUMN STREAM ====================
-    const sec3Container = document.getElementById('seccion-3-ecosistema');
-    if (sec3Container) {
+    // Flanking Assets Animation (poligonal02 from left, liquid01 from right, both 50% visible at rest)
+    const flankLeft = document.getElementById('sec3-flank-left');
+    const flankRight = document.getElementById('sec3-flank-right');
+    if (flankLeft && flankRight) {
       if (currentScrollLerp >= T_SPIN_END) {
+        // Flancos entran rápidamente y alcanzan su posición definitiva al 83.5% de scroll (0.80 -> 0.835)
+        const pFlank = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
+        const pFlankEased = Math.sin((pFlank * Math.PI) / 2);
+
+        // poligonal02 entra de izquierda a derecha: -100% -> -50% (translate3d para aceleración por GPU)
+        const leftX = -100 + (pFlankEased * 50);
+        flankLeft.style.transform = `translate3d(${leftX.toFixed(2)}%, -50%, 0)`;
+        flankLeft.style.opacity = pFlankEased.toFixed(3);
+
+        // liquid01 entra de derecha a izquierda: +100% -> +50% (translate3d para aceleración por GPU)
+        const rightX = 100 - (pFlankEased * 50);
+        flankRight.style.transform = `translate3d(${rightX.toFixed(2)}%, -50%, 0)`;
+        flankRight.style.opacity = (pFlankEased * 0.80).toFixed(3);
+      } else {
+        flankLeft.style.opacity = '0';
+        flankLeft.style.transform = 'translate3d(-100%, -50%, 0)';
+        flankRight.style.opacity = '0';
+        flankRight.style.transform = 'translate3d(100%, -50%, 0)';
+      }
+    }
+
+    const sec3Container = document.getElementById('seccion-3-ecosistema');
+    const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
+    if (sec3Container) {
+      if (currentScrollLerp >= 0.835) {
         sec3Container.style.opacity = '1';
         sec3Container.style.pointerEvents = 'auto';
 
-        // Escalonamiento secuencial: Cada tarjeta (k+1) empieza a subir cuando la anterior (k) alcanza el 60% de visibilidad
-        const cardStarts = [0.80, 0.84, 0.88, 0.92];
-        const cardDuration = 0.07;
+        // Deshabilitar scroll interno hasta 1 segundo después de que las imágenes laterales toman su posición
+        if (!sec3ScrollUnlockTimer && !isSec3InternalScrollEnabled) {
+          sec3ScrollUnlockTimer = setTimeout(() => {
+            isSec3InternalScrollEnabled = true;
+            if (sec3ScrollContainer) {
+              sec3ScrollContainer.style.overflowY = 'auto';
+            }
+          }, 1000);
+        }
 
-        for (let k = 0; k < 4; k++) {
+        // Escalonamiento secuencial: Las 6 tarjetas comienzan a aparecer EXACTAMENTE cuando las imágenes laterales ya tomaron posición
+        // La tarjeta 01 aparece primero para asegurar su total visibilidad en el visor
+        const cardStarts = [0.835, 0.845, 0.855, 0.865, 0.875, 0.885];
+        const cardDuration = 0.025;
+
+        for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
           if (card) {
             const start = cardStarts[k];
             if (currentScrollLerp < start) {
               card.style.opacity = '0';
-              card.style.transform = 'translateY(120px)';
+              card.style.transform = 'translateY(80px)';
             } else {
               const pCard = Math.min(1.0, (currentScrollLerp - start) / cardDuration);
               const pCardEased = Math.sin((pCard * Math.PI) / 2);
               card.style.opacity = pCardEased.toFixed(3);
-              card.style.transform = `translateY(${((1.0 - pCardEased) * 120).toFixed(1)}px)`;
+              card.style.transform = `translateY(${((1.0 - pCardEased) * 80).toFixed(1)}px)`;
             }
           }
         }
       } else {
         sec3Container.style.opacity = '0';
         sec3Container.style.pointerEvents = 'none';
-        for (let k = 0; k < 4; k++) {
+
+        // Reset scroll unlock timer and lock internal scroll when scrolling back
+        if (sec3ScrollUnlockTimer) {
+          clearTimeout(sec3ScrollUnlockTimer);
+          sec3ScrollUnlockTimer = null;
+        }
+        if (isSec3InternalScrollEnabled) {
+          isSec3InternalScrollEnabled = false;
+        }
+        if (sec3ScrollContainer) {
+          sec3ScrollContainer.style.overflowY = 'hidden';
+          sec3ScrollContainer.scrollTop = 0;
+        }
+
+        for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
           if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'translateY(120px)';
+            card.style.transform = 'translateY(80px)';
           }
         }
       }
@@ -2360,8 +2425,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 78%: Justo antes de completar el giro de 360° del smartphone con el fondo cinético
-  const targetY = trackTop + maxScroll * 0.78;
+  // Posición al 85%: Flancos laterales fijados y tarjeta 01 plenamente visible en el visor
+  const targetY = trackTop + maxScroll * 0.85;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -2416,4 +2481,36 @@ function initHeroRippleDistortion() {
   });
 }
 window.initHeroRippleDistortion = initHeroRippleDistortion;
+
+// ==================== INITIALIZE SECTION 3 TOPOGRAPHY (REACT BITS) ====================
+function initSec3Topography() {
+  const container = document.getElementById('sec3-topography-bg');
+  if (!container || typeof window.Topography === 'undefined') return;
+
+  window.sec3TopographyInstance = new window.Topography(container, {
+    lowColor: '#5227FF',
+    midColor: '#FF9FFC',
+    highColor: '#FFFFFF',
+    speed: 0.2,
+    morphAmount: 2.4,
+    morphSpeed: 0.04,
+    bands: 7,
+    thickness: 0.22,
+    scale: 2,
+    pixelSize: 1,
+    glow: 0.5,
+    colorMode: 'elevation',
+    contrast: 3,
+    brightness: 1,
+    fillBands: false,
+    opacity: 1,
+    grain: true,
+    grainIntensity: 0.05,
+    mouseInteraction: true,
+    mouseRadius: 0.3,
+    mouseStrength: 0.4
+  });
+}
+window.initSec3Topography = initSec3Topography;
+
 

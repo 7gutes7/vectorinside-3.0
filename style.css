@@ -573,4 +573,21 @@ body {
   85%, 100% { clip-path: inset(0% 0% 0% 0%); }
 }
 
+/* Custom Glassmorphic Scrollbar for Section 3 Cards Stream */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(195, 244, 0, 0.45);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(195, 244, 0, 0.85);
+}
+
+
 
