@@ -994,6 +994,11 @@ function initHero3DModel() {
   scene.add(smartphoneGroup);
   smartphoneGroup.visible = false;
 
+  // Smartphone screen state (declared at function scope so the render loop can read them)
+  let phoneScreenMesh = null;
+  let defaultScreenMap = null;
+  let section3ScreenTexture = null;
+
   // ==================== 3D TOPOGRAPHICAL TERRAIN (HARDWARE ACCELERATED 60-120 FPS) ====================
   const topoGeo = new THREE.PlaneGeometry(80, 80, 110, 110);
 
@@ -1247,9 +1252,40 @@ function initHero3DModel() {
     );
 
     // 3D Model 2: smartphone2.glb (Section 3)
-    let phoneScreenMesh = null;
-    let defaultScreenMap = null;
-    const section3ScreenTexture = createSection3ScreenTexture();
+    // --- Live video texture for the smartphone screen (Abstract Liquid Glass) ---
+    const screenVideo = document.createElement('video');
+    screenVideo.src = './Abstract_liquid_glass_animation_1080p_202608301203.mp4';
+    screenVideo.loop = true;
+    screenVideo.muted = true;
+    screenVideo.defaultMuted = true;
+    screenVideo.autoplay = true;
+    screenVideo.playsInline = true;
+    screenVideo.setAttribute('muted', '');
+    screenVideo.setAttribute('playsinline', '');
+    screenVideo.setAttribute('webkit-playsinline', '');
+    screenVideo.preload = 'auto';
+    screenVideo.style.cssText = 'position:absolute;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none;';
+    document.body.appendChild(screenVideo);
+
+    section3ScreenTexture = new THREE.VideoTexture(screenVideo);
+    if (THREE.sRGBEncoding !== undefined) section3ScreenTexture.encoding = THREE.sRGBEncoding;
+    section3ScreenTexture.minFilter = THREE.LinearFilter;
+    section3ScreenTexture.magFilter = THREE.LinearFilter;
+    section3ScreenTexture.generateMipmaps = false;
+    section3ScreenTexture.wrapS = THREE.ClampToEdgeWrapping;
+    section3ScreenTexture.wrapT = THREE.ClampToEdgeWrapping;
+    // El recorte "cover" real se calcula con la geometría de la pantalla al cargar el GLB.
+
+    const playScreenVideo = () => {
+      const p = screenVideo.play();
+      if (p && p.catch) p.catch(() => {});
+    };
+    playScreenVideo();
+    window.addEventListener('pointerdown', playScreenVideo, { once: true });
+    window.addEventListener('touchstart', playScreenVideo, { once: true });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) playScreenVideo();
+    });
 
     const phoneUrl = './smartphone2.glb';
     loader.load(
@@ -1278,22 +1314,64 @@ function initHero3DModel() {
             const meshName = (child.name || '').trim();
 
             if (matName === 'Lock_Screen' || meshName.includes('Object_0')) {
-              // Pantalla Emisiva Nítida e Iluminada
+              // Pantalla Emisiva Nítida e Iluminada (video en vivo)
               phoneScreenMesh = child;
               child.visible = true;
-              child.material = new THREE.MeshStandardMaterial({
+              child.renderOrder = 1;
+
+              // El GLB trae los UV de la pantalla en una isla del atlas ([0.08..0.87] x [0..0.99]),
+              // por eso el video quedaba recortado a los costados. Regeneramos UV planares
+              // a partir de la geometría para que el video cubra la pantalla de borde a borde.
+              const geo = child.geometry;
+              geo.computeBoundingBox();
+              const bb = geo.boundingBox;
+              const ext = new THREE.Vector3().subVectors(bb.max, bb.min);
+              // La pantalla es un plano: sus dos ejes con mayor extensión son alto y ancho,
+              // el tercero (grosor) es ~0. El eje más largo es el ALTO (pantalla vertical).
+              const order = ['x', 'y', 'z'].sort((a, b) => ext[b] - ext[a]);
+              const vAxis = order[0]; // alto de pantalla (eje más largo)
+              const uAxis = order[1]; // ancho de pantalla
+              const uKey = 'get' + uAxis.toUpperCase();
+              const vKey = 'get' + vAxis.toUpperCase();
+              const pos = geo.attributes.position;
+              const uvArr = new Float32Array(pos.count * 2);
+              for (let i = 0; i < pos.count; i++) {
+                uvArr[i * 2] = (pos[uKey](i) - bb.min[uAxis]) / (ext[uAxis] || 1);
+                uvArr[i * 2 + 1] = (pos[vKey](i) - bb.min[vAxis]) / (ext[vAxis] || 1);
+              }
+              geo.setAttribute('uv', new THREE.BufferAttribute(uvArr, 2));
+
+              // Ajuste "cover": el video llena la pantalla y se recorta lo que sobra
+              const screenAspect = (ext[uAxis] || 1) / (ext[vAxis] || 1);
+              const videoAspect = 16 / 9;
+              let rx = 1, ry = 1, ox = 0, oy = 0;
+              if (videoAspect > screenAspect) {
+                rx = screenAspect / videoAspect;
+                ox = (1 - rx) / 2;
+              } else {
+                ry = videoAspect / screenAspect;
+                oy = (1 - ry) / 2;
+              }
+              section3ScreenTexture.repeat.set(rx, ry);
+              section3ScreenTexture.offset.set(ox, oy);
+              section3ScreenTexture.needsUpdate = true;
+
+              // La malla de la pantalla del GLB tiene las normales invertidas: con material
+              // de una sola cara three.js la descarta y solo se ve una franja. DoubleSide la
+              // renderiza completa.
+              child.material = new THREE.MeshBasicMaterial({
                 color: 0xffffff,
                 map: section3ScreenTexture,
-                emissiveMap: section3ScreenTexture,
-                emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 1.35,
-                roughness: 0.35,
-                metalness: 0.0,
+                toneMapped: false,
                 transparent: false,
                 opacity: 1.0,
+                side: THREE.DoubleSide,
                 depthWrite: true,
                 depthTest: true
               });
+            } else if (matName === 'Glass') {
+              // Cristal frontal semitransparente: se oculta para que el video se vea nítido
+              child.visible = false;
             } else if (matName === 'Camera_Lens' || meshName.includes('Object_11')) {
               child.visible = true;
               child.material = new THREE.MeshStandardMaterial({
@@ -1305,8 +1383,6 @@ function initHero3DModel() {
                 depthWrite: true,
                 depthTest: true
               });
-            } else if (meshName.includes('Object_1')) {
-              child.visible = false;
             } else {
               // Carcasa, biseles, marco de titanio y tapa trasera (Gris titanio sólido elegante)
               child.visible = true;
