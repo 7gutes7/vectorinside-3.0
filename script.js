@@ -1796,10 +1796,10 @@ function initHero3DModel() {
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
 
-      // Elevate 3D Canvas Layer in front of all backgrounds and closed sections (z-index: 50)
+      // Elevate 3D Canvas Layer: frente al fondo cinético (z-32), pero detrás de la línea y punto de cierre (z-35, z-36)
       const hero3dContainer = document.getElementById('hero-3d-container');
       if (hero3dContainer) {
-        hero3dContainer.style.zIndex = '50';
+        hero3dContainer.style.zIndex = '34';
       }
 
       // Kinetic Text Background (Originkit) emerges behind the smartphone (z-index: 32)
@@ -2062,9 +2062,9 @@ function triggerStrokeTextEffect() {
       duration: 0.9,
       ease: "power3.out"
     }, 0)
-      // 2. Smooth Wipe Fill Animation in White (#FFFFFF) (duration: 0.65s)
+      // 2. Smooth Wipe Fill Animation with Incomplete Fill (width: 55%)
       .to(wipeRect, {
-        attr: { width: "100%" },
+        attr: { width: "55%" },
         duration: 0.65,
         ease: "power2.inOut"
       }, "+=0.10")
@@ -2084,9 +2084,9 @@ function triggerStrokeTextEffect() {
     strokePath.style.strokeDashoffset = '0';
     setTimeout(() => {
       wipeRect.style.transition = 'width 0.65s cubic-bezier(0.65, 0, 0.35, 1)';
-      wipeRect.setAttribute('width', '100%');
-      setTimeout(triggerCurtainRevealEffect, 680);
-    }, 1000);
+      wipeRect.setAttribute('width', '55%');
+      setTimeout(triggerCurtainRevealEffect, 450);
+    }, 950);
   }
 }
 
