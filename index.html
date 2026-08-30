@@ -70,9 +70,10 @@
 
   <!-- ==================== PAGE VIDEO INTRO & PRELOADER OVERLAY ==================== -->
   <div id="intro-screen"
-    class="fixed inset-0 z-[9999] bg-vector-black flex items-center justify-center transition-opacity duration-700">
-    <video id="intro-video" src="https://res.cloudinary.com/cci1klwx/video/upload/v1786506091/INTRO.mp4" autoplay muted
-      playsinline class="w-full h-full object-cover object-center mx-auto"></video>
+    class="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700">
+    <video id="intro-video" src="logo vector inside 01_1.mp4" autoplay muted
+      playsinline
+      class="w-[50vw] h-[50vh] max-w-[50vw] max-h-[50vh] object-contain object-center mx-auto rounded-xl intro-video-cinematic-enter"></video>
 
     <!-- Top Loading Indicator Overlay -->
     <div id="intro-loader"
@@ -98,195 +99,172 @@
       <a href="index.html" class="flex items-center gap-3 group">
         <img src="headerlogo.png" alt="Vector Inside Logo"
           class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
-        <span class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">PORTAL 3D</span>
+        <span
+          class="font-mono text-xs text-vector-lime/80 bg-vector-lime/10 px-2 py-0.5 border border-vector-lime/30 hidden sm:inline-block">PORTAL
+          3D</span>
       </a>
 
-      <!-- Desktop Nav Links -->
-      <nav class="hidden md:flex items-center space-x-7 font-mono text-xs tracking-widest text-text-muted uppercase">
-        <a href="manifiesto/index.html" class="hover:text-vector-lime transition-colors">01 // Manifiesto</a>
-        <a href="ecosistema/index.html" class="hover:text-vector-lime transition-colors">02 // Ecosistema</a>
-        <a href="ejecucion/index.html" class="hover:text-vector-lime transition-colors">03 // Ejecución</a>
-        <a href="evidencia/index.html" class="hover:text-vector-lime transition-colors">04 // Evidencia</a>
-        <a href="metodologia/index.html" class="hover:text-vector-lime transition-colors">05 // Metodología</a>
-        <a href="diagnostico/index.html" class="hover:text-vector-lime transition-colors">06 // Diagnóstico</a>
-      </nav>
-
-      <!-- CTA Button -->
-      <div class="hidden md:flex items-center gap-3">
-        <a href="diagnostico/index.html" class="btn-vector-primary px-5 py-2.5 text-xs font-mono tracking-wider">
-          <span class="pulse-dot mr-2"></span>
-          <span>AUDITORÍA NUCLEAR</span>
-        </a>
+      <!-- Center Headline in Header -->
+      <div
+        class="hidden md:flex items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1">
+        <span>Aceleración Digital // Diseño desde el Núcleo</span>
       </div>
 
-      <!-- Mobile Menu Button -->
-      <button id="mobile-menu-btn" class="md:hidden text-white hover:text-vector-lime p-2 focus:outline-none"
-        aria-label="Abrir Menú">
-        <span class="material-symbols-outlined text-3xl">menu</span>
-      </button>
-    </div>
-
-    <!-- Mobile Nav Dropdown -->
-    <div id="mobile-nav"
-      class="hidden md:hidden bg-vector-black/98 border-b border-white/10 px-6 py-6 font-mono text-sm uppercase space-y-4">
-      <a href="manifiesto/index.html" class="block text-text-muted hover:text-vector-lime">01 // Manifiesto</a>
-      <a href="ecosistema/index.html" class="block text-text-muted hover:text-vector-lime">02 // Ecosistema</a>
-      <a href="ejecucion/index.html" class="block text-text-muted hover:text-vector-lime">03 // Ejecución</a>
-      <a href="evidencia/index.html" class="block text-text-muted hover:text-vector-lime">04 // Evidencia</a>
-      <a href="metodologia/index.html" class="block text-text-muted hover:text-vector-lime">05 // Metodología</a>
-      <a href="diagnostico/index.html" class="block text-vector-lime font-bold">06 // Diagnóstico</a>
+      <!-- Header Right CTA Button (White Base -> Smooth Vector Lime Hover Sweep) -->
+      <div class="flex items-center gap-3">
+        <a href="diagnostico/index.html" class="btn-pill-nuclear group" id="header-pill-nav-btn">
+          <span class="btn-pill-bg"></span>
+          <span class="btn-pill-label">
+            <span class="pulse-dot mr-2"></span>
+            <span>AUDITORÍA NUCLEAR</span>
+          </span>
+        </a>
+      </div>
     </div>
   </header>
 
+  <!-- ==================== FIXED BOTTOM NAVIGATION DOCK (01 - 06) ==================== -->
+  <nav id="bottom-dock-nav"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-mono text-[11px] sm:text-xs tracking-wider uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
+    <a href="manifiesto/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">01 //
+      Manifiesto</a>
+    <a href="ecosistema/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">02 //
+      Ecosistema</a>
+    <a href="ejecucion/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">03 //
+      Ejecución</a>
+    <a href="evidencia/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">04 //
+      Evidencia</a>
+    <a href="metodologia/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">05 //
+      Metodología</a>
+    <a href="diagnostico/index.html" class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full">06 //
+      Diagnóstico</a>
+  </nav>
+
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
-  <div id="hero-scroll-track" class="relative w-full h-[260vh] bg-black">
-    
+  <div id="hero-scroll-track" class="relative w-full h-[520vh] bg-black">
     <!-- Pinned Sticky Viewport Window -->
-    <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-24 pb-6 px-6">
-      
-      <!-- Background Video Component -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <video id="hero-bg-video" autoplay muted loop playsinline class="w-full h-full object-cover opacity-80"></video>
-        <div class="absolute inset-0 bg-black/40"></div>
-      </div>
+    <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-20 px-6">
 
       <!-- Background 3D Canvas Layer -->
       <div id="hero-3d-container"
-        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto">
+        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto translate-y-[20px]">
         <canvas id="hero-3d-canvas"
           class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)]"></canvas>
       </div>
 
-      <!-- Eye Portal Expanding Iris Ring -->
-      <div id="eye-portal-overlay"
-        class="pointer-events-none fixed inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-200">
-        <div id="eye-portal-ring"
-          class="w-32 h-32 rounded-full border-4 border-vector-lime shadow-[0_0_120px_#c3f400] bg-vector-lime/10 transform scale-0 backdrop-blur-md"></div>
-      </div>
-
-      <!-- Hero UI Content Layer (Fades out with scroll zoom) -->
+      <!-- ==================== LAYER 10: HERO CONTENT & 3D STAGE ==================== -->
       <div id="hero-ui-content"
-        class="relative z-20 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 my-auto pointer-events-none transition-all duration-300">
+        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-between items-center text-center flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
 
-        <!-- Column 1: Headline Texts & CTAs (7 cols) -->
-        <div class="lg:col-span-7 flex flex-col items-start text-left pointer-events-auto">
-          
-          <!-- Main Headline with StrokeText Effect -->
+        <!-- Top Pinned Typography: DISEÑAMOS INSTINTO. -->
+        <div class="flex flex-col items-center justify-start text-center w-full max-w-4xl mx-auto pointer-events-auto">
           <h1
-            class="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter uppercase leading-[0.98] mb-6 drop-shadow-sm text-left max-w-4xl text-slate-900">
-            <!-- StrokeText SVG Component for "Diseñamos instinto." (2 Lines Stacked) -->
-            <div id="stroke-text-wrapper" class="relative w-full overflow-visible mb-2 select-none">
-              <svg viewBox="0 0 750 225" class="w-full h-auto overflow-visible">
+            class="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-center w-full text-slate-900 flex flex-col items-center">
+            <!-- Line 1: StrokeText SVG Component for "Diseñamos instinto." (Reduced by 20% to 60% width) -->
+            <div id="stroke-text-wrapper"
+              class="relative w-[60%] max-w-[60%] overflow-visible mb-0 select-none leading-none mx-auto flex justify-center">
+              <svg viewBox="0 18 1220 80" class="w-full h-auto block overflow-visible">
                 <defs>
                   <clipPath id="stroke-text-clip">
                     <rect id="stroke-wipe-rect" x="0" y="0" width="0%" height="100%" />
                   </clipPath>
                 </defs>
-                <text x="0" y="90" class="stroke-draw-path font-display font-black" font-size="96" font-weight="900"
-                  letter-spacing="-3" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="1800"
-                  stroke-dashoffset="1800">
-                  <tspan x="0" dy="0">DISEÑAMOS</tspan>
-                  <tspan x="0" dy="98">INSTINTO.</tspan>
+                <text x="50%" y="95" text-anchor="middle" class="stroke-draw-path font-display font-black"
+                  font-size="105" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF"
+                  stroke-width="3.5" stroke-dasharray="3500" stroke-dashoffset="3500">
+                  DISEÑAMOS INSTINTO.
                 </text>
-                <text x="0" y="90" class="stroke-fill-path font-display font-black" font-size="96" font-weight="900"
-                  letter-spacing="-3" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
-                  <tspan x="0" dy="0">DISEÑAMOS</tspan>
-                  <tspan x="0" dy="98">INSTINTO.</tspan>
+                <text x="50%" y="95" text-anchor="middle" class="stroke-fill-path font-display font-black"
+                  font-size="105" font-weight="900" letter-spacing="-3.5" fill="#FFFFFF"
+                  clip-path="url(#stroke-text-clip)">
+                  DISEÑAMOS INSTINTO.
                 </text>
               </svg>
             </div>
-            <!-- Curtain Reveal Component -->
-            <div class="relative overflow-hidden inline-block mt-2 align-bottom">
-              <div id="hero-curtain-overlay" class="absolute inset-0 bg-vector-lime z-20 w-full h-full transform origin-left scale-x-0"></div>
-              <span id="hero-curtain-text" class="text-stroke-lime block relative z-10 opacity-0 font-display font-black text-4xl sm:text-6xl md:text-7xl tracking-tighter uppercase">
-                Tu marca el único destino.
-              </span>
-            </div>
           </h1>
+        </div>
 
-          <!-- Subheadline -->
-          <div class="w-full max-w-3xl border-y border-white/20 py-3.5 mb-6">
-            <p class="font-mono text-xs sm:text-base tracking-[0.2em] text-vector-lime font-bold uppercase text-left">
-              Aceleración Digital // Diseño desde el Núcleo
-            </p>
+        <!-- Bottom Pinned Typography: Aligned precisely to the lateral margins drawn by the Fixed Bottom Dock -->
+        <div id="hero-flank-dock-wrapper"
+          class="w-full max-w-[830px] mx-auto flex items-center justify-between pointer-events-none mt-auto mb-2 px-1 transition-all">
+          <!-- Left Margin: LA MARCA (Aligned with 01 // Manifiesto left edge) -->
+          <div id="hero-curtain-left"
+            class="pointer-events-auto select-none cursor-pointer flex flex-col items-start text-left opacity-0">
+            <span id="shuffle-hero-left"
+              class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tighter uppercase leading-none whitespace-nowrap lime-shimmer-text transition-all">
+              LA MARCA
+            </span>
           </div>
 
-          <!-- Narrative Description -->
-          <p
-            class="font-body text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed mb-8 text-left">
-            Firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos que buscan dejar de
-            operar desde la improvisación.
-          </p>
-
-          <!-- Action CTAs -->
-          <div class="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto justify-start">
-            <a href="diagnostico/index.html"
-              class="btn-vector-primary px-8 py-4 text-sm tracking-wider w-full sm:w-auto shadow-[0_0_30px_rgba(195,244,0,0.3)]">
-              Solicitar Diagnóstico Vector
-            </a>
-            <a href="ecosistema/index.html"
-              class="btn-vector-outline px-8 py-4 text-sm tracking-wider w-full sm:w-auto text-center">
-              Explorar Ecosistema
-            </a>
+          <!-- Right Margin: EL ÚNICO DESTINO. (Aligned with 06 // Diagnóstico right edge) -->
+          <div id="hero-curtain-right"
+            class="pointer-events-auto select-none cursor-pointer flex flex-col items-end text-right opacity-0">
+            <span id="shuffle-hero-right"
+              class="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tighter uppercase leading-none whitespace-nowrap lime-shimmer-text transition-all">
+              EL DESTINO
+            </span>
           </div>
         </div>
 
-        <!-- Spacer Column for 3D model framing (5 cols) -->
-        <div class="lg:col-span-5 h-[300px] lg:h-[500px]"></div>
-
       </div>
 
-      <!-- Scroll Interactive Prompt -->
-      <div id="hero-scroll-hint" class="relative z-20 flex items-center justify-between border-t border-white/10 pt-3 font-mono text-xs text-text-muted">
-        <div class="flex items-center gap-2">
-          <span class="pulse-dot"></span>
-          <span class="text-vector-lime tracking-widest uppercase font-bold">DESLIZA / SCROLL HACIA ABAJO</span>
-        </div>
-        <div class="flex items-center gap-2 text-neutral-400">
-          <span>ENTRANDO AL OJO DEL NÚCLEO</span>
-          <span class="material-symbols-outlined text-sm animate-bounce text-vector-lime">south</span>
-        </div>
+      <!-- Kinetic Slit / Laser Reveal Elements for Section 2 -->
+      <div id="portal-reveal-slit-left"
+        class="pointer-events-none absolute z-[35] w-[2.5px] bg-vector-lime shadow-[0_0_20px_#c3f400,0_0_40px_#c3f400] opacity-0 -translate-x-1/2">
+      </div>
+      <div id="portal-reveal-slit-right"
+        class="pointer-events-none absolute z-[35] w-[2.5px] bg-vector-lime shadow-[0_0_20px_#c3f400,0_0_40px_#c3f400] opacity-0 -translate-x-1/2">
+      </div>
+      <div id="portal-reveal-dot"
+        class="pointer-events-none absolute z-[36] w-4 h-4 rounded-full bg-white border-2 border-vector-lime shadow-[0_0_30px_#c3f400,0_0_60px_#c3f400] opacity-0 -translate-x-1/2 -translate-y-1/2">
       </div>
 
-      <!-- ==================== LAYER 25: FIXED IN-PLACE SECTION 2 (BLUR-TO-FOCUS REVEAL) ==================== -->
+      <!-- ==================== LAYER 30: FIXED IN-PLACE SECTION 2 (POINT -> VERTICAL LINE -> SIDE EXPANSION REVEAL) ==================== -->
       <div id="seccion-portal-revelada"
-        class="absolute inset-0 z-25 w-full h-full overflow-y-auto pt-28 pb-8 px-6 flex flex-col justify-between bg-vector-black/95 backdrop-blur-xl opacity-0 pointer-events-none transition-all">
-        
-        <div class="max-w-7xl w-full mx-auto my-auto">
-          
+        class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-6 flex flex-col justify-start bg-vector-black opacity-0 pointer-events-none transition-none">
+
+        <div class="max-w-7xl w-full mx-auto py-6">
+
           <!-- Top Meta Badge -->
           <div class="flex items-center justify-between border-b border-white/15 pb-4 mb-8">
             <div class="flex items-center gap-3">
-              <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+              <span
+                class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
                 01 // MANIFIESTO NUCLEO
               </span>
               <span class="text-text-muted font-mono text-xs">// DENTRO DE LA VISIÓN VECTOR</span>
             </div>
-            <a href="manifiesto/index.html" class="font-mono text-xs text-vector-lime hover:underline flex items-center gap-1">
+            <a href="javascript:void(0)"
+              class="font-mono text-xs text-vector-lime hover:underline flex items-center gap-1">
               <span>VER EXPERIENCIA COMPLETA</span>
               <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
           </div>
 
-          <!-- Main Brutalist Statement Card -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-white/20 bg-surface-dark mb-10 overflow-hidden shadow-2xl">
-            
-            <!-- Left Visual Column -->
-            <div class="lg:col-span-4 relative min-h-[260px] lg:min-h-full border-b lg:border-b-0 lg:border-r border-white/20 overflow-hidden group">
-              <img src="arqui.jpeg" alt="Arquitectura Vector Inside" class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" />
-              <div class="absolute inset-0 bg-gradient-to-t from-vector-black/80 via-transparent to-transparent"></div>
-              <div class="absolute bottom-6 left-6 right-6">
-                <p class="font-mono text-xs text-vector-lime tracking-widest uppercase">COORDENADA NUCLEO</p>
-                <p class="font-display font-black text-xl uppercase text-white">Convertimos el Caos en Estructura</p>
-              </div>
+          <!-- Main Brutalist Statement Card with Background Video on Left 50% Fading to White -->
+          <div
+            class="relative w-full border border-white/20 bg-white mb-10 overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-2 gap-0">
+
+            <!-- Left Background Video Layer (Fills left 50%, fades to white at center) -->
+            <div class="absolute inset-y-0 left-0 w-full lg:w-1/2 overflow-hidden pointer-events-none z-0">
+              <video src="Animar_imagen.mp4" autoplay loop muted playsinline
+                class="w-full h-full object-cover object-left"></video>
+              <!-- Gradient Overlay: Smooth fade into pure white towards the center/right -->
+              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-white"></div>
             </div>
 
+            <!-- Left Empty Column for Video Visibility on Desktop -->
+            <div class="relative z-10 lg:min-h-[260px]"></div>
+
             <!-- Right Kinetic Manifesto -->
-            <div class="lg:col-span-8 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white text-vector-black">
+            <div class="relative z-10 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white/90 text-vector-black">
               <div>
-                <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-3 block">// DECLARACIÓN FUNDACIONAL</span>
-                <h2 class="font-display font-black text-xl sm:text-3xl lg:text-4xl uppercase leading-tight tracking-tight mb-6">
-                  Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no método; presupuesto publicitario, pero no tracción predecible.
+                <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-3 block">// DECLARACIÓN
+                  FUNDACIONAL</span>
+                <h2
+                  class="font-display font-black text-xl sm:text-3xl lg:text-4xl uppercase leading-tight tracking-tight mb-6">
+                  Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no
+                  método; presupuesto publicitario, pero no tracción predecible.
                 </h2>
               </div>
 
@@ -295,7 +273,8 @@
                   No agregamos parches: rediseñamos la arquitectura desde el núcleo.
                 </p>
                 <p class="font-mono text-xs text-text-muted">
-                  La aceleración real no es aumentar el volumen de ruido, sino eliminar la fricción estructural que frena la conversión.
+                  La aceleración real no es aumentar el volumen de ruido, sino <span class="text-vector-lime">eliminar
+                    la fricción estructural</span> que frena la conversión.
                 </p>
               </div>
             </div>
@@ -304,49 +283,66 @@
           <!-- ==================== COMMAND DOCK: 6 INDEPENDENT EXPERIENCES ==================== -->
           <div class="border-t border-white/15 pt-6">
             <div class="flex items-center justify-between mb-4">
-              <span class="font-mono text-xs text-text-muted uppercase tracking-widest">// ECOSISTEMA MODULAR VECTOR 3.0:</span>
+              <span class="font-mono text-xs text-text-muted uppercase tracking-widest">// ECOSISTEMA MODULAR VECTOR
+                3.0:</span>
               <span class="font-mono text-xs text-vector-lime">6 EXPERIENCIAS INTERACTIVAS</span>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              
+
               <!-- 01 Manifiesto -->
-              <a href="manifiesto/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+              <a href="manifiesto/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
                 <span class="font-mono text-[10px] text-vector-lime block mb-1">01 //</span>
-                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Manifiesto</p>
+                <p
+                  class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">
+                  Manifiesto</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">Fricción & Núcleo</p>
               </a>
 
               <!-- 02 Ecosistema -->
-              <a href="ecosistema/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+              <a href="ecosistema/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
                 <span class="font-mono text-[10px] text-vector-lime block mb-1">02 //</span>
-                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Ecosistema</p>
+                <p
+                  class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">
+                  Ecosistema</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">3 Vectores + ROI</p>
               </a>
 
               <!-- 03 Ejecución -->
-              <a href="ejecucion/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-operative-purple transition-all group block">
+              <a href="ejecucion/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-operative-purple transition-all group block">
                 <span class="font-mono text-[10px] text-operative-purple block mb-1">03 //</span>
-                <p class="font-display font-black text-xs uppercase text-white group-hover:text-operative-purple transition-colors">Ejecución</p>
+                <p
+                  class="font-display font-black text-xs uppercase text-white group-hover:text-operative-purple transition-colors">
+                  Ejecución</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">Matriz 40 Bloques</p>
               </a>
 
               <!-- 04 Evidencia -->
-              <a href="evidencia/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-cognitive-blue transition-all group block">
+              <a href="evidencia/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-cognitive-blue transition-all group block">
                 <span class="font-mono text-[10px] text-cognitive-blue block mb-1">04 //</span>
-                <p class="font-display font-black text-xs uppercase text-white group-hover:text-cognitive-blue transition-colors">Evidencia</p>
+                <p
+                  class="font-display font-black text-xs uppercase text-white group-hover:text-cognitive-blue transition-colors">
+                  Evidencia</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">Antes vs Después</p>
               </a>
 
               <!-- 05 Metodología -->
-              <a href="metodologia/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
+              <a href="metodologia/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime transition-all group block">
                 <span class="font-mono text-[10px] text-vector-lime block mb-1">05 //</span>
-                <p class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">Metodología</p>
+                <p
+                  class="font-display font-black text-xs uppercase text-white group-hover:text-vector-lime transition-colors">
+                  Metodología</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">Pipeline 4 Fases</p>
               </a>
 
               <!-- 06 Diagnóstico -->
-              <a href="diagnostico/index.html" class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime bg-vector-lime/5 transition-all group block">
+              <a href="diagnostico/index.html"
+                class="glass-panel p-3.5 border border-white/10 hover:border-vector-lime bg-vector-lime/5 transition-all group block">
                 <span class="font-mono text-[10px] text-vector-lime block mb-1">06 //</span>
                 <p class="font-display font-black text-xs uppercase text-vector-lime">Diagnóstico</p>
                 <p class="font-mono text-[9px] text-text-muted mt-0.5">Test en Tiempo Real</p>
@@ -358,9 +354,85 @@
         </div>
 
         <!-- Section 2 Footer inside fixed layer -->
-        <div class="border-t border-white/10 pt-4 text-center font-mono text-[11px] text-text-muted max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div
+          class="border-t border-white/10 pt-4 text-center font-mono text-[11px] text-text-muted max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
           <span>SYS_V.3.0.34</span>
+        </div>
+
+      </div>
+
+      <!-- ==================== LAYER 35: SECTION 3 ECOSISTEMA HUD OVERLAY ==================== -->
+      <div id="seccion-3-ecosistema"
+        class="absolute inset-0 z-[35] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-6 max-w-7xl mx-auto transition-opacity duration-300">
+
+        <!-- Top Header for Section 3 -->
+        <div class="flex items-center justify-between border-b border-white/15 pb-4">
+          <div class="flex items-center gap-3">
+            <span
+              class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+              02 // ECOSISTEMA NUCLEO
+            </span>
+            <span class="text-text-muted font-mono text-xs hidden sm:inline">// ARQUITECTURA DE CONVERSIÓN EN TIEMPO
+              REAL</span>
+          </div>
+          <span class="font-mono text-xs text-vector-lime flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-vector-lime animate-pulse"></span>
+            <span>MOTOR ACTIVO</span>
+          </span>
+        </div>
+
+        <!-- Floating Side HUD Panels around the Centered Smartphone -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center justify-between my-auto pointer-events-none">
+
+          <!-- Left Info HUD Card -->
+          <div id="sec3-hud-left"
+            class="bg-vector-black/80 backdrop-blur-xl border border-white/15 p-6 rounded-none max-w-md shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-500 translate-x-[-20px] opacity-0">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-1.5 h-1.5 bg-vector-lime"></span>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-text-muted">NÚCLEO ESTRUCTURAL</span>
+            </div>
+            <h3 class="font-display font-black text-2xl uppercase tracking-tight text-white mb-2">
+              ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
+            </h3>
+            <p class="font-body text-xs text-text-muted leading-relaxed mb-4">
+              Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a
+              cliente de alto valor.
+            </p>
+            <div class="flex items-center gap-3 pt-3 border-t border-white/10 font-mono text-[10px] text-vector-lime">
+              <span>LATENCIA // 0.02s</span>
+              <span>•</span>
+              <span>EFICIENCIA // 99.8%</span>
+            </div>
+          </div>
+
+          <!-- Right Info HUD Card -->
+          <div id="sec3-hud-right"
+            class="bg-vector-black/80 backdrop-blur-xl border border-white/15 p-6 rounded-none max-w-md ml-auto shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-500 translate-x-[20px] opacity-0">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-1.5 h-1.5 bg-operative-purple"></span>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-text-muted">SINCRONIZACIÓN TOTAL</span>
+            </div>
+            <h3 class="font-display font-black text-2xl uppercase tracking-tight text-white mb-2">
+              RESPUESTA <span class="text-operative-purple">NEURONAL</span>
+            </h3>
+            <p class="font-body text-xs text-text-muted leading-relaxed mb-4">
+              Automatización inteligente omnicanal que conecta WhatsApp, CRM y analítica predictiva en un único flujo
+              continuo.
+            </p>
+            <div
+              class="flex items-center gap-3 pt-3 border-t border-white/10 font-mono text-[10px] text-operative-purple">
+              <span>CANALES // 100% UNIFICADOS</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section 3 Footer -->
+        <div
+          class="border-t border-white/10 pt-4 text-center font-mono text-[11px] text-text-muted flex items-center justify-between">
+          <span>VECTOR INSIDE 3.0 // CONTROL OPERATIVO TOTAL</span>
+          <span class="text-vector-lime font-bold">DESLIZA PARA CONTINUAR</span>
         </div>
 
       </div>
@@ -368,8 +440,100 @@
     </div>
   </div>
 
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.45) -->
-  <script src="script.js?v=3.0.45"></script>
+  <!-- ==================== FLOATING CHATBOT WIDGET (BOTTOM RIGHT) ==================== -->
+  <div id="floating-chatbot-container"
+    class="fixed bottom-6 right-6 z-[100] flex flex-col items-end pointer-events-auto">
+
+    <!-- Chat Window Popup (Glassmorphic + Lime Accents) -->
+    <div id="chatbot-window"
+      class="hidden opacity-0 translate-y-4 transition-all duration-300 w-[350px] max-w-[90vw] h-[460px] max-h-[75vh] bg-surface-dark/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_30px_rgba(195,244,0,0.15)] flex-col overflow-hidden mb-3">
+
+      <!-- Chat Header -->
+      <div class="p-3.5 border-b border-white/10 bg-vector-black/70 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="relative w-9 h-9 rounded-full overflow-hidden border border-vector-lime/40 bg-vector-black p-0.5">
+            <img src="chatbot-icon.png" alt="Vector AI Assistant" class="w-full h-full object-cover rounded-full" />
+            <span
+              class="absolute bottom-0 right-0 w-2 h-2 bg-vector-lime rounded-full border border-vector-black animate-pulse"></span>
+          </div>
+          <div>
+            <h4 class="font-display font-black text-xs text-white uppercase tracking-tight">VECTOR AI // NÚCLEO</h4>
+            <p class="font-mono text-[9px] text-vector-lime flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-vector-lime"></span> EN LÍNEA • ASISTENTE
+              ARQUITECTURA
+            </p>
+          </div>
+        </div>
+        <button id="chatbot-close-btn"
+          class="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- Chat Messages Body -->
+      <div id="chatbot-messages" class="flex-1 p-3.5 overflow-y-auto space-y-3 font-mono text-xs scrollbar-thin">
+        <!-- Assistant Message -->
+        <div class="flex gap-2.5 items-start">
+          <div class="w-6 h-6 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black">
+            <img src="chatbot-icon.png" alt="AI" class="w-full h-full object-cover" />
+          </div>
+          <div
+            class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3 text-white/90 leading-relaxed shadow-sm">
+            <p class="font-sans text-xs">¡Hola! Soy el asistente inteligente de <strong>Vector Inside 3.0</strong>.
+              ¿Cómo puedo ayudarte hoy con tu diagnóstico o arquitectura de crecimiento?</p>
+          </div>
+        </div>
+
+        <!-- Quick Suggestion Pills -->
+        <div id="chatbot-quick-actions" class="pt-1 flex flex-wrap gap-1.5">
+          <button
+            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            data-msg="¿Cómo funciona el Diagnóstico Nuclear?">
+            ⚡ Diagnóstico Nuclear
+          </button>
+          <button
+            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            data-msg="¿Qué incluye la Arquitectura de Conversión?">
+            📐 Arquitectura de Conversión
+          </button>
+          <button
+            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            data-msg="Quiero agendar una sesión estratégica">
+            📞 Agendar Sesión
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Input Bar -->
+      <form id="chatbot-form" class="p-2.5 border-t border-white/10 bg-vector-black/80 flex items-center gap-2">
+        <input id="chatbot-input" type="text" placeholder="Escribe tu consulta aquí..."
+          class="flex-1 bg-white/5 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none transition-colors" />
+        <button type="submit"
+          class="bg-vector-lime hover:bg-white text-vector-black w-8 h-8 rounded-xl flex items-center justify-center transition-all group shrink-0">
+          <span
+            class="material-symbols-outlined text-sm font-bold group-hover:translate-x-0.5 transition-transform">send</span>
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Floating Bubble Trigger Button -->
+    <button id="chatbot-trigger-btn"
+      class="group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-vector-black/90 border-2 border-vector-lime/70 hover:border-vector-lime shadow-[0_0_25px_rgba(195,244,0,0.35),0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-center p-1.5 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-xl">
+      <img src="chatbot-icon.png" alt="Chatbot Vector Inside"
+        class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(195,244,0,0.4)]" />
+      <!-- Online Green Pulse Ping -->
+      <span class="absolute -top-1 -right-1 flex h-4 w-4">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-4 w-4 bg-vector-lime border-2 border-vector-black"></span>
+      </span>
+    </button>
+
+  </div>
+
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.84) -->
+  <script src="script.js?v=3.0.84"></script>
 </body>
 
 </html>
