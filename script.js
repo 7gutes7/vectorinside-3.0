@@ -4023,14 +4023,15 @@ class RubikCubeScene {
 
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = this.cfg.color || "#60B959";
-    const dot = Math.max(1, Math.min(6, Math.round(this.cfg.dotSize || 5)));
+    const dotScale = Math.min(1.0, Math.max(0.45, w / 220));
+    const baseDot = (this.cfg.dotSize || 5) * dotScale;
 
     for (let o = 0; o < count; o++) {
       const i = order[o];
       const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
       const tc = t < 0 ? 0 : t > 1 ? 1 : t;
       ctx.globalAlpha = 0.22 + 0.78 * tc;
-      const r = Math.max(0.4, dot * (0.5 + 0.7 * tc));
+      const r = Math.max(0.4, baseDot * (0.5 + 0.7 * tc));
       ctx.beginPath();
       ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
       ctx.fill();
@@ -4049,7 +4050,7 @@ function initRubikCube() {
     color: "#60B959",
     cubeGrid: 4,
     dotsPerFace: 6,
-    dotSize: 5,
+    dotSize: 4.5,
     dragSensitivity: 0.2,
     rotation: { x: -12, y: 12, z: 12 },
     sizePercent: 96,
