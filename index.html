@@ -942,60 +942,59 @@
   <div id="floating-chatbot-container"
     class="fixed bottom-6 right-6 z-[100] flex flex-col items-end pointer-events-auto">
 
-    <!-- Chat Window Popup (Glassmorphic + Lime Accents) -->
+    <!-- Chat Window Popup (Glassmorphic + Lime Accents + 30% Larger Scale) -->
     <div id="chatbot-window"
-      class="hidden opacity-0 translate-y-4 transition-all duration-300 w-[350px] max-w-[90vw] h-[460px] max-h-[75vh] bg-surface-dark/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_30px_rgba(195,244,0,0.15)] flex-col overflow-hidden mb-3">
+      class="hidden opacity-0 translate-y-4 transition-all duration-300 w-[450px] max-w-[92vw] h-[590px] max-h-[82vh] bg-surface-dark/95 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.9),0_0_40px_rgba(195,244,0,0.2)] flex-col overflow-hidden mb-4">
 
       <!-- Chat Header -->
-      <div class="p-3.5 border-b border-white/10 bg-vector-black/70 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="relative w-9 h-9 rounded-full overflow-hidden border border-vector-lime/40 bg-vector-black p-0.5">
+      <div class="p-4 sm:p-4.5 border-b border-white/10 bg-vector-black/75 flex items-center justify-between">
+        <div class="flex items-center gap-3.5">
+          <div class="relative w-11 h-11 rounded-full overflow-hidden border border-vector-lime/50 bg-vector-black p-0.5 shadow-[0_0_15px_rgba(195,244,0,0.3)]">
             <img src="chatbot-icon.png" alt="Vector AI Assistant" class="w-full h-full object-cover rounded-full" />
             <span
-              class="absolute bottom-0 right-0 w-2 h-2 bg-vector-lime rounded-full border border-vector-black animate-pulse"></span>
+              class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-vector-lime rounded-full border-2 border-vector-black animate-pulse"></span>
           </div>
           <div>
-            <h4 class="font-display font-black text-xs text-white uppercase tracking-tight">VECTOR AI // NÚCLEO</h4>
-            <p class="font-mono text-[9px] text-vector-lime flex items-center gap-1">
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-vector-lime"></span> EN LÍNEA • ASISTENTE
-              ARQUITECTURA
+            <h4 class="font-display font-black text-sm text-white uppercase tracking-tight">VECTOR AI // NÚCLEO</h4>
+            <p class="font-mono text-[10px] text-vector-lime flex items-center gap-1.5 font-semibold">
+              <span class="inline-block w-2 h-2 rounded-full bg-vector-lime animate-pulse"></span> EN LÍNEA • ASISTENTE ARQUITECTURA
             </p>
           </div>
         </div>
         <button id="chatbot-close-btn"
-          class="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
-          <span class="material-symbols-outlined text-base">close</span>
+          class="text-neutral-400 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors">
+          <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
 
       <!-- Chat Messages Body -->
-      <div id="chatbot-messages" class="flex-1 p-3.5 overflow-y-auto space-y-3 font-mono text-xs scrollbar-thin">
+      <div id="chatbot-messages" class="flex-1 p-4.5 overflow-y-auto space-y-4 font-mono text-sm scrollbar-thin">
         <!-- Assistant Message -->
-        <div class="flex gap-2.5 items-start">
-          <div class="w-6 h-6 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black">
+        <div class="flex gap-3 items-start">
+          <div class="w-8 h-8 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black shadow-sm">
             <img src="chatbot-icon.png" alt="AI" class="w-full h-full object-cover" />
           </div>
           <div
-            class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3 text-white/90 leading-relaxed shadow-sm">
-            <p class="font-sans text-xs">¡Hola! Soy el asistente inteligente de <strong>Vector Inside 3.0</strong>.
+            class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm">
+            <p class="font-sans text-[13.5px]">¡Hola! Soy el asistente inteligente de <strong>Vector Inside 3.0</strong>.
               ¿Cómo puedo ayudarte hoy con tu diagnóstico o arquitectura de crecimiento?</p>
           </div>
         </div>
 
         <!-- Quick Suggestion Pills -->
-        <div id="chatbot-quick-actions" class="pt-1 flex flex-wrap gap-1.5">
+        <div id="chatbot-quick-actions" class="pt-2 flex flex-wrap gap-2">
           <button
-            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            class="chatbot-quick-pill font-mono text-xs bg-white/5 hover:bg-vector-lime/20 border border-white/15 hover:border-vector-lime text-neutral-200 hover:text-vector-lime px-3 py-1.5 rounded-full transition-all text-left"
             data-msg="¿Cómo funciona el Diagnóstico Nuclear?">
             ⚡ Diagnóstico Nuclear
           </button>
           <button
-            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            class="chatbot-quick-pill font-mono text-xs bg-white/5 hover:bg-vector-lime/20 border border-white/15 hover:border-vector-lime text-neutral-200 hover:text-vector-lime px-3 py-1.5 rounded-full transition-all text-left"
             data-msg="¿Qué incluye la Arquitectura de Conversión?">
             📐 Arquitectura de Conversión
           </button>
           <button
-            class="chatbot-quick-pill font-mono text-[10px] bg-white/5 hover:bg-vector-lime/20 border border-white/10 hover:border-vector-lime text-neutral-300 hover:text-vector-lime px-2.5 py-1 rounded-full transition-all text-left"
+            class="chatbot-quick-pill font-mono text-xs bg-white/5 hover:bg-vector-lime/20 border border-white/15 hover:border-vector-lime text-neutral-200 hover:text-vector-lime px-3 py-1.5 rounded-full transition-all text-left"
             data-msg="Quiero agendar una sesión estratégica">
             📞 Agendar Sesión
           </button>
@@ -1003,27 +1002,27 @@
       </div>
 
       <!-- Chat Input Bar -->
-      <form id="chatbot-form" class="p-2.5 border-t border-white/10 bg-vector-black/80 flex items-center gap-2">
+      <form id="chatbot-form" class="p-3 border-t border-white/10 bg-vector-black/85 flex items-center gap-2.5">
         <input id="chatbot-input" type="text" placeholder="Escribe tu consulta aquí..."
-          class="flex-1 bg-white/5 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none transition-colors" />
+          class="flex-1 bg-white/5 border border-white/15 focus:border-vector-lime rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none transition-colors" />
         <button type="submit"
-          class="bg-vector-lime hover:bg-white text-vector-black w-8 h-8 rounded-xl flex items-center justify-center transition-all group shrink-0">
+          class="bg-vector-lime hover:bg-white text-vector-black w-10 h-10 rounded-xl flex items-center justify-center transition-all group shrink-0 shadow-[0_0_15px_rgba(195,244,0,0.3)] cursor-pointer">
           <span
-            class="material-symbols-outlined text-sm font-bold group-hover:translate-x-0.5 transition-transform">send</span>
+            class="material-symbols-outlined text-base font-bold group-hover:translate-x-0.5 transition-transform">send</span>
         </button>
       </form>
 
     </div>
 
-    <!-- Floating Bubble Trigger Button -->
+    <!-- Floating Bubble Trigger Button (+30% Larger Scale: 76px - 84px) -->
     <button id="chatbot-trigger-btn"
-      class="group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-vector-black/90 border-2 border-vector-lime/70 hover:border-vector-lime shadow-[0_0_25px_rgba(195,244,0,0.35),0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-center p-1.5 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-xl">
+      class="group relative w-[74px] h-[74px] sm:w-[84px] sm:h-[84px] rounded-full bg-vector-black/95 border-2 border-vector-lime/80 hover:border-vector-lime shadow-[0_0_35px_rgba(195,244,0,0.45),0_15px_40px_rgba(0,0,0,0.85)] flex items-center justify-center p-2 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-2xl">
       <img src="chatbot-icon.png" alt="Chatbot Vector Inside"
-        class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(195,244,0,0.4)]" />
+        class="w-full h-full object-contain drop-shadow-[0_0_14px_rgba(195,244,0,0.5)]" />
       <!-- Online Green Pulse Ping -->
-      <span class="absolute -top-1 -right-1 flex h-4 w-4">
+      <span class="absolute -top-1 -right-1 flex h-5 w-5">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-4 w-4 bg-vector-lime border-2 border-vector-black"></span>
+        <span class="relative inline-flex rounded-full h-5 w-5 bg-vector-lime border-2 border-vector-black"></span>
       </span>
     </button>
 
