@@ -3657,6 +3657,419 @@ function initFloatingGallery() {
   });
 
   initExecutionInternalScrollListener();
+  initRubikCube();
+}
+
+// ==================== ORIGINKIT 3D PARTICLE RUBIK CUBE SCENE ====================
+function latticeCoord(i, n) {
+  return n <= 1 ? 0 : -1 + (2 * i) / (n - 1);
+}
+
+function snapCoord(c, n) {
+  if (n <= 1) return 0;
+  const i = Math.round(((c + 1) / 2) * (n - 1));
+  return latticeCoord(Math.max(0, Math.min(n - 1, i)), n);
+}
+
+function buildRubikShell(cubeGrid, dotsPerFace) {
+  const totalPoints = Math.max(2, (cubeGrid - 1) * Math.max(1, dotsPerFace) + 1);
+  const xs = [];
+  const ys = [];
+  const zs = [];
+
+  for (let i = 0; i < totalPoints; i++) {
+    for (let j = 0; j < totalPoints; j++) {
+      for (let k = 0; k < totalPoints; k++) {
+        const onShell =
+          i === 0 ||
+          i === totalPoints - 1 ||
+          j === 0 ||
+          j === totalPoints - 1 ||
+          k === 0 ||
+          k === totalPoints - 1;
+        if (!onShell) continue;
+        xs.push(latticeCoord(i, totalPoints));
+        ys.push(latticeCoord(j, totalPoints));
+        zs.push(latticeCoord(k, totalPoints));
+      }
+    }
+  }
+  return {
+    x: Float32Array.from(xs),
+    y: Float32Array.from(ys),
+    z: Float32Array.from(zs),
+    count: xs.length,
+  };
+}
+
+function bandOf(c, cubeGrid) {
+  const norm = (c + 1) / 2;
+  const band = Math.floor(norm * cubeGrid);
+  return Math.max(0, Math.min(cubeGrid - 1, band));
+}
+
+function rotateRubikAxis(x, y, z, axis, c, s, out) {
+  if (axis === 0) {
+    out.x = x;
+    out.y = y * c - z * s;
+    out.z = y * s + z * c;
+  } else if (axis === 1) {
+    out.x = x * c + z * s;
+    out.y = y;
+    out.z = -x * s + z * c;
+  } else {
+    out.x = x * c - y * s;
+    out.y = x * s + y * c;
+    out.z = z;
+  }
+}
+
+const HALF_DIAG = Math.sqrt(3);
+
+function clampSpin(v) {
+  if (typeof v !== "number" || !isFinite(v)) return 0;
+  return Math.max(-12, Math.min(12, v));
+}
+
+function easeInOutCubicBezier(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+class RubikCubeScene {
+  constructor(container, cfg) {
+    this.container = container;
+    this.cfg = Object.assign({
+      color: "#60B959",
+      cubeGrid: 4,
+      dotsPerFace: 6,
+      dotSize: 5,
+      dragSensitivity: 0.2,
+      rotation: { x: -12, y: 12, z: 12 },
+      duration: 0.75,
+      sizePercent: 96
+    }, cfg);
+
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.position = "absolute";
+    this.canvas.style.inset = "0";
+    this.canvas.style.width = "100%";
+    this.canvas.style.height = "100%";
+    this.canvas.style.cursor = "grab";
+    this.canvas.style.touchAction = "none";
+    container.appendChild(this.canvas);
+
+    const ctx = this.canvas.getContext("2d");
+    if (!ctx) throw new Error("2D context unavailable");
+    this.ctx = ctx;
+
+    this.dpr = 1;
+    this.width = 1;
+    this.height = 1;
+
+    this.shell = buildRubikShell(this.clampGrid(this.cfg.cubeGrid), this.clampDots(this.cfg.dotsPerFace));
+    this.adoptShell();
+    this.bindEvents();
+
+    this.ax = 0.5;
+    this.ay = 0.6;
+    this.az = 0;
+
+    this.isDragging = false;
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
+
+    this.frameId = 0;
+    this.lastT = performance.now();
+    this.disposed = false;
+
+    this.tmp = { x: 0, y: 0, z: 0 };
+    this.turn = null;
+    this.turnTarget = 0;
+    this.turnProgress = 0;
+    this.turnStartTime = 0;
+    this.turnDuration = (this.cfg.duration || 0.75) * 1000;
+    this.turnMembers = [];
+    this.lastMove = null;
+
+    this.start();
+  }
+
+  clampGrid(n) {
+    return Math.max(2, Math.min(8, Math.round(n)));
+  }
+
+  clampDots(n) {
+    return Math.max(1, Math.min(8, Math.round(n)));
+  }
+
+  totalPoints() {
+    const grid = this.clampGrid(this.cfg.cubeGrid);
+    const dots = this.clampDots(this.cfg.dotsPerFace);
+    return Math.max(2, (grid - 1) * dots + 1);
+  }
+
+  adoptShell() {
+    this.px = Float32Array.from(this.shell.x);
+    this.py = Float32Array.from(this.shell.y);
+    this.pz = Float32Array.from(this.shell.z);
+    this.depth = new Float32Array(this.shell.count);
+    this.order = new Int32Array(this.shell.count);
+    this.pxp = new Float32Array(this.shell.count);
+    this.pyp = new Float32Array(this.shell.count);
+    this.memberFlag = new Uint8Array(this.shell.count);
+    for (let i = 0; i < this.shell.count; i++) this.order[i] = i;
+    this.turn = null;
+    this.turnMembers = [];
+    this.turnProgress = 0;
+  }
+
+  bindEvents() {
+    const onPointerDown = (e) => {
+      this.isDragging = true;
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
+      this.canvas.style.cursor = "grabbing";
+    };
+
+    const onPointerMove = (e) => {
+      if (!this.isDragging) return;
+      const dx = e.clientX - this.lastMouseX;
+      const dy = e.clientY - this.lastMouseY;
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
+
+      const sens = (this.cfg.dragSensitivity || 0.2) * 0.008;
+      this.ay += dx * sens;
+      this.ax += dy * sens;
+    };
+
+    const onPointerUp = () => {
+      this.isDragging = false;
+      this.canvas.style.cursor = "grab";
+    };
+
+    const onPointerLeave = () => {
+      this.isDragging = false;
+      this.canvas.style.cursor = "grab";
+    };
+
+    this.canvas.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    this.canvas.addEventListener("pointerleave", onPointerLeave);
+  }
+
+  setSize(width, height) {
+    if (this.disposed || width <= 0 || height <= 0) return;
+    this.width = width;
+    this.height = height;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = Math.max(1, Math.floor(width * this.dpr));
+    this.canvas.height = Math.max(1, Math.floor(height * this.dpr));
+  }
+
+  pickMove() {
+    const grid = this.clampGrid(this.cfg.cubeGrid);
+    let m;
+    let tries = 0;
+    do {
+      m = {
+        axis: Math.floor(Math.random() * 3),
+        layer: Math.floor(Math.random() * grid),
+        dir: Math.random() < 0.5 ? 1 : -1,
+      };
+      tries++;
+    } while (
+      tries < 8 &&
+      this.lastMove &&
+      m.axis === this.lastMove.axis &&
+      m.layer === this.lastMove.layer &&
+      m.dir === -this.lastMove.dir
+    );
+
+    const axisArr = m.axis === 0 ? this.px : m.axis === 1 ? this.py : this.pz;
+    const members = [];
+    this.memberFlag.fill(0);
+    for (let i = 0; i < this.shell.count; i++) {
+      if (bandOf(axisArr[i], grid) === m.layer) {
+        members.push(i);
+        this.memberFlag[i] = 1;
+      }
+    }
+
+    this.turn = m;
+    this.turnMembers = members;
+    this.turnProgress = 0;
+    this.turnTarget = (m.dir * Math.PI) / 2;
+    this.turnStartTime = performance.now();
+    this.lastMove = m;
+  }
+
+  commitTurn() {
+    const m = this.turn;
+    if (!m) return;
+    const n = this.totalPoints();
+    const c = Math.cos(this.turnTarget);
+    const s = Math.sin(this.turnTarget);
+    const out = this.tmp;
+    for (let idx = 0; idx < this.turnMembers.length; idx++) {
+      const i = this.turnMembers[idx];
+      rotateRubikAxis(this.px[i], this.py[i], this.pz[i], m.axis, c, s, out);
+      this.px[i] = snapCoord(out.x, n);
+      this.py[i] = snapCoord(out.y, n);
+      this.pz[i] = snapCoord(out.z, n);
+    }
+    this.memberFlag.fill(0);
+    this.turn = null;
+    this.turnMembers = [];
+  }
+
+  start() {
+    this.lastT = performance.now();
+    const loop = (now) => {
+      if (this.disposed) return;
+      this.frameId = requestAnimationFrame(loop);
+      this.step(now);
+    };
+    this.frameId = requestAnimationFrame(loop);
+  }
+
+  step(now) {
+    let dt = (now - this.lastT) / 1000;
+    this.lastT = now;
+    if (!isFinite(dt) || dt < 0) dt = 0;
+    if (dt > 0.05) dt = 0.05;
+
+    if (!this.isDragging) {
+      const rot = this.cfg.rotation;
+      const k = 0.06;
+      this.ax += clampSpin(rot?.x) * k * dt;
+      this.ay += clampSpin(rot?.y) * k * dt;
+      this.az += clampSpin(rot?.z) * k * dt;
+    }
+
+    if (!this.turn) {
+      this.pickMove();
+    } else {
+      const elapsed = now - this.turnStartTime;
+      const p = Math.min(1.0, elapsed / this.turnDuration);
+      this.turnProgress = easeInOutCubicBezier(p);
+      if (p >= 1.0) {
+        this.commitTurn();
+      }
+    }
+
+    this.render();
+  }
+
+  render() {
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+    if (w <= 0 || h <= 0) return;
+
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+    const sizePct = Math.max(20, Math.min(200, Math.round(this.cfg.sizePercent || 96)));
+    const scale = Math.min(w, h) * 0.26 * (sizePct / 100);
+
+    const cax = Math.cos(this.ax);
+    const sax = Math.sin(this.ax);
+    const cay = Math.cos(this.ay);
+    const say = Math.sin(this.ay);
+    const caz = Math.cos(this.az);
+    const saz = Math.sin(this.az);
+
+    const turn = this.turn;
+    const angle = this.turnTarget * this.turnProgress;
+    const cs = turn ? Math.cos(angle) : 1;
+    const sn = turn ? Math.sin(angle) : 0;
+    const turnAxis = turn ? turn.axis : 0;
+    const memberFlag = this.memberFlag;
+
+    const count = this.shell.count;
+    const tmp = this.tmp;
+
+    for (let i = 0; i < count; i++) {
+      let x = this.px[i];
+      let y = this.py[i];
+      let z = this.pz[i];
+
+      if (turn && memberFlag[i]) {
+        rotateRubikAxis(x, y, z, turnAxis, cs, sn, tmp);
+        x = tmp.x;
+        y = tmp.y;
+        z = tmp.z;
+      }
+
+      const y1 = y * cax - z * sax;
+      const z1 = y * sax + z * cax;
+      const x2 = x * cay + z1 * say;
+      const z2 = -x * say + z1 * cay;
+      const x3 = x2 * caz - y1 * saz;
+      const y3 = x2 * saz + y1 * caz;
+
+      this.depth[i] = z2;
+      const persp = 1 + z2 * 0.16;
+      this.pxp[i] = cx + x3 * scale * persp;
+      this.pyp[i] = cy - y3 * scale * persp;
+    }
+
+    const order = this.order;
+    order.sort((a, b) => this.depth[a] - this.depth[b]);
+
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = this.cfg.color || "#60B959";
+    const dot = Math.max(1, Math.min(6, Math.round(this.cfg.dotSize || 5)));
+
+    for (let o = 0; o < count; o++) {
+      const i = order[o];
+      const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
+      const tc = t < 0 ? 0 : t > 1 ? 1 : t;
+      ctx.globalAlpha = 0.22 + 0.78 * tc;
+      const r = Math.max(0.4, dot * (0.5 + 0.7 * tc));
+      ctx.beginPath();
+      ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+  }
+}
+
+function initRubikCube() {
+  const container = document.getElementById("rubik-cube-root");
+  if (!container) return;
+
+  const scene = new RubikCubeScene(container, {
+    color: "#60B959",
+    cubeGrid: 4,
+    dotsPerFace: 6,
+    dotSize: 5,
+    dragSensitivity: 0.2,
+    rotation: { x: -12, y: 12, z: 12 },
+    sizePercent: 96,
+    duration: 0.75
+  });
+
+  const updateSize = () => {
+    const rect = container.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      scene.setSize(rect.width, rect.height);
+    }
+  };
+
+  updateSize();
+  window.addEventListener("resize", updateSize);
+
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => updateSize());
+    ro.observe(container);
+  }
 }
 
 if (document.readyState === 'loading') {
