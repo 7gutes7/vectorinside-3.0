@@ -12,8 +12,9 @@ next-app/.next/
 # Heavy 3D Models (> 100MB)
 poligonalFINAL.glb
 poligonalFINAL-standard.glb
-poligonal-30-08-26.glb
 poligonalFINAL-optimized.glb
+*-original.glb
+Copia de *
 
 # OS generated files
 .DS_Store

@@ -972,8 +972,6 @@ function initHero3DModel() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // ==================== ENVIRONMENT MAP (IBL) — reflejos reales sobre el material del hero ====================
   // Archivo studio.exr en la raíz del proyecto (junto a index.html)
@@ -1011,9 +1009,6 @@ function initHero3DModel() {
 
   const pointLight = new THREE.PointLight(0xffffff, 2.0, 50);
   pointLight.position.set(0, 5, 5);
-  pointLight.castShadow = true;
-  pointLight.shadow.mapSize.set(1024, 1024);
-  pointLight.shadow.bias = -0.0015;
   scene.add(pointLight);
 
   // Luz de rebote púrpura muy sutil en la parte inferior izquierda del modelo 3D Hero
@@ -1036,9 +1031,6 @@ function initHero3DModel() {
   const smartphoneGroup = new THREE.Group();
   scene.add(smartphoneGroup);
   smartphoneGroup.visible = false;
-
-  // Shadow-catcher: invisible salvo por la sombra proyectada, da anclaje visual al modelo del hero
-  let heroShadowPlane = null;
 
   // Smartphone screen state (declared at function scope so the render loop can read them)
   let phoneScreenMesh = null;
@@ -1243,20 +1235,19 @@ function initHero3DModel() {
             child.castShadow = true;
             child.receiveShadow = true;
             child.frustumCulled = false; // Prevent premature culling during extreme close-ups
-            if (child.material) {
-              const srcMat = child.material;
-              const physMat = new THREE.MeshPhysicalMaterial({
-                color: 0x85AEE3, // Soft Sky / Pastel Blue Base Color (#85AEE3)
-                transparent: true,
-                opacity: 1.0,
-                depthWrite: true,
-                metalness: 0.18,        // plástico = mayormente dieléctrico (antes 0.75 lo hacía ver cromado)
-                roughness: 0.34,
-                clearcoat: 0.5,         // capa de barniz/laca — el acabado "sintético brillante"
-                clearcoatRoughness: 0.15,
-                envMapIntensity: 0.55,  // se activa en cuanto cargue studio.exr arriba
-              });
-              // Conserva mapas del material original del GLB si existen (detalle real de superficie)
+            const srcMat = child.material;
+            const physMat = new THREE.MeshPhysicalMaterial({
+              color: 0x433DAE, // Azul de marca (--cognitive-blue en style.css / Tailwind)
+              transparent: true,
+              opacity: 1.0,
+              depthWrite: true,
+              metalness: 0.18,        // plástico = mayormente dieléctrico
+              roughness: 0.36,
+              clearcoat: 0.35,        // menos barniz blanco encima
+              clearcoatRoughness: 0.18,
+              envMapIntensity: 0.22,  // HDR balanceado
+            });
+            if (srcMat) {
               if (srcMat.map) physMat.map = srcMat.map;
               if (srcMat.normalMap) {
                 physMat.normalMap = srcMat.normalMap;
@@ -1267,16 +1258,21 @@ function initHero3DModel() {
                 physMat.aoMap = srcMat.aoMap;
                 physMat.aoMapIntensity = srcMat.aoMapIntensity ?? 1;
               }
-              physMat.needsUpdate = true;
-              child.material = physMat;
             }
+            physMat.needsUpdate = true;
+            child.material = physMat;
 
             const name = (child.name || '').trim();
             const matName = (child.material ? child.material.name || '' : '').trim();
 
-            // Target 'Grid' as EYE sub-mesh and 'mesh_node' as HEAD sub-mesh
-            if (name === 'Grid' || matName === 'Material' || name.toLowerCase().includes('grid')) {
-              console.log("--> OJOS IDENTIFICADOS EXACTAMENTE:", name, matName);
+            // Identificar 'Sphere'/'Sphere.001' (ojos en poligonal-30-08-26.glb) o 'Grid'
+            const isEye = name.toLowerCase().includes('sphere') ||
+                          name.toLowerCase().includes('grid') ||
+                          name.toLowerCase().includes('eye') ||
+                          matName.toLowerCase().includes('eye');
+
+            if (isEye) {
+              console.log("--> OJO IDENTIFICADO EXACTAMENTE:", name, matName);
               detectedEyeMeshes.push(child);
             } else {
               console.log("--> CABEZA IDENTIFICADA EXACTAMENTE:", name, matName);
@@ -1294,18 +1290,6 @@ function initHero3DModel() {
         modelGroup.position.set(0, 0, 0);
         modelGroup.rotation.set(0, 0, 0);
         modelGroup.updateMatrixWorld(true);
-
-        // Sombra de contacto: ancla visualmente el modelo en vez de dejarlo "flotando"
-        const heroBox = new THREE.Box3().setFromObject(model);
-        if (!heroShadowPlane) {
-          const shadowGeo = new THREE.PlaneGeometry(24, 24);
-          const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3 });
-          heroShadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-          heroShadowPlane.rotation.x = -Math.PI / 2;
-          heroShadowPlane.receiveShadow = true;
-          scene.add(heroShadowPlane);
-        }
-        heroShadowPlane.position.y = heroBox.min.y - 0.05;
 
         // Calibrated exact Rhombus Eye Socket Target for poligonal-30-08-26.glb
         targetEyePos.set(0.85, 0.40, 1.05);
@@ -1760,11 +1744,9 @@ function initHero3DModel() {
       heroRipple.style.visibility = ripOpacity > 0.001 ? 'visible' : 'hidden';
     }
 
-    // Bottom-dock jump override (05 // Metodología, 06 // Diagnóstico):
-    // while a dock button drives the page to the end of the timeline we SNAP the
-    // progress instead of easing it. Otherwise the ~1s easing catch-up keeps this
-    // loop in the "expansion in progress" branch, which zeroes the internal
-    // execution-container scroll every frame and dumps the user back on 03 / 02.
+    // Bottom-dock jump override (05 // Metodología, 06 // Diagnóstico): while a dock
+    // button drives the page to the end of the timeline we SNAP progress instead of
+    // easing it, so this loop stops zeroing / shrinking the 03 portal mid-catch-up.
     if (window.__forceTimelineProgress != null) {
       if (performance.now() < window.__forceTimelineUntil) {
         scrollProgress = window.__forceTimelineProgress;
@@ -1797,23 +1779,40 @@ function initHero3DModel() {
     // 96% -> 100%: 03 // Ejecución full stage active
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
-      // El modelo se mantiene 100% sólido durante todo el zoom y comienza a desvanecerse a partir de que aparece el punto
+      // 2. Camera Deep Eye Entry (0.0 to 0.10) - Centered in Hero, zooms into eye socket
+      const pHead = Math.min(1.0, currentScrollLerp / T_HEAD_ZOOM_END);
+
+      // El modelo de la cabeza se mantiene sólido y comienza a desvanecerse al aparecer el punto
       let headOpacity = 1.0;
       if (currentScrollLerp >= T_REVEAL_START) {
         const pFade = (currentScrollLerp - T_REVEAL_START) / 0.03;
         headOpacity = Math.max(0, 1.0 - Math.min(1.0, pFade));
       }
+
+      // Los OJOS se desvanecen cuando el recorrido hacia el ojo ha avanzado un 60% (pHead >= 0.60)
+      let eyeOpacity = headOpacity;
+      if (pHead >= 0.60) {
+        // Desvanecimiento suave desde el 60% hasta el 78% del recorrido
+        const pEyeFade = Math.min(1.0, Math.max(0, (pHead - 0.60) / 0.18));
+        const eyeFadeProgress = 0.5 * (1.0 + Math.cos(pEyeFade * Math.PI)); // 1.0 -> 0.0 suave
+        eyeOpacity = Math.min(headOpacity, eyeFadeProgress);
+      }
+
       detectedHeadMeshes.forEach(mesh => {
         if (mesh.material) {
           mesh.material.opacity = headOpacity;
+          mesh.material.transparent = true;
         }
       });
       detectedEyeMeshes.forEach(mesh => {
         if (mesh.material) {
-          mesh.material.opacity = headOpacity;
+          mesh.material.opacity = eyeOpacity;
+          mesh.material.transparent = true;
+          mesh.material.depthWrite = eyeOpacity > 0.5;
         }
+        mesh.visible = eyeOpacity > 0.001;
       });
-      modelGroup.visible = headOpacity > 0.001;
+      modelGroup.visible = (headOpacity > 0.001 || eyeOpacity > 0.001);
       smartphoneGroup.visible = false;
 
       // Full Iconic Hero Lighting for Wolf Head (Vibrant Cyber-Lavender + Lime & Purple Specular Highlights)
@@ -1837,7 +1836,7 @@ function initHero3DModel() {
       upperRightPinkLight.intensity = 0.45;
 
       ambientLight.color.set(0xffffff);
-      ambientLight.intensity = 0.4;
+      ambientLight.intensity = 0.25;
       phoneFrontLight.position.set(0, 2, 10);
       phoneFrontLight.intensity = 0.0;
 
@@ -1861,8 +1860,7 @@ function initHero3DModel() {
       modelGroup.rotation.x = 0;
       modelGroup.rotation.z = 0;
 
-      // 2. Camera Deep Eye Entry (0.0 to 0.12) - Centered in Hero, zooms into eye socket
-      const pHead = Math.min(1.0, currentScrollLerp / T_HEAD_ZOOM_END);
+      // 2. Camera Deep Eye Entry (0.0 to 0.10) - Centered in Hero, zooms into eye socket
       const baseCamPos = new THREE.Vector3(0, 0, 10);
       const targetCamPos = new THREE.Vector3(
         targetEyePos.x,
@@ -3645,19 +3643,37 @@ window.scrollToEjecucionMatriz = scrollToGaleriaFlotante;
 window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 
 // ==================== JUMP TO 05 // METODOLOGÍA ====================
-// The 05 curtain lives INSIDE the internal scroll of #sec-ejecucion-scroll-container,
-// which is only scrollable once the master timeline is fully at the end (~1.0).
-// A smooth window scroll + short setTimeout retries lost the race against the
-// master render loop (which zeroes that container while the timeline eases), so
-// the click ended on an earlier cover. We now jump the window instantly, tell the
-// master loop to SNAP the timeline (window.__forceTimelineProgress), and keep
-// pinning the internal scroll to the bottom for a short window via rAF.
+// The 05 curtain is a sticky element inside the internal scroll of
+// #sec-ejecucion-scroll-container. Two things broke the dock button:
+//  1) a smooth window scroll lost the race with the master render loop, which
+//     zeroes that container while the timeline eases -> landed on 03.
+//  2) scrolling the container to scrollHeight overscrolls past the sticky zone,
+//     detaching the curtain -> banner shows, everything below is black.
+// Fix: jump the window instantly, freeze the timeline, force the 03 portal to its
+// final full-screen size, and pin the internal scroll INSIDE the sticky range.
 function scrollToMetodologia() {
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
   const globalHeader = document.getElementById('main-global-header');
+  const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+  const expandFrame = document.getElementById('scroll-expand-frame');
+  const expandVideo = document.getElementById('scroll-expand-video');
+
+  const forceFullScreenFrame = () => {
+    if (expandWrapper) {
+      expandWrapper.style.opacity = '1';
+      expandWrapper.style.filter = 'none';
+      expandWrapper.style.pointerEvents = 'auto';
+    }
+    if (expandFrame) {
+      expandFrame.style.width = '100vw';
+      expandFrame.style.height = '100vh';
+      expandFrame.style.borderRadius = '0px';
+    }
+    if (expandVideo) expandVideo.style.transform = 'scale(1)';
+  };
 
   const revealCurtain = () => {
     if (metodologiaWrapper) {
@@ -3673,28 +3689,37 @@ function scrollToMetodologia() {
 
   if (!container) { revealCurtain(); return; }
 
-  const internalTarget = () =>
-    container.scrollHeight || (matrixTrack ? matrixTrack.offsetTop + matrixTrack.offsetHeight : 4000);
+  const internalTarget = () => {
+    if (!matrixTrack) return 3000;
+    const scrollable = matrixTrack.offsetHeight - container.clientHeight;
+    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.92);
+  };
 
   if (mainTrack) {
     const maxScroll = mainTrack.offsetHeight - window.innerHeight;
     const targetY = Math.round(maxScroll * 0.995);
 
-    // Freeze the master timeline at the end so it stops fighting the internal scroll.
     window.__forceTimelineProgress = 0.995;
     window.__forceTimelineUntil = performance.now() + 1400;
+    setTimeout(() => { window.__forceTimelineProgress = null; }, 1600);
 
     window.scrollTo(0, targetY); // instant — smooth loses the race here
 
-    let frames = 0;
-    const pin = () => {
+    const apply = () => {
       window.scrollTo(0, targetY);
+      forceFullScreenFrame();
       container.scrollTop = internalTarget();
       revealCurtain();
-      if (++frames < 84) requestAnimationFrame(pin); // ~1.4s @60fps
+    };
+    const deadline = performance.now() + 1500;
+    const pin = () => {
+      apply();
+      if (performance.now() < deadline) requestAnimationFrame(pin);
     };
     requestAnimationFrame(pin);
+    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(apply, t));
   } else {
+    forceFullScreenFrame();
     container.scrollTop = internalTarget();
     revealCurtain();
   }
@@ -4460,22 +4485,15 @@ function scrollToDiagnostico(e) {
   if (!target) return true; // let the <a href> fallback navigate
   if (e && e.preventDefault) e.preventDefault();
 
-  // The 06 section starts hidden (opacity 0 / scaled) and is only revealed by the
-  // cube-portal scroll choreography. A smooth scrollIntoView on #sec-cube-portal
-  // landed at its very top (p = 0) — a black frame with nothing revealed. Jump
-  // instantly to the real section and force its final revealed state.
+  // 06 starts hidden and is only revealed by the cube-portal scroll choreography;
+  // a smooth scrollIntoView on #sec-cube-portal landed at p = 0 (black frame).
   window.__forceTimelineProgress = null;
   window.scrollTo(0, (diag || target).offsetTop);
-
-  if (diag) {
-    diag.style.opacity = '1';
-    diag.style.transform = 'none';
-  }
+  if (diag) { diag.style.opacity = '1'; diag.style.transform = 'none'; }
   const cube = document.getElementById('rubik-cube-root');
   if (cube) { cube.style.opacity = '0'; cube.style.pointerEvents = 'none'; }
   const watermark = document.getElementById('cube-portal-watermark');
   if (watermark) watermark.style.opacity = '0';
-
   updateActiveDockItem(5);
   return false;
 }
