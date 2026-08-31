@@ -3964,8 +3964,8 @@ class RubikCubeScene {
 
     const cx = w / 2;
     const cy = h / 2;
-    const sizePct = Math.max(20, Math.min(200, Math.round(this.cfg.sizePercent || 96)));
-    const scale = Math.min(w, h) * 0.28 * (sizePct / 100);
+    const sizePct = Math.max(20, Math.min(200, Math.round(this.cfg.sizePercent || 100)));
+    const scale = Math.min(w, h) * 0.32 * (sizePct / 100);
 
     const cax = Math.cos(this.ax);
     const sax = Math.sin(this.ax);
@@ -4012,24 +4012,24 @@ class RubikCubeScene {
     const order = this.order;
     order.sort((a, b) => this.depth[a] - this.depth[b]);
 
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = this.cfg.color || "#60B959";
-    const dotScale = Math.min(1.0, Math.max(0.45, w / 220));
-    const baseDot = (this.cfg.dotSize || 5) * dotScale;
+    ctx.fillStyle = this.cfg.color || "#58F306";
+    ctx.shadowColor = this.cfg.color || "#58F306";
+    ctx.shadowBlur = 6;
+    const baseDot = (this.cfg.dotSize || 5);
 
     for (let o = 0; o < count; o++) {
       const i = order[o];
       const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
       const tc = t < 0 ? 0 : t > 1 ? 1 : t;
-      ctx.globalAlpha = 0.22 + 0.78 * tc;
-      const r = Math.max(0.4, baseDot * (0.5 + 0.7 * tc));
+      ctx.globalAlpha = 0.55 + 0.45 * tc;
+      const r = Math.max(1.8, baseDot * (0.65 + 0.55 * tc));
       ctx.beginPath();
       ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = "source-over";
   }
 }
 
