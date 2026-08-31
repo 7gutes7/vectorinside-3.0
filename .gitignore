@@ -9,11 +9,13 @@ next-app/.next/
 .env
 .env.local
 
-# Heavy 3D Models (> 100MB)
+# Heavy 3D Models & Original Backups
 poligonalFINAL.glb
 poligonalFINAL-standard.glb
 poligonalFINAL-optimized.glb
 *-original.glb
+*-original.exr
+*-original.png
 Copia de *
 
 # OS generated files

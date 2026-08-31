@@ -1735,14 +1735,6 @@ function initHero3DModel() {
       heroBgVideo.style.visibility = bgOpacity > 0.001 ? 'visible' : 'hidden';
     }
 
-    // Update Hero RippleDistortion Fade with Scroll
-    const heroRipple = document.getElementById('hero-ripple-distortion');
-    if (heroRipple) {
-      const pRipFade = Math.max(0, (currentScrollLerp - 0.055) / 0.045);
-      const ripOpacity = Math.max(0, 1.0 - Math.min(1.0, pRipFade));
-      heroRipple.style.opacity = ripOpacity.toFixed(3);
-      heroRipple.style.visibility = ripOpacity > 0.001 ? 'visible' : 'hidden';
-    }
 
     // Bottom-dock jump override (05 // Metodología, 06 // Diagnóstico): while a dock
     // button drives the page to the end of the timeline we SNAP progress instead of
@@ -2474,7 +2466,11 @@ function initHero3DModel() {
       }
     }
 
-    renderer.render(scene, camera);
+    // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
+    const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
+    if (is3DActive) {
+      renderer.render(scene, camera);
+    }
   }
 
   requestAnimationFrame(animate);
