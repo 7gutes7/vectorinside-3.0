@@ -3554,14 +3554,19 @@ function scrollToMetodologia() {
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  const globalHeader = document.getElementById('main-global-header');
 
   const doInternalScroll = () => {
-    if (container && matrixTrack) {
-      const targetTop = matrixTrack.offsetTop + (matrixTrack.offsetHeight - container.clientHeight);
+    if (container) {
+      const targetTop = container.scrollHeight || (matrixTrack ? matrixTrack.offsetTop + matrixTrack.offsetHeight : 3000);
       container.scrollTo({ top: targetTop, behavior: 'smooth' });
       if (metodologiaWrapper) {
         metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
         metodologiaWrapper.style.pointerEvents = 'auto';
+      }
+      if (globalHeader) {
+        globalHeader.classList.add('glass-nav-white-liquid');
+        globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
       }
       updateActiveDockItem(4);
     }
@@ -3575,9 +3580,9 @@ function scrollToMetodologia() {
 
     // Immediate execution + scheduled frame confirmation for 100% reliable 1st-click action
     doInternalScroll();
-    setTimeout(doInternalScroll, 100);
-    setTimeout(doInternalScroll, 300);
-    setTimeout(doInternalScroll, 600);
+    setTimeout(doInternalScroll, 80);
+    setTimeout(doInternalScroll, 250);
+    setTimeout(doInternalScroll, 500);
   } else {
     doInternalScroll();
   }
