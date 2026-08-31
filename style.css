@@ -196,8 +196,8 @@ body {
 
 .liquid-glass-item {
   position: relative;
-  color: #64748b !important;
-  font-weight: 700;
+  color: #1e293b !important;
+  font-weight: 800;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
 }
