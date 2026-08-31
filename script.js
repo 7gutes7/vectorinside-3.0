@@ -971,6 +971,32 @@ function initHero3DModel() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
+  if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // ==================== ENVIRONMENT MAP (IBL) — reflejos reales sobre el material del hero ====================
+  // Archivo studio.exr en la raíz del proyecto (junto a index.html)
+  if (typeof THREE.EXRLoader !== 'undefined') {
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    new THREE.EXRLoader().load(
+      './studio.exr',
+      (hdrTexture) => {
+        const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+        scene.environment = envMap;
+        hdrTexture.dispose();
+        pmremGenerator.dispose();
+        console.log('EXR de entorno cargado — reflejos activos en el material del hero.');
+      },
+      undefined,
+      (err) => {
+        console.warn('No se encontró studio.exr en la raíz del proyecto; el modelo seguirá sin reflejos de entorno hasta que lo agregues ahí.', err);
+      }
+    );
+  } else {
+    console.warn('THREE.EXRLoader no está cargado — revisa el <script> de EXRLoader.js en index.html.');
+  }
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
   scene.add(ambientLight);
@@ -985,6 +1011,9 @@ function initHero3DModel() {
 
   const pointLight = new THREE.PointLight(0xffffff, 2.0, 50);
   pointLight.position.set(0, 5, 5);
+  pointLight.castShadow = true;
+  pointLight.shadow.mapSize.set(1024, 1024);
+  pointLight.shadow.bias = -0.0015;
   scene.add(pointLight);
 
   // Luz de rebote púrpura muy sutil en la parte inferior izquierda del modelo 3D Hero
@@ -1007,6 +1036,9 @@ function initHero3DModel() {
   const smartphoneGroup = new THREE.Group();
   scene.add(smartphoneGroup);
   smartphoneGroup.visible = false;
+
+  // Shadow-catcher: invisible salvo por la sombra proyectada, da anclaje visual al modelo del hero
+  let heroShadowPlane = null;
 
   // Smartphone screen state (declared at function scope so the render loop can read them)
   let phoneScreenMesh = null;
@@ -1212,14 +1244,31 @@ function initHero3DModel() {
             child.receiveShadow = true;
             child.frustumCulled = false; // Prevent premature culling during extreme close-ups
             if (child.material) {
-              child.material = child.material.clone();
-              child.material.transparent = true;
-              child.material.opacity = 1.0;
-              child.material.depthWrite = true;
-              child.material.metalness = 0.75;
-              child.material.roughness = 0.25;
-              child.material.color.set(0x85AEE3); // Soft Sky / Pastel Blue Base Color (#85AEE3)
-              child.material.needsUpdate = true;
+              const srcMat = child.material;
+              const physMat = new THREE.MeshPhysicalMaterial({
+                color: 0x85AEE3, // Soft Sky / Pastel Blue Base Color (#85AEE3)
+                transparent: true,
+                opacity: 1.0,
+                depthWrite: true,
+                metalness: 0.18,        // plástico = mayormente dieléctrico (antes 0.75 lo hacía ver cromado)
+                roughness: 0.34,
+                clearcoat: 0.5,         // capa de barniz/laca — el acabado "sintético brillante"
+                clearcoatRoughness: 0.15,
+                envMapIntensity: 0.55,  // se activa en cuanto cargue studio.exr arriba
+              });
+              // Conserva mapas del material original del GLB si existen (detalle real de superficie)
+              if (srcMat.map) physMat.map = srcMat.map;
+              if (srcMat.normalMap) {
+                physMat.normalMap = srcMat.normalMap;
+                if (srcMat.normalScale) physMat.normalScale = srcMat.normalScale.clone();
+              }
+              if (srcMat.roughnessMap) physMat.roughnessMap = srcMat.roughnessMap;
+              if (srcMat.aoMap) {
+                physMat.aoMap = srcMat.aoMap;
+                physMat.aoMapIntensity = srcMat.aoMapIntensity ?? 1;
+              }
+              physMat.needsUpdate = true;
+              child.material = physMat;
             }
 
             const name = (child.name || '').trim();
@@ -1245,6 +1294,18 @@ function initHero3DModel() {
         modelGroup.position.set(0, 0, 0);
         modelGroup.rotation.set(0, 0, 0);
         modelGroup.updateMatrixWorld(true);
+
+        // Sombra de contacto: ancla visualmente el modelo en vez de dejarlo "flotando"
+        const heroBox = new THREE.Box3().setFromObject(model);
+        if (!heroShadowPlane) {
+          const shadowGeo = new THREE.PlaneGeometry(24, 24);
+          const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3 });
+          heroShadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+          heroShadowPlane.rotation.x = -Math.PI / 2;
+          heroShadowPlane.receiveShadow = true;
+          scene.add(heroShadowPlane);
+        }
+        heroShadowPlane.position.y = heroBox.min.y - 0.05;
 
         // Calibrated exact Rhombus Eye Socket Target for poligonal-30-08-26.glb
         targetEyePos.set(0.85, 0.40, 1.05);
@@ -1699,6 +1760,20 @@ function initHero3DModel() {
       heroRipple.style.visibility = ripOpacity > 0.001 ? 'visible' : 'hidden';
     }
 
+    // Bottom-dock jump override (05 // Metodología, 06 // Diagnóstico):
+    // while a dock button drives the page to the end of the timeline we SNAP the
+    // progress instead of easing it. Otherwise the ~1s easing catch-up keeps this
+    // loop in the "expansion in progress" branch, which zeroes the internal
+    // execution-container scroll every frame and dumps the user back on 03 / 02.
+    if (window.__forceTimelineProgress != null) {
+      if (performance.now() < window.__forceTimelineUntil) {
+        scrollProgress = window.__forceTimelineProgress;
+        currentScrollLerp = window.__forceTimelineProgress;
+      } else {
+        window.__forceTimelineProgress = null;
+      }
+    }
+
     // Smoothly interpolate scroll progress for cinematic motion
     currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
 
@@ -1742,24 +1817,27 @@ function initHero3DModel() {
       smartphoneGroup.visible = false;
 
       // Full Iconic Hero Lighting for Wolf Head (Vibrant Cyber-Lavender + Lime & Purple Specular Highlights)
+      // NOTA: intensidades reducidas vs. el original — con metalness bajo (material tipo plástico)
+      // la respuesta difusa es mucho mayor que con el metalness:0.75 anterior, así que estos mismos
+      // valores ahora sobreexponían el modelo (se veía casi blanco puro).
       dirLightLime.color.set(0xc3f400);
       dirLightLime.position.set(5, 10, 7);
-      dirLightLime.intensity = 2.5;
+      dirLightLime.intensity = 1.1;
 
       dirLightPurple.color.set(0x64b5f6);
       dirLightPurple.position.set(-5, -5, -5);
-      dirLightPurple.intensity = 2.0;
+      dirLightPurple.intensity = 0.9;
 
       pointLight.color.set(0xffffff);
       pointLight.position.set(0, 5, 5);
-      pointLight.intensity = 2.0;
+      pointLight.intensity = 0.9;
 
-      lowerLeftPurpleLight.intensity = 0.75;
+      lowerLeftPurpleLight.intensity = 0.35;
       upperRightPinkLight.color.set(0xff1443);
-      upperRightPinkLight.intensity = 0.95;
+      upperRightPinkLight.intensity = 0.45;
 
       ambientLight.color.set(0xffffff);
-      ambientLight.intensity = 1.2;
+      ambientLight.intensity = 0.4;
       phoneFrontLight.position.set(0, 2, 10);
       phoneFrontLight.intensity = 0.0;
 
@@ -3509,6 +3587,24 @@ class FloatingGallery {
   }
 }
 
+// Bottom dock active-item helper (global — shared by the top-level scroll handlers below).
+// Previously this only existed nested inside initHero3DModel, so scrollToGaleriaFlotante,
+// scrollToMetodologia and initExecutionInternalScrollListener threw a ReferenceError when
+// they called it — which aborted initFloatingGallery() before it could run initRubikCube().
+function updateActiveDockItem(index) {
+  const bottomDock = document.getElementById('bottom-dock-nav');
+  const dockLinks = bottomDock ? bottomDock.querySelectorAll('a') : [];
+  dockLinks.forEach((link, i) => {
+    if (index !== null && i === index) {
+      link.classList.add('bg-vector-lime', 'text-vector-black', 'font-bold');
+      link.classList.remove('text-white');
+    } else {
+      link.classList.remove('bg-vector-lime', 'text-vector-black', 'font-bold');
+      link.classList.add('text-white');
+    }
+  });
+}
+
 // ==================== CINEMATIC SMOOTH SCROLL TO 04 // EVIDENCIA (GALERÍA FLOTANTE) ====================
 function scrollToGaleriaFlotante() {
   const mainTrack = document.getElementById('hero-scroll-track');
@@ -3548,7 +3644,14 @@ window.scrollToGaleriaFlotante = scrollToGaleriaFlotante;
 window.scrollToEjecucionMatriz = scrollToGaleriaFlotante;
 window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 
-// ==================== CINEMATIC SMOOTH SCROLL TO 05 // METODOLOGÍA ====================
+// ==================== JUMP TO 05 // METODOLOGÍA ====================
+// The 05 curtain lives INSIDE the internal scroll of #sec-ejecucion-scroll-container,
+// which is only scrollable once the master timeline is fully at the end (~1.0).
+// A smooth window scroll + short setTimeout retries lost the race against the
+// master render loop (which zeroes that container while the timeline eases), so
+// the click ended on an earlier cover. We now jump the window instantly, tell the
+// master loop to SNAP the timeline (window.__forceTimelineProgress), and keep
+// pinning the internal scroll to the bottom for a short window via rAF.
 function scrollToMetodologia() {
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
@@ -3556,35 +3659,44 @@ function scrollToMetodologia() {
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
   const globalHeader = document.getElementById('main-global-header');
 
-  const doInternalScroll = () => {
-    if (container) {
-      const targetTop = container.scrollHeight || (matrixTrack ? matrixTrack.offsetTop + matrixTrack.offsetHeight : 3000);
-      container.scrollTo({ top: targetTop, behavior: 'smooth' });
-      if (metodologiaWrapper) {
-        metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
-        metodologiaWrapper.style.pointerEvents = 'auto';
-      }
-      if (globalHeader) {
-        globalHeader.classList.add('glass-nav-white-liquid');
-        globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
-      }
-      updateActiveDockItem(4);
+  const revealCurtain = () => {
+    if (metodologiaWrapper) {
+      metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+      metodologiaWrapper.style.pointerEvents = 'auto';
     }
+    if (globalHeader) {
+      globalHeader.classList.add('glass-nav-white-liquid');
+      globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
+    }
+    updateActiveDockItem(4);
   };
+
+  if (!container) { revealCurtain(); return; }
+
+  const internalTarget = () =>
+    container.scrollHeight || (matrixTrack ? matrixTrack.offsetTop + matrixTrack.offsetHeight : 4000);
 
   if (mainTrack) {
     const maxScroll = mainTrack.offsetHeight - window.innerHeight;
-    const targetY = maxScroll * 0.98;
+    const targetY = Math.round(maxScroll * 0.995);
 
-    window.scrollTo({ top: targetY, behavior: 'smooth' });
+    // Freeze the master timeline at the end so it stops fighting the internal scroll.
+    window.__forceTimelineProgress = 0.995;
+    window.__forceTimelineUntil = performance.now() + 1400;
 
-    // Immediate execution + scheduled frame confirmation for 100% reliable 1st-click action
-    doInternalScroll();
-    setTimeout(doInternalScroll, 80);
-    setTimeout(doInternalScroll, 250);
-    setTimeout(doInternalScroll, 500);
+    window.scrollTo(0, targetY); // instant — smooth loses the race here
+
+    let frames = 0;
+    const pin = () => {
+      window.scrollTo(0, targetY);
+      container.scrollTop = internalTarget();
+      revealCurtain();
+      if (++frames < 84) requestAnimationFrame(pin); // ~1.4s @60fps
+    };
+    requestAnimationFrame(pin);
   } else {
-    doInternalScroll();
+    container.scrollTop = internalTarget();
+    revealCurtain();
   }
 }
 window.scrollToMetodologia = scrollToMetodologia;
@@ -3719,10 +3831,10 @@ class RubikCubeScene {
   constructor(canvas, cfg) {
     this.canvas = canvas;
     this.cfg = Object.assign({
-      color: "#58F306",
+      color: "#89B059",
       cubeGrid: 3,
       dotsPerFace: 5,
-      dotSize: 4.8,
+      dotSize: 2.4,
       dragSensitivity: 0.28,
       rotation: { x: -14, y: 16, z: 10 },
       duration: 0.65,
@@ -3764,6 +3876,11 @@ class RubikCubeScene {
     this.turnDuration = (this.cfg.duration || 0.65) * 1000;
     this.turnMembers = [];
     this.lastMove = null;
+
+    // ---- Cube-portal state (06 // Diagnóstico scroll choreography) ----
+    // p: 0 = normal cube in header slot; 0->1 = fly to center, freeze, draw the
+    // section-6 cover in the front face's particles, then bloom + hand off.
+    this.portal = { p: 0, active: false, img: null, faceIdx: null, faceUV: null };
 
     this.start();
   }
@@ -3921,6 +4038,34 @@ class RubikCubeScene {
     if (!isFinite(dt) || dt < 0) dt = 0;
     if (dt > 0.05) dt = 0.05;
 
+    // ---- Cube-portal phase: settle to a flat, camera-facing front face; no new scrambles ----
+    if (this.portal.p > 0) {
+      const norm = (a) => {
+        a = a % (2 * Math.PI);
+        if (a > Math.PI) a -= 2 * Math.PI;
+        if (a < -Math.PI) a += 2 * Math.PI;
+        return a;
+      };
+      if (this._axP0 == null) {
+        this._axP0 = norm(this.ax);
+        this._ayP0 = norm(this.ay);
+        this._azP0 = norm(this.az);
+      }
+      const fp = easeInOutCubicBezier(Math.min(1, this.portal.p / 0.30));
+      this.ax = this._axP0 * (1 - fp);
+      this.ay = this._ayP0 * (1 - fp);
+      this.az = this._azP0 * (1 - fp);
+      // let any in-flight quarter-turn finish, but never start a new one
+      if (this.turn) {
+        const pr = Math.min(1.0, (now - this.turnStartTime) / this.turnDuration);
+        this.turnProgress = easeInOutCubicBezier(pr);
+        if (pr >= 1.0) this.commitTurn();
+      }
+      this.render();
+      return;
+    }
+    this._axP0 = this._ayP0 = this._azP0 = null;
+
     if (!this.isDragging) {
       const rot = this.cfg.rotation;
       const k = 0.06;
@@ -3943,6 +4088,25 @@ class RubikCubeScene {
     this.render();
   }
 
+  // Keep the scene's drawing buffer in sync with the (externally driven) CSS box.
+  syncPortalSize() {
+    const w = this.canvas.offsetWidth || this.width;
+    const h = this.canvas.offsetHeight || this.height;
+    if (Math.abs(w - this.width) > 0.5 || Math.abs(h - this.height) > 0.5) {
+      this.setSize(w, h);
+    }
+  }
+
+  sampleImg(u, v) {
+    const im = this.portal.img;
+    if (!im) return null;
+    const x = Math.max(0, Math.min(im.width - 1, (u * im.width) | 0));
+    const y = Math.max(0, Math.min(im.height - 1, (v * im.height) | 0));
+    const idx = (y * im.width + x) * 4;
+    const d = im.data;
+    return { r: d[idx], g: d[idx + 1], b: d[idx + 2], a: d[idx + 3] };
+  }
+
   render() {
     const ctx = this.ctx;
     const w = this.width;
@@ -3954,14 +4118,15 @@ class RubikCubeScene {
     const pw = Math.floor(w * this.dpr);
     const ph = Math.floor(h * this.dpr);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // Transparent canvas — the particles float directly over the section (no opaque box).
     ctx.clearRect(0, 0, pw, ph);
-    ctx.fillStyle = "#080808";
-    ctx.fillRect(0, 0, pw, ph);
 
     // All drawing coordinates must be in PHYSICAL pixels
     const cx = pw / 2;
     const cy = ph / 2;
-    const scale = Math.min(pw, ph) * 0.38;
+    // 0.21 keeps the whole tumbling cube (incl. perspective on the far corners)
+    // inside the canvas bounds so it never looks clipped by an invisible box.
+    const scale = Math.min(pw, ph) * 0.21;
 
     const cax = Math.cos(this.ax);
     const sax = Math.sin(this.ax);
@@ -4008,22 +4173,61 @@ class RubikCubeScene {
     const order = this.order;
     order.sort((a, b) => this.depth[a] - this.depth[b]);
 
-    const color = this.cfg.color || "#58F306";
-    const baseDot = (this.cfg.dotSize || 4.8) * this.dpr;
+    const color = this.cfg.color || "#89B059";
+    const baseDot = (this.cfg.dotSize || 2.4) * this.dpr;
 
     ctx.fillStyle = color;
+    // Tight per-dot glow only. A wide blur over ~600 particles used to smear a
+    // translucent wash across the whole canvas — fine on the old opaque #080808
+    // box, but on the transparent floating canvas it left a haze. The outer halo
+    // now comes from the element's CSS drop-shadow instead.
     ctx.shadowColor = color;
-    ctx.shadowBlur = 8 * this.dpr;
+    ctx.shadowBlur = 2 * this.dpr;
+
+    // ---- Cube-portal draw/bloom: the front face's particles render the section-6 cover ----
+    const pp = this.portal.p;
+    const drawP = pp > 0 ? Math.max(0, Math.min(1, (pp - 0.38) / 0.30)) : 0;   // recolor + swell
+    const bloomP = pp > 0 ? Math.max(0, Math.min(1, (pp - 0.68) / 0.32)) : 0;  // grow + dissolve
+    const portalDraw = drawP > 0;
 
     for (let o = 0; o < count; o++) {
       const i = order[o];
       const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
       const tc = t < 0 ? 0 : t > 1 ? 1 : t;
-      ctx.globalAlpha = 0.5 + 0.5 * tc;
-      const r = Math.max(1.5 * this.dpr, baseDot * (0.6 + 0.5 * tc));
+      let alpha = 0.5 + 0.5 * tc;
+      let r = Math.max(1.5 * this.dpr, baseDot * (0.6 + 0.5 * tc));
+      let fill = null;
+
+      if (portalDraw) {
+        const isFront = this.pz[i] > 0.995;
+        if (isFront) {
+          const u = (this.px[i] + 1) / 2;
+          const v = 1 - (this.py[i] + 1) / 2;
+          const s = this.sampleImg(u, v);
+          const ink = s && s.a > 40 && (s.r + s.g + s.b) > 66;
+          if (ink) {
+            fill = `rgb(${s.r},${s.g},${s.b})`;
+            alpha = 1;
+            // swell into "pixels" of the cover, then bloom outward on hand-off
+            r = baseDot * (1 + 3.0 * drawP + 5.0 * bloomP);
+            if (bloomP > 0) alpha = 1 - 0.85 * bloomP;
+          } else {
+            alpha *= (1 - 0.92 * drawP);
+            r *= (1 - 0.4 * drawP);
+          }
+        } else {
+          // side / back faces recede while the front face takes over
+          alpha *= (1 - 0.9 * drawP);
+        }
+        if (alpha <= 0.01) continue;
+      }
+
+      ctx.globalAlpha = alpha;
+      if (fill) ctx.fillStyle = fill;
       ctx.beginPath();
       ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
       ctx.fill();
+      if (fill) ctx.fillStyle = color;
     }
 
     ctx.shadowBlur = 0;
@@ -4039,10 +4243,10 @@ function initRubikCube() {
 
   try {
     const scene = new RubikCubeScene(canvas, {
-      color: "#58F306",
+      color: "#89B059",
       cubeGrid: 3,
       dotsPerFace: 5,
-      dotSize: 4.8,
+      dotSize: 2.4,
       dragSensitivity: 0.28,
       rotation: { x: -14, y: 16, z: 10 },
       sizePercent: 100,
@@ -4056,17 +4260,224 @@ function initRubikCube() {
       if (w > 0 && h > 0) scene.setSize(w, h);
     };
 
+    // First sizing only — from here on initCubePortal() owns the canvas box
+    // (it is position:fixed and glued to #rubik-cube-slot, then to the viewport).
     setTimeout(updateSize, 30);
     setTimeout(updateSize, 150);
-    window.addEventListener("resize", updateSize);
-
-    if (window.ResizeObserver) {
-      const ro = new ResizeObserver(updateSize);
-      ro.observe(canvas);
-    }
   } catch (e) {
     console.error("RubikCube init error:", e);
   }
+}
+
+/**
+ * Offscreen render of the 06 // Diagnóstico cover — sampled into the cube's
+ * front-face particles during the cube-portal scroll phase.
+ * Mirrors the manual-canvas pattern of createSection3ScreenTexture().
+ */
+function buildDiagnosticoPortadaImage() {
+  const S = 320;
+  const c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const x = c.getContext('2d');
+
+  x.fillStyle = '#080808';
+  x.fillRect(0, 0, S, S);
+
+  // Badge: 06 // DIAGNÓSTICO
+  x.fillStyle = '#c3f400';
+  x.font = 'bold 20px "JetBrains Mono", monospace';
+  x.textAlign = 'center';
+  x.fillText('06 // DIAGNÓSTICO', S / 2, 70);
+
+  // Divider
+  x.strokeStyle = 'rgba(195,244,0,0.5)';
+  x.lineWidth = 2;
+  x.beginPath();
+  x.moveTo(50, 88); x.lineTo(S - 50, 88); x.stroke();
+
+  // Title (wrapped)
+  x.fillStyle = '#ffffff';
+  x.font = '900 30px "Montserrat", sans-serif';
+  const lines = ['TEST DE FRICCIÓN', '& AUDITORÍA', 'NUCLEAR'];
+  lines.forEach((ln, i) => x.fillText(ln, S / 2, 140 + i * 40));
+
+  // Subtitle
+  x.fillStyle = 'rgba(196,201,172,0.9)';
+  x.font = '500 14px "JetBrains Mono", monospace';
+  x.fillText('EVALUACIÓN DE MADUREZ DIGITAL', S / 2, 280);
+
+  return x.getImageData(0, 0, S, S);
+}
+
+/**
+ * Cube-portal scroll choreography (06 // Diagnóstico).
+ * Glues the fixed #rubik-cube-root to #rubik-cube-slot until #sec-cube-portal
+ * scrolls into range, then flies it to center + near-fullscreen while the front
+ * face draws the cover, then reveals #sec-06-diagnostico.
+ */
+function initCubePortal() {
+  const canvas = document.getElementById('rubik-cube-root');
+  const scene = window.rubikSceneInstance;
+  const slot = document.getElementById('rubik-cube-slot');
+  const portalSec = document.getElementById('sec-cube-portal');
+  const diagSec = document.getElementById('sec-06-diagnostico');
+  const watermark = document.getElementById('cube-portal-watermark');
+
+  if (!canvas || !scene || !portalSec) {
+    if (!scene) { setTimeout(initCubePortal, 150); }
+    return;
+  }
+  if (window.__cubePortalInit) return;
+  window.__cubePortalInit = true;
+
+  // Build the cover image (retry once fonts are ready for crisp glyphs)
+  scene.portal.img = buildDiagnosticoPortadaImage();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { scene.portal.img = buildDiagnosticoPortadaImage(); });
+  }
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const ease = (t) => Math.sin(clamp01(t) * Math.PI / 2);
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  let box = { l: -1, t: -1, w: -1, h: -1 };
+  function setBox(l, t, w, h) {
+    if (Math.abs(l - box.l) < 0.5 && Math.abs(t - box.t) < 0.5 &&
+        Math.abs(w - box.w) < 0.5 && Math.abs(h - box.h) < 0.5) return;
+    box = { l, t, w, h };
+    canvas.style.left = l + 'px';
+    canvas.style.top = t + 'px';
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+  }
+
+  function frame() {
+    let p = 0;
+    const r = portalSec.getBoundingClientRect();
+    const span = r.height - window.innerHeight;
+    if (span > 0) p = clamp01(-r.top / span);
+    scene.portal.p = p;
+
+    if (p <= 0) {
+      // Normal cube: glued to the header slot, draggable
+      const s = slot ? slot.getBoundingClientRect() : null;
+      const onScreen = s && s.width > 4 && s.bottom > 8 && s.top < window.innerHeight - 8;
+      if (onScreen) {
+        setBox(s.left, s.top, s.width, s.height);
+        canvas.style.opacity = '1';
+        canvas.style.pointerEvents = 'auto';
+      } else {
+        canvas.style.opacity = '0';
+        canvas.style.pointerEvents = 'none';
+      }
+      if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.transform = 'scale(.955)'; }
+      if (watermark) watermark.style.opacity = '0';
+    } else {
+      canvas.style.pointerEvents = 'none';
+      const s = slot ? slot.getBoundingClientRect() : null;
+      const sx = s ? s.left : (window.innerWidth / 2 - 75);
+      const sy = s ? s.top : (window.innerHeight / 2 - 75);
+      const sw = (s && s.width) || 150;
+      const sh = (s && s.height) || 150;
+
+      const flyP = ease(p / 0.38);
+      const big = Math.min(window.innerWidth, window.innerHeight) * 0.92;
+      const tx = (window.innerWidth - big) / 2;
+      const ty = (window.innerHeight - big) / 2;
+      setBox(lerp(sx, tx, flyP), lerp(sy, ty, flyP), lerp(sw, big, flyP), lerp(sh, big, flyP));
+
+      if (watermark) watermark.style.opacity = (0.7 * ease((p - 0.05) / 0.28)).toFixed(3);
+
+      const revealP = ease((p - 0.68) / 0.32);
+      if (diagSec) {
+        diagSec.style.opacity = revealP.toFixed(3);
+        diagSec.style.transform = 'scale(' + (0.955 + 0.045 * revealP).toFixed(4) + ')';
+      }
+      canvas.style.opacity = (1 - ease((p - 0.82) / 0.18)).toFixed(3);
+    }
+
+    scene.syncPortalSize();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/** Live maturity score for the embedded 06 // Diagnóstico test (ported from diagnostico/index.html). */
+function initDiagnosticoTest() {
+  const sec = document.getElementById('sec-06-diagnostico');
+  if (!sec) return;
+  const radios = sec.querySelectorAll('.diag-radio');
+  const scoreNum = document.getElementById('score-number');
+  const scoreStatus = document.getElementById('score-status');
+  const scoreExp = document.getElementById('score-explanation');
+  const whatsappLink = document.getElementById('whatsapp-cta-link');
+  if (!scoreNum || !scoreStatus || !scoreExp) return;
+
+  function calculateScore() {
+    let total = 0;
+    radios.forEach((rr) => { if (rr.checked) total += parseInt(rr.value, 10) || 0; });
+    scoreNum.textContent = total + ' / 120';
+
+    if (total <= 45) {
+      scoreStatus.textContent = 'NIVEL: IMPROVISACIÓN CRÍTICA';
+      scoreStatus.className = 'font-mono text-xs uppercase text-red-400 font-bold';
+      scoreExp.textContent = 'Tu operación presenta alta fricción y pérdida de capital por procesos manuales desconectados. Se requiere una intervención inmediata en arquitectura operativa.';
+    } else if (total <= 85) {
+      scoreStatus.textContent = 'NIVEL: FRICCIÓN OPERATIVA MODERADA';
+      scoreStatus.className = 'font-mono text-xs uppercase text-yellow-400 font-bold';
+      scoreExp.textContent = 'Cuentas con herramientas básicas, pero careces de integración y automatización con IA, limitando tu capacidad de escalar sin aumentar costos.';
+    } else {
+      scoreStatus.textContent = 'NIVEL: LISTO PARA ACELERACIÓN VECTORIAL';
+      scoreStatus.className = 'font-mono text-xs uppercase text-vector-lime font-bold';
+      scoreExp.textContent = 'Tu negocio cuenta con bases sólidas y está en la posición ideal para implementar interfaces vanguardistas y modelos predictivos avanzados.';
+    }
+
+    if (whatsappLink) {
+      const msg = encodeURIComponent('Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ' + total + '/120 - ' + scoreStatus.textContent + ') y me gustaría agendar la sesión estratégica.');
+      whatsappLink.href = 'https://wa.me/?text=' + msg;
+    }
+  }
+
+  radios.forEach((rr) => rr.addEventListener('change', calculateScore));
+  calculateScore();
+
+  // Safety net: never leave section 6 invisible if the cube-portal driver failed to start.
+  setTimeout(() => {
+    if (!window.__cubePortalInit) {
+      sec.style.opacity = '1';
+      sec.style.transform = 'none';
+      const cv = document.getElementById('rubik-cube-root');
+      if (cv) cv.style.display = 'none';
+    }
+  }, 3500);
+}
+
+/** Dock link handler: jump straight to the 06 // Diagnóstico test (no page nav). */
+function scrollToDiagnostico(e) {
+  const diag = document.getElementById('sec-06-diagnostico');
+  const portal = document.getElementById('sec-cube-portal');
+  const target = diag || portal;
+  if (!target) return true; // let the <a href> fallback navigate
+  if (e && e.preventDefault) e.preventDefault();
+
+  // The 06 section starts hidden (opacity 0 / scaled) and is only revealed by the
+  // cube-portal scroll choreography. A smooth scrollIntoView on #sec-cube-portal
+  // landed at its very top (p = 0) — a black frame with nothing revealed. Jump
+  // instantly to the real section and force its final revealed state.
+  window.__forceTimelineProgress = null;
+  window.scrollTo(0, (diag || target).offsetTop);
+
+  if (diag) {
+    diag.style.opacity = '1';
+    diag.style.transform = 'none';
+  }
+  const cube = document.getElementById('rubik-cube-root');
+  if (cube) { cube.style.opacity = '0'; cube.style.pointerEvents = 'none'; }
+  const watermark = document.getElementById('cube-portal-watermark');
+  if (watermark) watermark.style.opacity = '0';
+
+  updateActiveDockItem(5);
+  return false;
 }
 
 // Initialize Floating Gallery Events & Instance
@@ -4093,16 +4504,22 @@ function initFloatingGallery() {
 
   initExecutionInternalScrollListener();
   initRubikCube();
+  initCubePortal();
+  initDiagnosticoTest();
 }
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initFloatingGallery();
     initRubikCube();
+    initCubePortal();
+    initDiagnosticoTest();
   });
 } else {
   initFloatingGallery();
   initRubikCube();
+  initCubePortal();
+  initDiagnosticoTest();
 }
 
 

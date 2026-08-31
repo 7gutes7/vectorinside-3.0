@@ -27,6 +27,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
@@ -133,7 +134,7 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Evidencia</a>
     <a href="javascript:void(0)" onclick="scrollToMetodologia()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Metodología</a>
-    <a href="diagnostico/index.html"
+    <a href="diagnostico/index.html" onclick="return scrollToDiagnostico(event)"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">06 // Diagnóstico</a>
   </nav>
 
@@ -821,8 +822,10 @@
                           Ingeniería de Aceleración en 4 Fases
                         </h2>
                       </div>
-                      <!-- 3D Particle Rubik Cube — Originkit Variant-5 (canvas IS the element) -->
-                      <canvas id="rubik-cube-root" class="z-30 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] rounded-2xl border-2 border-vector-lime/50 shadow-[0_10px_30px_rgba(0,0,0,0.45),0_0_25px_rgba(88,243,6,0.35)] shrink-0 cursor-grab" style="touch-action:none;display:block;background:#080808;"></canvas>
+                      <!-- 3D Particle Rubik Cube — slot placeholder. The real <canvas id="rubik-cube-root">
+                           lives as a fixed-position direct child of <body> and is glued to this slot's
+                           bounding box until the cube-portal scroll phase takes over. -->
+                      <div id="rubik-cube-slot" class="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] shrink-0" aria-hidden="true"></div>
                     </div>
                     <p class="font-mono text-xs text-neutral-700 max-w-xs font-medium">
                       Un proceso sistemático, medible y sin sorpresas diseñado para ejecutar en ciclos rápidos de alto
@@ -942,6 +945,152 @@
     </div>
   </div>
 
+  <!-- ==================== 3D PARTICLE RUBIK CUBE — FIXED OVERLAY LAYER ====================
+       Glued to #rubik-cube-slot (in the 05 // Metodología header) until the cube-portal
+       scroll phase; then flies to screen center and grows to near-fullscreen while one
+       face draws the 06 // Diagnóstico cover in its particles. Driven by initCubePortal(). -->
+  <canvas id="rubik-cube-root"
+    class="cursor-grab drop-shadow-[0_4px_18px_rgba(137,176,89,0.4)]"
+    style="position:fixed;left:0;top:0;width:150px;height:150px;z-index:45;display:block;background:transparent;touch-action:none;opacity:0;pointer-events:auto;will-change:left,top,width,height,opacity;"></canvas>
+
+  <!-- ==================== 06 // DIAGNÓSTICO — CUBE PORTAL STAGE (scroll choreography) ==================== -->
+  <section id="sec-cube-portal" class="relative w-full h-[350vh] bg-black">
+    <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+      <div class="absolute inset-0" style="background:radial-gradient(circle at 50% 44%, rgba(157,78,221,0.14), rgba(8,8,8,0) 62%);"></div>
+      <span id="cube-portal-watermark"
+        class="absolute left-1/2 -translate-x-1/2 top-[11%] font-mono text-[11px] sm:text-sm tracking-[0.38em] uppercase text-vector-lime/70 pointer-events-none"
+        style="opacity:0;">06 // DIAGNÓSTICO</span>
+    </div>
+  </section>
+
+  <!-- ==================== 06 // DIAGNÓSTICO — INTERACTIVE ASSESSMENT (ported from diagnostico/index.html) ==================== -->
+  <section id="sec-06-diagnostico"
+    class="diag-reveal relative w-full bg-vector-black text-white pt-24 pb-24 px-6 will-change-transform"
+    style="opacity:0;transform:scale(.955);">
+    <div class="max-w-7xl mx-auto w-full">
+
+      <!-- Top Title -->
+      <div class="flex flex-wrap items-end justify-between gap-6 border-b border-white/15 pb-6 mb-12">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <span class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+              06 // DIAGNÓSTICO
+            </span>
+            <span class="text-text-muted font-mono text-xs">// EVALUACIÓN DE MADUREZ DIGITAL</span>
+          </div>
+          <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
+            Test de Fricción &amp; Auditoría Nuclear
+          </h1>
+        </div>
+        <p class="font-mono text-xs text-text-muted max-w-md">
+          Responde 5 preguntas clave en 60 segundos y obtén un diagnóstico en tiempo real del estado de tu arquitectura empresarial.
+        </p>
+      </div>
+
+      <!-- Assessment Widget & Radar Result -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
+
+        <!-- Left: Interactive Form -->
+        <div class="lg:col-span-7 glass-panel p-8 sm:p-10 border border-white/20 bg-surface-dark space-y-8">
+
+          <div class="space-y-3">
+            <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">01 // ¿CÓMO GESTIONAS TUS DATOS Y PIPELINE COMERCIAL?</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q1" value="10" checked class="accent-[#c3f400] diag-radio">
+                <span>Hojas de cálculo / Procesos manuales sin CRM centralizado.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q1" value="25" class="accent-[#c3f400] diag-radio">
+                <span>CRM básico, pero sin automatizaciones ni sincronización con marketing.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q1" value="40" class="accent-[#c3f400] diag-radio">
+                <span>Ecosistema integrado con IA y atribución multicanal en tiempo real.</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">02 // ¿CUÁL ES TU TIEMPO PROMEDIO DE RESPUESTA A LEADS?</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q2" value="10" checked class="accent-[#c3f400] diag-radio">
+                <span>Más de 4 horas o al día siguiente.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q2" value="25" class="accent-[#c3f400] diag-radio">
+                <span>Entre 15 minutos y 1 hora.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q2" value="40" class="accent-[#c3f400] diag-radio">
+                <span>Menos de 90 segundos mediante agentes IA autónomos.</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">03 // ¿CÓMO DESCRIBIRÍAS LA AUTORIDAD VISUAL DE TU MARCA?</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q3" value="10" checked class="accent-[#c3f400] diag-radio">
+                <span>Genérica; competimos principalmente por precio frente a la competencia.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q3" value="25" class="accent-[#c3f400] diag-radio">
+                <span>Correcta pero tradicional; no proyecta vanguardia tecnológica.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
+                <input type="radio" name="q3" value="40" class="accent-[#c3f400] diag-radio">
+                <span>Posicionamiento brutalista y experiencia 3D de alta conversión.</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Real-time Live Result -->
+        <div class="lg:col-span-5 glass-panel p-8 sm:p-10 border border-vector-lime/40 bg-surface-dark space-y-6 flex flex-col justify-between">
+          <div>
+            <span class="font-mono text-xs text-vector-lime uppercase tracking-widest block mb-2">// RADIOGRAFÍA EN TIEMPO REAL</span>
+            <h2 class="font-display font-black text-2xl uppercase mb-6">Puntaje de Madurez Vector</h2>
+
+            <div class="p-6 bg-black/70 border border-white/10 text-center mb-6">
+              <p id="score-number" class="font-display font-black text-6xl text-vector-lime mb-2">30 / 120</p>
+              <p id="score-status" class="font-mono text-xs uppercase text-red-400 font-bold">NIVEL: IMPROVISACIÓN CRÍTICA</p>
+            </div>
+
+            <div class="space-y-3 font-mono text-xs">
+              <p class="text-white font-bold uppercase">// DIAGNÓSTICO ESTIMADO:</p>
+              <p id="score-explanation" class="text-text-muted leading-relaxed">
+                Tu empresa presenta fugas críticas de capital debido a tareas operativas manuales y falta de una tesis de aceleración digital unificada.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-white/10">
+            <a id="whatsapp-cta-link" href="https://wa.me/?text=Hola%20Vector%20Inside,%20obtuve%20mi%20Diagnostico%20de%20Madurez%20Digital%20y%20quiero%20agendar%20una%20sesion%20estrategica." target="_blank" rel="noopener" class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest text-center block uppercase shadow-[0_0_25px_rgba(195,244,0,0.3)]">
+              AGENDAR AUDITORÍA NUCLEAR
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
+        <a href="javascript:void(0)" onclick="scrollToMetodologia()" class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">arrow_back</span> 05 // METODOLOGÍA
+        </a>
+        <a href="diagnostico/index.html" class="btn-vector-outline px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
+          <span>ABRIR DIAGNÓSTICO COMPLETO</span>
+          <span class="material-symbols-outlined text-sm">open_in_new</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ==================== FLOATING CHATBOT WIDGET (BOTTOM RIGHT) ==================== -->
   <div id="floating-chatbot-container"
     class="fixed bottom-6 right-6 z-[100] flex flex-col items-end pointer-events-auto">
@@ -1036,8 +1185,8 @@
   <script src="RippleDistortion.js?v=3.0.171"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.191) -->
-  <script src="script.js?v=3.0.191"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.193) -->
+  <script src="script.js?v=3.0.193"></script>
 </body>
 
 </html>
