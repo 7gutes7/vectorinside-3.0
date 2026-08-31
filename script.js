@@ -3509,31 +3509,72 @@ class FloatingGallery {
   }
 }
 
-// Smooth scroll to the 25-block matrix within the execution internal container
-function scrollToEjecucionMatriz() {
+// ==================== CINEMATIC SMOOTH SCROLL TO 04 // EVIDENCIA (GALERÍA FLOTANTE) ====================
+function scrollToGaleriaFlotante() {
+  const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
-  const track = document.getElementById('sec-matriz-25-track');
-  if (container && track) {
-    const targetTop = track.offsetTop + 10;
-    container.scrollTo({ top: targetTop, behavior: 'smooth' });
-    updateActiveDockItem(3);
+  const matrixTrack = document.getElementById('sec-matriz-25-track');
+
+  const doInternalScroll = () => {
+    if (container && matrixTrack) {
+      const targetTop = matrixTrack.offsetTop + 10;
+      container.scrollTo({ top: targetTop, behavior: 'smooth' });
+      updateActiveDockItem(3);
+    }
+  };
+
+  if (mainTrack) {
+    const trackRect = mainTrack.getBoundingClientRect();
+    const trackTop = window.scrollY + trackRect.top;
+    const maxScroll = mainTrack.offsetHeight - window.innerHeight;
+    const targetY = trackTop + maxScroll * 0.96;
+
+    if (Math.abs(window.scrollY - targetY) > 80) {
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      setTimeout(doInternalScroll, 650);
+    } else {
+      doInternalScroll();
+    }
+  } else {
+    doInternalScroll();
   }
 }
-window.scrollToEjecucionMatriz = scrollToEjecucionMatriz;
+window.scrollToGaleriaFlotante = scrollToGaleriaFlotante;
+window.scrollToEjecucionMatriz = scrollToGaleriaFlotante;
+window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 
-// ==================== SMOOTH SCROLL NAVIGATION WITHIN EXPANDED EXECUTION / METODOLOGÍA ====================
+// ==================== CINEMATIC SMOOTH SCROLL TO 05 // METODOLOGÍA ====================
 function scrollToMetodologia() {
+  const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
-  const track = document.getElementById('sec-matriz-25-track');
-  if (container && track) {
-    const targetTop = track.offsetTop + (track.offsetHeight - container.clientHeight);
-    container.scrollTo({ top: targetTop, behavior: 'smooth' });
-    updateActiveDockItem(4);
+  const matrixTrack = document.getElementById('sec-matriz-25-track');
+
+  const doInternalScroll = () => {
+    if (container && matrixTrack) {
+      const targetTop = matrixTrack.offsetTop + (matrixTrack.offsetHeight - container.clientHeight);
+      container.scrollTo({ top: targetTop, behavior: 'smooth' });
+      updateActiveDockItem(4);
+    }
+  };
+
+  if (mainTrack) {
+    const trackRect = mainTrack.getBoundingClientRect();
+    const trackTop = window.scrollY + trackRect.top;
+    const maxScroll = mainTrack.offsetHeight - window.innerHeight;
+    const targetY = trackTop + maxScroll * 0.96;
+
+    if (Math.abs(window.scrollY - targetY) > 80) {
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      setTimeout(doInternalScroll, 650);
+    } else {
+      doInternalScroll();
+    }
+  } else {
+    doInternalScroll();
   }
 }
 window.scrollToMetodologia = scrollToMetodologia;
 window.triggerLaserMetodologiaTransition = scrollToMetodologia;
-window.triggerLaserEvidenciaTransition = scrollToEjecucionMatriz;
 
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología)
 function initExecutionInternalScrollListener() {
