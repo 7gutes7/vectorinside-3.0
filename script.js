@@ -3715,8 +3715,9 @@ function easeInOutCubicBezier(t) {
 }
 
 class RubikCubeScene {
-  constructor(container, cfg) {
-    this.container = container;
+  // canvas: the <canvas> element itself (NOT a container div)
+  constructor(canvas, cfg) {
+    this.canvas = canvas;
     this.cfg = Object.assign({
       color: "#58F306",
       cubeGrid: 3,
@@ -3728,22 +3729,16 @@ class RubikCubeScene {
       sizePercent: 100
     }, cfg);
 
-    this.canvas = document.createElement("canvas");
-    this.canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;display:block;";
-    container.appendChild(this.canvas);
-
     const ctx = this.canvas.getContext("2d");
     if (!ctx) throw new Error("2D context unavailable");
     this.ctx = ctx;
 
-    // Resolve size immediately from container
+    // Read CSS-pixel size from the element's layout (offsetWidth is reliable even inside transforms)
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const rect = container.getBoundingClientRect();
-    this.width = Math.max(rect.width || container.offsetWidth || 100, 10);
-    this.height = Math.max(rect.height || container.offsetHeight || 100, 10);
-    // Set physical canvas size
-    this.canvas.width = Math.floor(this.width * this.dpr);
-    this.canvas.height = Math.floor(this.height * this.dpr);
+    this.width  = Math.max(this.canvas.offsetWidth  || 130, 10);
+    this.height = Math.max(this.canvas.offsetHeight || 130, 10);
+    this.canvas.width  = Math.round(this.width  * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
 
     this.shell = buildRubikShell(this.clampGrid(this.cfg.cubeGrid), this.clampDots(this.cfg.dotsPerFace));
     this.adoptShell();
@@ -3916,9 +3911,8 @@ class RubikCubeScene {
   step(now) {
     // Auto-recover size if canvas lost dimensions
     if (this.width < 10 || this.height < 10) {
-      const rect = this.container.getBoundingClientRect();
-      const w = rect.width || this.container.offsetWidth || 100;
-      const h = rect.height || this.container.offsetHeight || 100;
+      const w = this.canvas.offsetWidth  || 130;
+      const h = this.canvas.offsetHeight || 130;
       if (w >= 10 && h >= 10) this.setSize(w, h);
     }
 
@@ -4038,16 +4032,13 @@ class RubikCubeScene {
 }
 
 function initRubikCube() {
-  const container = document.getElementById("rubik-cube-root");
-  if (!container) return;
-
-  // Ensure container is positioned for absolute child
-  if (getComputedStyle(container).position === "static") {
-    container.style.position = "relative";
-  }
+  // #rubik-cube-root is now a <canvas> element — use it directly
+  if (window.rubikSceneInstance) return; // prevent double-init
+  const canvas = document.getElementById("rubik-cube-root");
+  if (!canvas || canvas.tagName !== "CANVAS") return;
 
   try {
-    const scene = new RubikCubeScene(container, {
+    const scene = new RubikCubeScene(canvas, {
       color: "#58F306",
       cubeGrid: 3,
       dotsPerFace: 5,
@@ -4060,22 +4051,18 @@ function initRubikCube() {
     window.rubikSceneInstance = scene;
 
     const updateSize = () => {
-      const rect = container.getBoundingClientRect();
-      const w = rect.width || container.offsetWidth || 100;
-      const h = rect.height || container.offsetHeight || 100;
-      if (w > 0 && h > 0) {
-        scene.setSize(w, h);
-      }
+      const w = canvas.offsetWidth  || 130;
+      const h = canvas.offsetHeight || 130;
+      if (w > 0 && h > 0) scene.setSize(w, h);
     };
 
-    // Update size after a brief delay to let layout settle
-    setTimeout(updateSize, 50);
-    setTimeout(updateSize, 200);
+    setTimeout(updateSize, 30);
+    setTimeout(updateSize, 150);
     window.addEventListener("resize", updateSize);
 
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => updateSize());
-      ro.observe(container);
+      const ro = new ResizeObserver(updateSize);
+      ro.observe(canvas);
     }
   } catch (e) {
     console.error("RubikCube init error:", e);
