@@ -250,8 +250,8 @@
 
             <!-- Left Background Video Layer (Pinned to left, shifted -50px left, fades to white towards right) -->
             <div class="absolute inset-y-0 left-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none z-0">
-              <video id="section2-manifesto-video" src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152146/Animar_imagen.mp4" autoplay loop muted playsinline
-                preload="auto"
+              <video id="section2-manifesto-video" data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152146/Animar_imagen.mp4" loop muted playsinline
+                preload="none"
                 class="w-[calc(100%+50px)] max-w-none h-full object-cover object-left block -translate-x-[50px]"></video>
               <!-- Gradient Overlay: Smooth fade into pure white towards the right -->
               <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white pointer-events-none">
@@ -424,7 +424,7 @@
       <!-- ==================== LAYER 38: SECTION 3 BACKGROUND (FONDO ECOSISTEMA) ==================== -->
       <div id="sec3-bg-wrapper"
         class="absolute inset-0 w-full h-full pointer-events-none z-[38] overflow-hidden opacity-0 transition-none will-change-[filter,opacity]">
-        <img src="fondo%20ecosistema.jpeg?v=3.0.1" alt="Fondo Ecosistema"
+        <img src="fondo%20ecosistema.jpeg?v=3.0.1" alt="Fondo Ecosistema" loading="lazy" decoding="async"
           class="w-full h-full object-cover object-center select-none" />
         <!-- Dark gradient overlay for contrast with text and cards -->
         <div class="absolute inset-0 bg-black/45 pointer-events-none"></div>
@@ -435,13 +435,13 @@
         <!-- Left Flank: poligonal02.png (Entra de izquierda a derecha, 50% visible) -->
         <div id="sec3-flank-left"
           class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
-          <img src="poligonal02.png?v=3.0.182" alt="Poligonal 02" class="w-full h-auto object-contain select-none" />
+          <img src="poligonal02.png?v=3.0.182" alt="Poligonal 02" loading="lazy" decoding="async" class="w-full h-auto object-contain select-none" />
         </div>
 
         <!-- Right Flank: liquid01.png (Entra de derecha a izquierda, 50% visible) -->
         <div id="sec3-flank-right"
           class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
-          <img src="liquid01.png?v=3.0.182" alt="Liquid 01" class="w-full h-auto object-contain select-none" />
+          <img src="liquid01.png?v=3.0.182" alt="Liquid 01" loading="lazy" decoding="async" class="w-full h-auto object-contain select-none" />
         </div>
       </div>
 
@@ -661,7 +661,8 @@
           <!-- Inner Background Media (Video Dashboard with scale 1.35 -> 1.0) -->
           <div id="scroll-expand-media-wrapper"
             class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
-            <video id="scroll-expand-video" src="https://res.cloudinary.com/cci1klwx/video/upload/v1786506102/dashboard.mp4" autoplay loop muted playsinline
+            <video id="scroll-expand-video" data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1786506102/dashboard.mp4" loop muted playsinline
+              preload="none"
               class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
             <!-- Overlay Scrim Gradient for high contrast -->
             <div id="scroll-expand-scrim"
@@ -792,8 +793,8 @@
 
                 <!-- Background Abstract Liquid Flow Motion Video -->
                 <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                  <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-90">
-                    <source src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152141/Abstract_liquid_flow_motion_1080p_202608301513.mp4" type="video/mp4">
+                  <video id="ejecucion-liquid-flow-video" loop muted playsinline preload="none" class="w-full h-full object-cover opacity-90">
+                    <source data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152141/Abstract_liquid_flow_motion_1080p_202608301513.mp4" type="video/mp4">
                   </video>
                   <!-- White Liquid Frosted Glass Overlay (Half Opacity for Higher Video Visibility) -->
                   <div class="absolute inset-0 bg-gradient-to-b from-white/45 via-white/35 to-white/50 backdrop-blur-[1px]">
@@ -818,10 +819,10 @@
                           Ingeniería de Aceleración en 4 Fases
                         </h2>
                       </div>
-                      <!-- 3D Particle Rubik Cube — slot placeholder. The real <canvas id="rubik-cube-root">
-                           lives as a fixed-position direct child of <body> and is glued to this slot's
-                           bounding box until the cube-portal scroll phase takes over. -->
-                      <div id="rubik-cube-slot" class="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] shrink-0" aria-hidden="true"></div>
+                      <!-- 3D Vector Isotipo (Amarillo/Lima girando a 20 RPM) -->
+                      <div id="vector-isotipo-container" class="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] shrink-0 flex items-center justify-center relative">
+                        <canvas id="vector-isotipo-canvas" class="w-full h-full object-contain block"></canvas>
+                      </div>
                     </div>
                     <p class="font-mono text-xs text-neutral-700 max-w-xs font-medium">
                       Un proceso sistemático, medible y sin sorpresas diseñado para ejecutar en ciclos rápidos de alto
@@ -941,28 +942,10 @@
     </div>
   </div>
 
-  <!-- ==================== 3D PARTICLE RUBIK CUBE — FIXED OVERLAY LAYER ====================
-       Glued to #rubik-cube-slot (in the 05 // Metodología header) until the cube-portal
-       scroll phase; then flies to screen center and grows to near-fullscreen while one
-       face draws the 06 // Diagnóstico cover in its particles. Driven by initCubePortal(). -->
-  <canvas id="rubik-cube-root"
-    class="cursor-grab drop-shadow-[0_4px_18px_rgba(137,176,89,0.4)]"
-    style="position:fixed;left:0;top:0;width:150px;height:150px;z-index:45;display:block;background:transparent;touch-action:none;opacity:0;pointer-events:auto;will-change:left,top,width,height,opacity;"></canvas>
-
-  <!-- ==================== 06 // DIAGNÓSTICO — CUBE PORTAL STAGE (scroll choreography) ==================== -->
-  <section id="sec-cube-portal" class="relative w-full h-[350vh] bg-black">
-    <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
-      <div class="absolute inset-0" style="background:radial-gradient(circle at 50% 44%, rgba(157,78,221,0.14), rgba(8,8,8,0) 62%);"></div>
-      <span id="cube-portal-watermark"
-        class="absolute left-1/2 -translate-x-1/2 top-[11%] font-mono text-[11px] sm:text-sm tracking-[0.38em] uppercase text-vector-lime/70 pointer-events-none"
-        style="opacity:0;">06 // DIAGNÓSTICO</span>
-    </div>
-  </section>
-
   <!-- ==================== 06 // DIAGNÓSTICO — INTERACTIVE ASSESSMENT (ported from diagnostico/index.html) ==================== -->
   <section id="sec-06-diagnostico"
     class="diag-reveal relative w-full bg-vector-black text-white pt-24 pb-24 px-6 will-change-transform"
-    style="opacity:0;transform:scale(.955);">
+    style="opacity:1;transform:none;">
     <div class="max-w-7xl mx-auto w-full">
 
       <!-- Top Title -->
@@ -1099,7 +1082,7 @@
       <div class="p-4 sm:p-4.5 border-b border-white/10 bg-vector-black/75 flex items-center justify-between">
         <div class="flex items-center gap-3.5">
           <div class="relative w-11 h-11 rounded-full overflow-hidden border border-vector-lime/50 bg-vector-black p-0.5 shadow-[0_0_15px_rgba(195,244,0,0.3)]">
-            <img src="chatbot-icon.png" alt="Vector AI Assistant" class="w-full h-full object-cover rounded-full" />
+            <img src="chatbot-icon.png" alt="Vector AI Assistant" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-full" />
             <span
               class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-vector-lime rounded-full border-2 border-vector-black animate-pulse"></span>
           </div>
@@ -1121,7 +1104,7 @@
         <!-- Assistant Message -->
         <div class="flex gap-3 items-start">
           <div class="w-8 h-8 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black shadow-sm">
-            <img src="chatbot-icon.png" alt="AI" class="w-full h-full object-cover" />
+            <img src="chatbot-icon.png" alt="AI" loading="lazy" decoding="async" class="w-full h-full object-cover" />
           </div>
           <div
             class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm">
@@ -1180,8 +1163,8 @@
 
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.196) -->
-  <script src="script.js?v=3.0.196"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.199) -->
+  <script src="script.js?v=3.0.199"></script>
 </body>
 
 </html>

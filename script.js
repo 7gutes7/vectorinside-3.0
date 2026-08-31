@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. Mobile Menu Toggle
   initMobileMenu();
 
+  // 7. Lazy-load below-the-fold background videos (fetch + play only when visible)
+  initLazyVideos();
+
   // Fallback trigger if intro screen is disabled or absent
   const introScreen = document.getElementById('intro-screen');
   if (!introScreen || window.getComputedStyle(introScreen).display === 'none') {
@@ -697,6 +700,50 @@ function initGradientWavesShader() {
 
 
 /**
+ * Lazy-load below-the-fold background videos.
+ * These carry `data-lazy-src` (on the <video> or a child <source>) instead of `src`,
+ * so the browser never fetches them until they actually scroll into view — and we
+ * pause (not unload) them when they scroll back out, to save CPU/battery without
+ * re-buffering every time the user scrolls past.
+ */
+function initLazyVideos() {
+  const videoEls = new Set();
+  document.querySelectorAll('video[data-lazy-src]').forEach((v) => videoEls.add(v));
+  document.querySelectorAll('source[data-lazy-src]').forEach((source) => {
+    const parentVideo = source.closest('video');
+    if (parentVideo) videoEls.add(parentVideo);
+  });
+  if (videoEls.size === 0) return;
+
+  const startVideo = (video) => {
+    if (!video.dataset.lazyLoaded) {
+      if (video.dataset.lazySrc) {
+        video.src = video.dataset.lazySrc;
+      } else {
+        const source = video.querySelector('source[data-lazy-src]');
+        if (source) source.src = source.dataset.lazySrc;
+      }
+      video.load();
+      video.dataset.lazyLoaded = 'true';
+    }
+    const p = video.play();
+    if (p && p.catch) p.catch(() => {});
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        startVideo(entry.target);
+      } else if (entry.target.dataset.lazyLoaded) {
+        entry.target.pause();
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '200px 0px' });
+
+  videoEls.forEach((video) => io.observe(video));
+}
+
+/**
  * Reveal-on-scroll animations
  */
 function initScrollAnimations() {
@@ -1311,7 +1358,8 @@ function initHero3DModel() {
     // 3D Model 2: smartphone2.glb (Section 3)
     // --- Live video texture for the smartphone screen (Abstract Liquid Glass) ---
     const screenVideo = document.createElement('video');
-    screenVideo.src = './Abstract_liquid_glass_animation_1080p_202608301203.mp4';
+    screenVideo.crossOrigin = 'anonymous'; // necesario: el video ahora viene de Cloudinary (otro origen) y se sube como textura WebGL
+    screenVideo.src = 'https://res.cloudinary.com/cci1klwx/video/upload/v1788152143/Abstract_liquid_glass_animation_1080p_202608301203.mp4';
     screenVideo.loop = true;
     screenVideo.muted = true;
     screenVideo.defaultMuted = true;
@@ -1321,7 +1369,7 @@ function initHero3DModel() {
     screenVideo.setAttribute('playsinline', '');
     screenVideo.setAttribute('webkit-playsinline', '');
     screenVideo.preload = 'auto';
-    screenVideo.style.cssText = 'position:absolute;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none;';
+    screenVideo.style.cssText = 'position:fixed;left:0;top:0;width:32px;height:32px;opacity:0.01;pointer-events:none;z-index:-9999;';
     document.body.appendChild(screenVideo);
 
     section3ScreenTexture = new THREE.VideoTexture(screenVideo);
@@ -1331,13 +1379,16 @@ function initHero3DModel() {
     section3ScreenTexture.generateMipmaps = false;
     section3ScreenTexture.wrapS = THREE.ClampToEdgeWrapping;
     section3ScreenTexture.wrapT = THREE.ClampToEdgeWrapping;
-    // El recorte "cover" real se calcula con la geometría de la pantalla al cargar el GLB.
 
     const playScreenVideo = () => {
-      const p = screenVideo.play();
-      if (p && p.catch) p.catch(() => {});
+      if (screenVideo.paused) {
+        const p = screenVideo.play();
+        if (p && p.catch) p.catch(() => {});
+      }
     };
+    screenVideo.addEventListener('loadeddata', playScreenVideo);
     playScreenVideo();
+    window.addEventListener('scroll', playScreenVideo, { passive: true, once: true });
     window.addEventListener('pointerdown', playScreenVideo, { once: true });
     window.addEventListener('touchstart', playScreenVideo, { once: true });
     document.addEventListener('visibilitychange', () => {
@@ -3772,655 +3823,116 @@ function initExecutionInternalScrollListener() {
   }
 }
 
-// ==================== ORIGINKIT 3D PARTICLE RUBIK CUBE SCENE ====================
-function latticeCoord(i, n) {
-  return n <= 1 ? 0 : -1 + (2 * i) / (n - 1);
-}
+// ==================== 3D VECTOR ISOTIPO (SECTION 05 // METODOLOGÍA) ====================
+function initVectorIsotipo() {
+  const canvas = document.getElementById('vector-isotipo-canvas');
+  if (!canvas || typeof THREE === 'undefined') return;
 
-function snapCoord(c, n) {
-  if (n <= 1) return 0;
-  const i = Math.round(((c + 1) / 2) * (n - 1));
-  return latticeCoord(Math.max(0, Math.min(n - 1, i)), n);
-}
+  const container = canvas.parentElement;
+  if (!container) return;
 
-function buildRubikShell(cubeGrid, dotsPerFace) {
-  const totalPoints = Math.max(2, (cubeGrid - 1) * Math.max(1, dotsPerFace) + 1);
-  const xs = [];
-  const ys = [];
-  const zs = [];
+  const scene = new THREE.Scene();
 
-  for (let i = 0; i < totalPoints; i++) {
-    for (let j = 0; j < totalPoints; j++) {
-      for (let k = 0; k < totalPoints; k++) {
-        const onShell =
-          i === 0 ||
-          i === totalPoints - 1 ||
-          j === 0 ||
-          j === totalPoints - 1 ||
-          k === 0 ||
-          k === totalPoints - 1;
-        if (!onShell) continue;
-        xs.push(latticeCoord(i, totalPoints));
-        ys.push(latticeCoord(j, totalPoints));
-        zs.push(latticeCoord(k, totalPoints));
-      }
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0, 4.2);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: 'high-performance'
+  });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+  function syncSize() {
+    const w = container.clientWidth || 140;
+    const h = container.clientHeight || 140;
+    if (w > 0 && h > 0) {
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
     }
   }
-  return {
-    x: Float32Array.from(xs),
-    y: Float32Array.from(ys),
-    z: Float32Array.from(zs),
-    count: xs.length,
-  };
-}
+  syncSize();
+  window.addEventListener('resize', syncSize);
 
-function bandOf(c, cubeGrid) {
-  const norm = (c + 1) / 2;
-  const band = Math.floor(norm * cubeGrid);
-  return Math.max(0, Math.min(cubeGrid - 1, band));
-}
+  // Iluminación para destacar el volumen 3D y brillo del isotipo
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+  scene.add(ambientLight);
 
-function rotateRubikAxis(x, y, z, axis, c, s, out) {
-  if (axis === 0) {
-    out.x = x;
-    out.y = y * c - z * s;
-    out.z = y * s + z * c;
-  } else if (axis === 1) {
-    out.x = x * c + z * s;
-    out.y = y;
-    out.z = -x * s + z * c;
-  } else {
-    out.x = x * c - y * s;
-    out.y = x * s + y * c;
-    out.z = z;
-  }
-}
+  const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
+  dirLight1.position.set(4, 6, 5);
+  scene.add(dirLight1);
 
-const HALF_DIAG = Math.sqrt(3);
+  const dirLight2 = new THREE.DirectionalLight(0xc3f400, 1.8);
+  dirLight2.position.set(-4, -3, 3);
+  scene.add(dirLight2);
 
-function clampSpin(v) {
-  if (typeof v !== "number" || !isFinite(v)) return 0;
-  return Math.max(-12, Math.min(12, v));
-}
+  const pivotGroup = new THREE.Group();
+  scene.add(pivotGroup);
 
-function easeInOutCubicBezier(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+  // Material amarillo/lima del proyecto (#c3f400)
+  const limeMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xc3f400,          // Color amarillo / lima del proyecto (#c3f400)
+    emissive: 0xc3f400,
+    emissiveIntensity: 0.15,  // Brillo sutil distintivo de marca
+    metalness: 0.35,
+    roughness: 0.28,
+    clearcoat: 0.8,
+    clearcoatRoughness: 0.15,
+    side: THREE.DoubleSide
+  });
 
-class RubikCubeScene {
-  // canvas: the <canvas> element itself (NOT a container div)
-  constructor(canvas, cfg) {
-    this.canvas = canvas;
-    this.cfg = Object.assign({
-      color: "#89B059",
-      cubeGrid: 3,
-      dotsPerFace: 5,
-      dotSize: 2.4,
-      dragSensitivity: 0.28,
-      rotation: { x: -14, y: 16, z: 10 },
-      duration: 0.65,
-      sizePercent: 100
-    }, cfg);
-
-    const ctx = this.canvas.getContext("2d");
-    if (!ctx) throw new Error("2D context unavailable");
-    this.ctx = ctx;
-
-    // Read CSS-pixel size from the element's layout (offsetWidth is reliable even inside transforms)
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.width  = Math.max(this.canvas.offsetWidth  || 130, 10);
-    this.height = Math.max(this.canvas.offsetHeight || 130, 10);
-    this.canvas.width  = Math.round(this.width  * this.dpr);
-    this.canvas.height = Math.round(this.height * this.dpr);
-
-    this.shell = buildRubikShell(this.clampGrid(this.cfg.cubeGrid), this.clampDots(this.cfg.dotsPerFace));
-    this.adoptShell();
-    this.bindEvents();
-
-    this.ax = 0.5;
-    this.ay = 0.6;
-    this.az = 0;
-
-    this.isDragging = false;
-    this.lastMouseX = 0;
-    this.lastMouseY = 0;
-
-    this.frameId = 0;
-    this.lastT = performance.now();
-    this.disposed = false;
-
-    this.tmp = { x: 0, y: 0, z: 0 };
-    this.turn = null;
-    this.turnTarget = 0;
-    this.turnProgress = 0;
-    this.turnStartTime = 0;
-    this.turnDuration = (this.cfg.duration || 0.65) * 1000;
-    this.turnMembers = [];
-    this.lastMove = null;
-
-    // ---- Cube-portal state (06 // Diagnóstico scroll choreography) ----
-    // p: 0 = normal cube in header slot; 0->1 = fly to center, freeze, draw the
-    // section-6 cover in the front face's particles, then bloom + hand off.
-    this.portal = { p: 0, active: false, img: null, faceIdx: null, faceUV: null };
-
-    this.start();
-  }
-
-  clampGrid(n) {
-    return Math.max(2, Math.min(8, Math.round(n)));
-  }
-
-  clampDots(n) {
-    return Math.max(1, Math.min(8, Math.round(n)));
-  }
-
-  totalPoints() {
-    const grid = this.clampGrid(this.cfg.cubeGrid);
-    const dots = this.clampDots(this.cfg.dotsPerFace);
-    return Math.max(2, (grid - 1) * dots + 1);
-  }
-
-  adoptShell() {
-    this.px = Float32Array.from(this.shell.x);
-    this.py = Float32Array.from(this.shell.y);
-    this.pz = Float32Array.from(this.shell.z);
-    this.depth = new Float32Array(this.shell.count);
-    this.order = new Int32Array(this.shell.count);
-    this.pxp = new Float32Array(this.shell.count);
-    this.pyp = new Float32Array(this.shell.count);
-    this.memberFlag = new Uint8Array(this.shell.count);
-    for (let i = 0; i < this.shell.count; i++) this.order[i] = i;
-    this.turn = null;
-    this.turnMembers = [];
-    this.turnProgress = 0;
-  }
-
-  bindEvents() {
-    const onPointerDown = (e) => {
-      this.isDragging = true;
-      this.lastMouseX = e.clientX;
-      this.lastMouseY = e.clientY;
-      this.canvas.style.cursor = "grabbing";
-    };
-
-    const onPointerMove = (e) => {
-      if (!this.isDragging) return;
-      const dx = e.clientX - this.lastMouseX;
-      const dy = e.clientY - this.lastMouseY;
-      this.lastMouseX = e.clientX;
-      this.lastMouseY = e.clientY;
-
-      const sens = (this.cfg.dragSensitivity || 0.28) * 0.008;
-      this.ay += dx * sens;
-      this.ax += dy * sens;
-    };
-
-    const onPointerUp = () => {
-      this.isDragging = false;
-      this.canvas.style.cursor = "grab";
-    };
-
-    const onPointerLeave = () => {
-      this.isDragging = false;
-      this.canvas.style.cursor = "grab";
-    };
-
-    this.canvas.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    this.canvas.addEventListener("pointerleave", onPointerLeave);
-  }
-
-  setSize(width, height) {
-    if (this.disposed || width <= 0 || height <= 0) return;
-    this.width = width;
-    this.height = height;
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.max(1, Math.floor(width * this.dpr));
-    this.canvas.height = Math.max(1, Math.floor(height * this.dpr));
-  }
-
-  pickMove() {
-    const grid = this.clampGrid(this.cfg.cubeGrid);
-    let m;
-    let tries = 0;
-    do {
-      m = {
-        axis: Math.floor(Math.random() * 3),
-        layer: Math.floor(Math.random() * grid),
-        dir: Math.random() < 0.5 ? 1 : -1,
-      };
-      tries++;
-    } while (
-      tries < 8 &&
-      this.lastMove &&
-      m.axis === this.lastMove.axis &&
-      m.layer === this.lastMove.layer &&
-      m.dir === -this.lastMove.dir
-    );
-
-    const axisArr = m.axis === 0 ? this.px : m.axis === 1 ? this.py : this.pz;
-    const members = [];
-    this.memberFlag.fill(0);
-    for (let i = 0; i < this.shell.count; i++) {
-      if (bandOf(axisArr[i], grid) === m.layer) {
-        members.push(i);
-        this.memberFlag[i] = 1;
-      }
-    }
-
-    this.turn = m;
-    this.turnMembers = members;
-    this.turnProgress = 0;
-    this.turnTarget = (m.dir * Math.PI) / 2;
-    this.turnStartTime = performance.now();
-    this.lastMove = m;
-  }
-
-  commitTurn() {
-    const m = this.turn;
-    if (!m) return;
-    const n = this.totalPoints();
-    const c = Math.cos(this.turnTarget);
-    const s = Math.sin(this.turnTarget);
-    const out = this.tmp;
-    for (let idx = 0; idx < this.turnMembers.length; idx++) {
-      const i = this.turnMembers[idx];
-      rotateRubikAxis(this.px[i], this.py[i], this.pz[i], m.axis, c, s, out);
-      this.px[i] = snapCoord(out.x, n);
-      this.py[i] = snapCoord(out.y, n);
-      this.pz[i] = snapCoord(out.z, n);
-    }
-    this.memberFlag.fill(0);
-    this.turn = null;
-    this.turnMembers = [];
-  }
-
-  start() {
-    this.lastT = performance.now();
-    const loop = (now) => {
-      if (this.disposed) return;
-      this.frameId = requestAnimationFrame(loop);
-      this.step(now);
-    };
-    this.frameId = requestAnimationFrame(loop);
-  }
-
-  step(now) {
-    // Auto-recover size if canvas lost dimensions
-    if (this.width < 10 || this.height < 10) {
-      const w = this.canvas.offsetWidth  || 130;
-      const h = this.canvas.offsetHeight || 130;
-      if (w >= 10 && h >= 10) this.setSize(w, h);
-    }
-
-    let dt = (now - this.lastT) / 1000;
-    this.lastT = now;
-    if (!isFinite(dt) || dt < 0) dt = 0;
-    if (dt > 0.05) dt = 0.05;
-
-    // ---- Cube-portal phase: settle to a flat, camera-facing front face; no new scrambles ----
-    if (this.portal.p > 0) {
-      const norm = (a) => {
-        a = a % (2 * Math.PI);
-        if (a > Math.PI) a -= 2 * Math.PI;
-        if (a < -Math.PI) a += 2 * Math.PI;
-        return a;
-      };
-      if (this._axP0 == null) {
-        this._axP0 = norm(this.ax);
-        this._ayP0 = norm(this.ay);
-        this._azP0 = norm(this.az);
-      }
-      const fp = easeInOutCubicBezier(Math.min(1, this.portal.p / 0.30));
-      this.ax = this._axP0 * (1 - fp);
-      this.ay = this._ayP0 * (1 - fp);
-      this.az = this._azP0 * (1 - fp);
-      // let any in-flight quarter-turn finish, but never start a new one
-      if (this.turn) {
-        const pr = Math.min(1.0, (now - this.turnStartTime) / this.turnDuration);
-        this.turnProgress = easeInOutCubicBezier(pr);
-        if (pr >= 1.0) this.commitTurn();
-      }
-      this.render();
-      return;
-    }
-    this._axP0 = this._ayP0 = this._azP0 = null;
-
-    if (!this.isDragging) {
-      const rot = this.cfg.rotation;
-      const k = 0.06;
-      this.ax += clampSpin(rot?.x) * k * dt;
-      this.ay += clampSpin(rot?.y) * k * dt;
-      this.az += clampSpin(rot?.z) * k * dt;
-    }
-
-    if (!this.turn) {
-      this.pickMove();
-    } else {
-      const elapsed = now - this.turnStartTime;
-      const p = Math.min(1.0, elapsed / this.turnDuration);
-      this.turnProgress = easeInOutCubicBezier(p);
-      if (p >= 1.0) {
-        this.commitTurn();
-      }
-    }
-
-    this.render();
-  }
-
-  // Keep the scene's drawing buffer in sync with the (externally driven) CSS box.
-  syncPortalSize() {
-    const w = this.canvas.offsetWidth || this.width;
-    const h = this.canvas.offsetHeight || this.height;
-    if (Math.abs(w - this.width) > 0.5 || Math.abs(h - this.height) > 0.5) {
-      this.setSize(w, h);
-    }
-  }
-
-  sampleImg(u, v) {
-    const im = this.portal.img;
-    if (!im) return null;
-    const x = Math.max(0, Math.min(im.width - 1, (u * im.width) | 0));
-    const y = Math.max(0, Math.min(im.height - 1, (v * im.height) | 0));
-    const idx = (y * im.width + x) * 4;
-    const d = im.data;
-    return { r: d[idx], g: d[idx + 1], b: d[idx + 2], a: d[idx + 3] };
-  }
-
-  render() {
-    const ctx = this.ctx;
-    const w = this.width;
-    const h = this.height;
-    if (w < 10 || h < 10) return;
-
-    // Draw in PHYSICAL pixels (canvas.width x canvas.height)
-    // ctx.resetTransform() resets any accidental transforms
-    const pw = Math.floor(w * this.dpr);
-    const ph = Math.floor(h * this.dpr);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    // Transparent canvas — the particles float directly over the section (no opaque box).
-    ctx.clearRect(0, 0, pw, ph);
-
-    // All drawing coordinates must be in PHYSICAL pixels
-    const cx = pw / 2;
-    const cy = ph / 2;
-    // 0.21 keeps the whole tumbling cube (incl. perspective on the far corners)
-    // inside the canvas bounds so it never looks clipped by an invisible box.
-    const scale = Math.min(pw, ph) * 0.21;
-
-    const cax = Math.cos(this.ax);
-    const sax = Math.sin(this.ax);
-    const cay = Math.cos(this.ay);
-    const say = Math.sin(this.ay);
-    const caz = Math.cos(this.az);
-    const saz = Math.sin(this.az);
-
-    const turn = this.turn;
-    const angle = this.turnTarget * this.turnProgress;
-    const cs = turn ? Math.cos(angle) : 1;
-    const sn = turn ? Math.sin(angle) : 0;
-    const turnAxis = turn ? turn.axis : 0;
-    const memberFlag = this.memberFlag;
-
-    const count = this.shell.count;
-    const tmp = this.tmp;
-
-    for (let i = 0; i < count; i++) {
-      let x = this.px[i];
-      let y = this.py[i];
-      let z = this.pz[i];
-
-      if (turn && memberFlag[i]) {
-        rotateRubikAxis(x, y, z, turnAxis, cs, sn, tmp);
-        x = tmp.x;
-        y = tmp.y;
-        z = tmp.z;
-      }
-
-      const y1 = y * cax - z * sax;
-      const z1 = y * sax + z * cax;
-      const x2 = x * cay + z1 * say;
-      const z2 = -x * say + z1 * cay;
-      const x3 = x2 * caz - y1 * saz;
-      const y3 = x2 * saz + y1 * caz;
-
-      this.depth[i] = z2;
-      const persp = 1 + z2 * 0.16;
-      this.pxp[i] = cx + x3 * scale * persp;
-      this.pyp[i] = cy - y3 * scale * persp;
-    }
-
-    const order = this.order;
-    order.sort((a, b) => this.depth[a] - this.depth[b]);
-
-    const color = this.cfg.color || "#89B059";
-    const baseDot = (this.cfg.dotSize || 2.4) * this.dpr;
-
-    ctx.fillStyle = color;
-    // Tight per-dot glow only. A wide blur over ~600 particles used to smear a
-    // translucent wash across the whole canvas — fine on the old opaque #080808
-    // box, but on the transparent floating canvas it left a haze. The outer halo
-    // now comes from the element's CSS drop-shadow instead.
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 2 * this.dpr;
-
-    // ---- Cube-portal draw/bloom: the front face's particles render the section-6 cover ----
-    const pp = this.portal.p;
-    const drawP = pp > 0 ? Math.max(0, Math.min(1, (pp - 0.38) / 0.30)) : 0;   // recolor + swell
-    const bloomP = pp > 0 ? Math.max(0, Math.min(1, (pp - 0.68) / 0.32)) : 0;  // grow + dissolve
-    const portalDraw = drawP > 0;
-
-    for (let o = 0; o < count; o++) {
-      const i = order[o];
-      const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
-      const tc = t < 0 ? 0 : t > 1 ? 1 : t;
-      let alpha = 0.5 + 0.5 * tc;
-      let r = Math.max(1.5 * this.dpr, baseDot * (0.6 + 0.5 * tc));
-      let fill = null;
-
-      if (portalDraw) {
-        const isFront = this.pz[i] > 0.995;
-        if (isFront) {
-          const u = (this.px[i] + 1) / 2;
-          const v = 1 - (this.py[i] + 1) / 2;
-          const s = this.sampleImg(u, v);
-          const ink = s && s.a > 40 && (s.r + s.g + s.b) > 66;
-          if (ink) {
-            fill = `rgb(${s.r},${s.g},${s.b})`;
-            alpha = 1;
-            // swell into "pixels" of the cover, then bloom outward on hand-off
-            r = baseDot * (1 + 3.0 * drawP + 5.0 * bloomP);
-            if (bloomP > 0) alpha = 1 - 0.85 * bloomP;
-          } else {
-            alpha *= (1 - 0.92 * drawP);
-            r *= (1 - 0.4 * drawP);
+  if (typeof THREE.GLTFLoader !== 'undefined') {
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      './Vector isotipo.glb',
+      (gltf) => {
+        const model = gltf.scene;
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.material = limeMaterial;
+            child.castShadow = true;
+            child.receiveShadow = true;
           }
-        } else {
-          // side / back faces recede while the front face takes over
-          alpha *= (1 - 0.9 * drawP);
-        }
-        if (alpha <= 0.01) continue;
-      }
+        });
 
-      ctx.globalAlpha = alpha;
-      if (fill) ctx.fillStyle = fill;
-      ctx.beginPath();
-      ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
-      ctx.fill();
-      if (fill) ctx.fillStyle = color;
+        // Centrar exactamente en el pivote de rotación
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const scale = 2.4 / maxDim;
+
+        model.scale.set(scale, scale, scale);
+        model.position.sub(center.clone().multiplyScalar(scale));
+
+        pivotGroup.add(model);
+      },
+      undefined,
+      (err) => {
+        console.error('Error cargando Vector isotipo.glb:', err);
+      }
+    );
+  }
+
+  // Velocidad de rotación: exactamente 20 RPM (20 revoluciones por minuto)
+  const radPerSec = (20 * 2 * Math.PI) / 60; // ~2.094 rad/s
+
+  let lastTime = performance.now();
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min(0.05, (now - lastTime) * 0.001);
+    lastTime = now;
+
+    if (pivotGroup) {
+      pivotGroup.rotation.y += radPerSec * dt;
     }
 
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
+    renderer.render(scene, camera);
   }
-}
-
-function initRubikCube() {
-  // #rubik-cube-root is now a <canvas> element — use it directly
-  if (window.rubikSceneInstance) return; // prevent double-init
-  const canvas = document.getElementById("rubik-cube-root");
-  if (!canvas || canvas.tagName !== "CANVAS") return;
-
-  try {
-    const scene = new RubikCubeScene(canvas, {
-      color: "#89B059",
-      cubeGrid: 3,
-      dotsPerFace: 5,
-      dotSize: 2.4,
-      dragSensitivity: 0.28,
-      rotation: { x: -14, y: 16, z: 10 },
-      sizePercent: 100,
-      duration: 0.65
-    });
-    window.rubikSceneInstance = scene;
-
-    const updateSize = () => {
-      const w = canvas.offsetWidth  || 130;
-      const h = canvas.offsetHeight || 130;
-      if (w > 0 && h > 0) scene.setSize(w, h);
-    };
-
-    // First sizing only — from here on initCubePortal() owns the canvas box
-    // (it is position:fixed and glued to #rubik-cube-slot, then to the viewport).
-    setTimeout(updateSize, 30);
-    setTimeout(updateSize, 150);
-  } catch (e) {
-    console.error("RubikCube init error:", e);
-  }
-}
-
-/**
- * Offscreen render of the 06 // Diagnóstico cover — sampled into the cube's
- * front-face particles during the cube-portal scroll phase.
- * Mirrors the manual-canvas pattern of createSection3ScreenTexture().
- */
-function buildDiagnosticoPortadaImage() {
-  const S = 320;
-  const c = document.createElement('canvas');
-  c.width = S; c.height = S;
-  const x = c.getContext('2d');
-
-  x.fillStyle = '#080808';
-  x.fillRect(0, 0, S, S);
-
-  // Badge: 06 // DIAGNÓSTICO
-  x.fillStyle = '#c3f400';
-  x.font = 'bold 20px "JetBrains Mono", monospace';
-  x.textAlign = 'center';
-  x.fillText('06 // DIAGNÓSTICO', S / 2, 70);
-
-  // Divider
-  x.strokeStyle = 'rgba(195,244,0,0.5)';
-  x.lineWidth = 2;
-  x.beginPath();
-  x.moveTo(50, 88); x.lineTo(S - 50, 88); x.stroke();
-
-  // Title (wrapped)
-  x.fillStyle = '#ffffff';
-  x.font = '900 30px "Montserrat", sans-serif';
-  const lines = ['TEST DE FRICCIÓN', '& AUDITORÍA', 'NUCLEAR'];
-  lines.forEach((ln, i) => x.fillText(ln, S / 2, 140 + i * 40));
-
-  // Subtitle
-  x.fillStyle = 'rgba(196,201,172,0.9)';
-  x.font = '500 14px "JetBrains Mono", monospace';
-  x.fillText('EVALUACIÓN DE MADUREZ DIGITAL', S / 2, 280);
-
-  return x.getImageData(0, 0, S, S);
-}
-
-/**
- * Cube-portal scroll choreography (06 // Diagnóstico).
- * Glues the fixed #rubik-cube-root to #rubik-cube-slot until #sec-cube-portal
- * scrolls into range, then flies it to center + near-fullscreen while the front
- * face draws the cover, then reveals #sec-06-diagnostico.
- */
-function initCubePortal() {
-  const canvas = document.getElementById('rubik-cube-root');
-  const scene = window.rubikSceneInstance;
-  const slot = document.getElementById('rubik-cube-slot');
-  const portalSec = document.getElementById('sec-cube-portal');
-  const diagSec = document.getElementById('sec-06-diagnostico');
-  const watermark = document.getElementById('cube-portal-watermark');
-
-  if (!canvas || !scene || !portalSec) {
-    if (!scene) { setTimeout(initCubePortal, 150); }
-    return;
-  }
-  if (window.__cubePortalInit) return;
-  window.__cubePortalInit = true;
-
-  // Build the cover image (retry once fonts are ready for crisp glyphs)
-  scene.portal.img = buildDiagnosticoPortadaImage();
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => { scene.portal.img = buildDiagnosticoPortadaImage(); });
-  }
-
-  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
-  const ease = (t) => Math.sin(clamp01(t) * Math.PI / 2);
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  let box = { l: -1, t: -1, w: -1, h: -1 };
-  function setBox(l, t, w, h) {
-    if (Math.abs(l - box.l) < 0.5 && Math.abs(t - box.t) < 0.5 &&
-        Math.abs(w - box.w) < 0.5 && Math.abs(h - box.h) < 0.5) return;
-    box = { l, t, w, h };
-    canvas.style.left = l + 'px';
-    canvas.style.top = t + 'px';
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-  }
-
-  function frame() {
-    let p = 0;
-    const r = portalSec.getBoundingClientRect();
-    const span = r.height - window.innerHeight;
-    if (span > 0) p = clamp01(-r.top / span);
-    scene.portal.p = p;
-
-    if (p <= 0) {
-      // Normal cube: glued to the header slot, draggable
-      const s = slot ? slot.getBoundingClientRect() : null;
-      const onScreen = s && s.width > 4 && s.bottom > 8 && s.top < window.innerHeight - 8;
-      if (onScreen) {
-        setBox(s.left, s.top, s.width, s.height);
-        canvas.style.opacity = '1';
-        canvas.style.pointerEvents = 'auto';
-      } else {
-        canvas.style.opacity = '0';
-        canvas.style.pointerEvents = 'none';
-      }
-      if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.transform = 'scale(.955)'; }
-      if (watermark) watermark.style.opacity = '0';
-    } else {
-      canvas.style.pointerEvents = 'none';
-      const s = slot ? slot.getBoundingClientRect() : null;
-      const sx = s ? s.left : (window.innerWidth / 2 - 75);
-      const sy = s ? s.top : (window.innerHeight / 2 - 75);
-      const sw = (s && s.width) || 150;
-      const sh = (s && s.height) || 150;
-
-      const flyP = ease(p / 0.38);
-      const big = Math.min(window.innerWidth, window.innerHeight) * 0.92;
-      const tx = (window.innerWidth - big) / 2;
-      const ty = (window.innerHeight - big) / 2;
-      setBox(lerp(sx, tx, flyP), lerp(sy, ty, flyP), lerp(sw, big, flyP), lerp(sh, big, flyP));
-
-      if (watermark) watermark.style.opacity = (0.7 * ease((p - 0.05) / 0.28)).toFixed(3);
-
-      const revealP = ease((p - 0.68) / 0.32);
-      if (diagSec) {
-        diagSec.style.opacity = revealP.toFixed(3);
-        diagSec.style.transform = 'scale(' + (0.955 + 0.045 * revealP).toFixed(4) + ')';
-      }
-      canvas.style.opacity = (1 - ease((p - 0.82) / 0.18)).toFixed(3);
-    }
-
-    scene.syncPortalSize();
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(animate);
 }
 
 /** Live maturity score for the embedded 06 // Diagnóstico test (ported from diagnostico/index.html). */
@@ -4461,35 +3973,16 @@ function initDiagnosticoTest() {
 
   radios.forEach((rr) => rr.addEventListener('change', calculateScore));
   calculateScore();
-
-  // Safety net: never leave section 6 invisible if the cube-portal driver failed to start.
-  setTimeout(() => {
-    if (!window.__cubePortalInit) {
-      sec.style.opacity = '1';
-      sec.style.transform = 'none';
-      const cv = document.getElementById('rubik-cube-root');
-      if (cv) cv.style.display = 'none';
-    }
-  }, 3500);
 }
 
 /** Dock link handler: jump straight to the 06 // Diagnóstico test (no page nav). */
 function scrollToDiagnostico(e) {
   const diag = document.getElementById('sec-06-diagnostico');
-  const portal = document.getElementById('sec-cube-portal');
-  const target = diag || portal;
-  if (!target) return true; // let the <a href> fallback navigate
+  if (!diag) return true;
   if (e && e.preventDefault) e.preventDefault();
 
-  // 06 starts hidden and is only revealed by the cube-portal scroll choreography;
-  // a smooth scrollIntoView on #sec-cube-portal landed at p = 0 (black frame).
   window.__forceTimelineProgress = null;
-  window.scrollTo(0, (diag || target).offsetTop);
-  if (diag) { diag.style.opacity = '1'; diag.style.transform = 'none'; }
-  const cube = document.getElementById('rubik-cube-root');
-  if (cube) { cube.style.opacity = '0'; cube.style.pointerEvents = 'none'; }
-  const watermark = document.getElementById('cube-portal-watermark');
-  if (watermark) watermark.style.opacity = '0';
+  window.scrollTo({ top: diag.offsetTop, behavior: 'smooth' });
   updateActiveDockItem(5);
   return false;
 }
@@ -4517,22 +4010,19 @@ function initFloatingGallery() {
   });
 
   initExecutionInternalScrollListener();
-  initRubikCube();
-  initCubePortal();
+  initVectorIsotipo();
   initDiagnosticoTest();
 }
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initFloatingGallery();
-    initRubikCube();
-    initCubePortal();
+    initVectorIsotipo();
     initDiagnosticoTest();
   });
 } else {
   initFloatingGallery();
-  initRubikCube();
-  initCubePortal();
+  initVectorIsotipo();
   initDiagnosticoTest();
 }
 
