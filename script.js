@@ -3514,27 +3514,32 @@ function scrollToGaleriaFlotante() {
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+
+  if (metodologiaWrapper) {
+    metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+    metodologiaWrapper.style.pointerEvents = 'none';
+  }
 
   const doInternalScroll = () => {
     if (container && matrixTrack) {
-      const targetTop = matrixTrack.offsetTop + 10;
+      const targetTop = matrixTrack.offsetTop;
       container.scrollTo({ top: targetTop, behavior: 'smooth' });
       updateActiveDockItem(3);
     }
   };
 
   if (mainTrack) {
-    const trackRect = mainTrack.getBoundingClientRect();
-    const trackTop = window.scrollY + trackRect.top;
     const maxScroll = mainTrack.offsetHeight - window.innerHeight;
-    const targetY = trackTop + maxScroll * 0.96;
+    const targetY = maxScroll * 0.98;
 
-    if (Math.abs(window.scrollY - targetY) > 80) {
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-      setTimeout(doInternalScroll, 650);
-    } else {
-      doInternalScroll();
-    }
+    window.scrollTo({ top: targetY, behavior: 'smooth' });
+
+    // Immediate execution + scheduled frame confirmation for 100% reliable 1st-click action
+    doInternalScroll();
+    setTimeout(doInternalScroll, 100);
+    setTimeout(doInternalScroll, 300);
+    setTimeout(doInternalScroll, 600);
   } else {
     doInternalScroll();
   }
@@ -3548,27 +3553,31 @@ function scrollToMetodologia() {
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
 
   const doInternalScroll = () => {
     if (container && matrixTrack) {
       const targetTop = matrixTrack.offsetTop + (matrixTrack.offsetHeight - container.clientHeight);
       container.scrollTo({ top: targetTop, behavior: 'smooth' });
+      if (metodologiaWrapper) {
+        metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+        metodologiaWrapper.style.pointerEvents = 'auto';
+      }
       updateActiveDockItem(4);
     }
   };
 
   if (mainTrack) {
-    const trackRect = mainTrack.getBoundingClientRect();
-    const trackTop = window.scrollY + trackRect.top;
     const maxScroll = mainTrack.offsetHeight - window.innerHeight;
-    const targetY = trackTop + maxScroll * 0.96;
+    const targetY = maxScroll * 0.98;
 
-    if (Math.abs(window.scrollY - targetY) > 80) {
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-      setTimeout(doInternalScroll, 650);
-    } else {
-      doInternalScroll();
-    }
+    window.scrollTo({ top: targetY, behavior: 'smooth' });
+
+    // Immediate execution + scheduled frame confirmation for 100% reliable 1st-click action
+    doInternalScroll();
+    setTimeout(doInternalScroll, 100);
+    setTimeout(doInternalScroll, 300);
+    setTimeout(doInternalScroll, 600);
   } else {
     doInternalScroll();
   }
