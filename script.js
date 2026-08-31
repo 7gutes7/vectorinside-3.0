@@ -3759,6 +3759,7 @@ class RubikCubeScene {
     this.canvas.style.inset = "0";
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
+    this.canvas.style.zIndex = "30";
     this.canvas.style.cursor = "grab";
     this.canvas.style.touchAction = "none";
     container.appendChild(this.canvas);
@@ -3940,6 +3941,13 @@ class RubikCubeScene {
   }
 
   step(now) {
+    if (this.width <= 1 || this.height <= 1) {
+      const rect = this.container.getBoundingClientRect();
+      if (rect.width > 1 && rect.height > 1) {
+        this.setSize(rect.width, rect.height);
+      }
+    }
+
     let dt = (now - this.lastT) / 1000;
     this.lastT = now;
     if (!isFinite(dt) || dt < 0) dt = 0;
@@ -3975,11 +3983,13 @@ class RubikCubeScene {
 
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#080808";
+    ctx.fillRect(0, 0, w, h);
 
     const cx = w / 2;
     const cy = h / 2;
     const sizePct = Math.max(20, Math.min(200, Math.round(this.cfg.sizePercent || 96)));
-    const scale = Math.min(w, h) * 0.26 * (sizePct / 100);
+    const scale = Math.min(w, h) * 0.28 * (sizePct / 100);
 
     const cax = Math.cos(this.ax);
     const sax = Math.sin(this.ax);
