@@ -4039,14 +4039,14 @@ function initRubikCube() {
 
   try {
     const scene = new RubikCubeScene(container, {
-      color: "#60B959",
-      cubeGrid: 4,
-      dotsPerFace: 6,
-      dotSize: 4.5,
-      dragSensitivity: 0.2,
-      rotation: { x: -12, y: 12, z: 12 },
-      sizePercent: 96,
-      duration: 0.75
+      color: "#58F306",
+      cubeGrid: 3,
+      dotsPerFace: 5,
+      dotSize: 4.8,
+      dragSensitivity: 0.28,
+      rotation: { x: -14, y: 16, z: 10 },
+      sizePercent: 100,
+      duration: 0.65
     });
     window.rubikSceneInstance = scene;
 
