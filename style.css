@@ -94,6 +94,79 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark Glass Header Theme */
+.glass-nav-dark {
+  background: rgba(8, 8, 8, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.glass-nav-dark .brand-logo-img {
+  filter: none;
+}
+
+.glass-nav-dark .header-center-headline {
+  color: rgba(195, 244, 0, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* White Liquid Glass Header Theme (For White / Brutalist Contrast Sections) */
+.glass-nav-white-liquid {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 245, 250, 0.80) 50%, rgba(235, 235, 245, 0.70) 100%) !important;
+  backdrop-filter: blur(36px) saturate(200%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(200%) brightness(1.05) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 
+    0 10px 35px rgba(0, 0, 0, 0.08),
+    0 1px 1px rgba(255, 255, 255, 0.95) inset,
+    0 -1px 1px rgba(0, 0, 0, 0.05) inset !important;
+}
+
+.glass-nav-white-liquid .brand-logo-img {
+  filter: brightness(0) saturate(100%); /* High contrast pure black logo on white glass */
+}
+
+.glass-nav-white-liquid .header-center-headline {
+  color: #0b0b0d !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  font-weight: 900 !important;
+}
+
+.glass-nav-white-liquid .header-cta-btn .btn-pill-bg {
+  background: #0b0b0d !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+.glass-nav-white-liquid .header-cta-btn .btn-pill-label {
+  color: #c3f400 !important;
+}
+
+/* Transparent Floating Header Theme (During Smartphone Spin/Stage) */
+.glass-nav-transparent {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.glass-nav-transparent .header-center-headline {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, -10px) !important;
+}
+
+.glass-nav-transparent .brand-logo-img {
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.8)) !important;
+}
+
+.glass-nav-transparent .header-cta-btn {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Liquid Glass Dock Styling */

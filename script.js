@@ -1586,7 +1586,7 @@ function initHero3DModel() {
         const maxInternalScroll = sec3ScrollContainerElem.scrollHeight - sec3ScrollContainerElem.clientHeight;
         if (maxInternalScroll > 0) {
           const ratio = Math.max(0, Math.min(1.0, sec3ScrollContainerElem.scrollTop / maxInternalScroll));
-          const targetProgress = 0.865 + ratio * (1.0 - 0.865);
+          const targetProgress = 0.725 + ratio * (0.81 - 0.725);
           const track = document.getElementById('hero-scroll-track');
           if (track) {
             const trackRect = track.getBoundingClientRect();
@@ -1609,6 +1609,52 @@ function initHero3DModel() {
         }, 150);
       }
     });
+  }
+
+  // ==================== BIDIRECTIONAL SCROLL CONTROLLER FOR SCROLL-EXPAND (03 EJECUCIÓN) ====================
+  const scrollExpandWrapperElem = document.getElementById('sec-scroll-expand-wrapper');
+  const secEjecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
+
+  if (secEjecucionScrollContainer) {
+    secEjecucionScrollContainer.addEventListener('wheel', (e) => {
+      // If the section is not fully expanded yet (expansion in progress)
+      if (currentScrollLerp < 0.95) {
+        window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        e.preventDefault();
+        return;
+      }
+
+      // If fully expanded:
+      // If user is at top of internal container (scrollTop <= 0) and scrolling UP (deltaY < 0), forward to window scroll
+      if (secEjecucionScrollContainer.scrollTop <= 0 && e.deltaY < 0) {
+        window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        e.preventDefault();
+      }
+      // Otherwise allow standard internal scrolling of the 25-block matrix
+    }, { passive: false });
+
+    let expandTouchStartY = 0;
+    secEjecucionScrollContainer.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        expandTouchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    secEjecucionScrollContainer.addEventListener('touchmove', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = expandTouchStartY - currentY;
+      expandTouchStartY = currentY;
+
+      if (currentScrollLerp < 0.95) {
+        window.scrollBy({ top: deltaY, behavior: 'auto' });
+        return;
+      }
+
+      if (secEjecucionScrollContainer.scrollTop <= 0 && deltaY < 0) {
+        window.scrollBy({ top: deltaY, behavior: 'auto' });
+      }
+    }, { passive: true });
   }
 
   // Smooth scroll tracking variables & Exact Deep Eye Cavity Target for poligonal-30-08-26.glb
@@ -1659,17 +1705,21 @@ function initHero3DModel() {
     // =========================================================================
     // UNIFIED DETERMINISTIC SCROLL TIMELINE (0.0 to 1.0)
     // =========================================================================
-    const T_HEAD_ZOOM_END = 0.12;       // 0% -> 12%: 3D Head zooms into eye
-    const T_REVEAL_START = 0.10;        // 10% -> Laser dot appears
-    const T_REVEAL_END = 0.20;          // 20% -> Section 2 curtains 100% open & flat
-    const T_CONTENT_SCROLL_END = 0.34;  // 20% -> 34%: Section 2 content active
-    const T_EXIT_START = 0.35;          // 35% -> Curtains start closing (Plano -> Línea)
-    const T_PHONE_ZOOM_START = 0.40;    // 40% -> Vertical line is formed & Smartphone starts Zoom Out!
-    const T_EXIT_END = 0.46;            // 46% -> Line collapses to center PUNTO
-    const T_PHONE_ZOOM_END = 0.60;      // 60% -> Smartphone fully centered
-    const T_SPIN_START = 0.60;          // 60% -> 360° rotation begins with scroll
-    const T_SPIN_END = 0.80;            // 80% -> 360° spin completes
-    // 80% -> 100%: Smartphone shifts upwards & Kinetic Text Background fades in blur!
+    const T_HEAD_ZOOM_END = 0.10;       // 0% -> 10%: 3D Head zooms into eye
+    const T_REVEAL_START = 0.08;        // 8% -> Laser dot appears
+    const T_REVEAL_END = 0.16;          // 16% -> Section 2 curtains 100% open & flat
+    const T_CONTENT_SCROLL_END = 0.28;  // 16% -> 28%: Section 2 content active
+    const T_EXIT_START = 0.29;          // 29% -> Curtains start closing (Plano -> Línea)
+    const T_PHONE_ZOOM_START = 0.34;    // 34% -> Vertical line is formed & Smartphone starts Zoom Out!
+    const T_EXIT_END = 0.39;            // 39% -> Line collapses to center PUNTO
+    const T_PHONE_ZOOM_END = 0.50;      // 50% -> Smartphone fully centered
+    const T_SPIN_START = 0.50;          // 50% -> 360° rotation begins with scroll
+    const T_SPIN_END = 0.65;            // 65% -> 360° spin completes
+    // 65% -> 70%: Smartphone shifts upwards & Kinetic Text Background fades out
+    // 70% -> 81%: Section 3 Ecosistema cards stream active
+    // 81% -> 84%: ScrollExpand appears with blur effect
+    // 84% -> 96%: ScrollExpand expands to full screen (44vw->100vw, 58vh->100vh, 24px->0px) & flanks retreat
+    // 96% -> 100%: 03 // Ejecución full stage active
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
       // El modelo se mantiene 100% sólido durante todo el zoom y comienza a desvanecerse a partir de que aparece el punto
@@ -2028,14 +2078,14 @@ function initHero3DModel() {
         smartphoneGroup.rotation.set(0, pSpin * Math.PI * 2, 0); // Full 360° Spin!
 
       } else {
-        // B.3 Desplazamiento hacia arriba con scroll y desvanecimiento en blur del fondo (0.80 -> 1.00)
+        // B.3 Desplazamiento hacia arriba con scroll y desvanecimiento en blur del fondo (0.65 -> 0.70)
         if (portalDot) portalDot.style.opacity = '0';
         if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
         camera.position.set(0, 0, 8.5);
         camera.lookAt(0, 0, 0);
 
-        const pUp = (currentScrollLerp - T_SPIN_END) / (1.0 - T_SPIN_END);
+        const pUp = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.05);
         const pUpEased = Math.sin((pUp * Math.PI) / 2);
 
         // Smartphone se desplaza hacia arriba suavemente
@@ -2047,7 +2097,7 @@ function initHero3DModel() {
           smartphoneGroup.visible = false;
         }
 
-        // Fondo con letras se desvanece de forma limpia sin filtros pesados de blur
+        // Fondo con letras se desvanece de forma limpia
         if (kineticBg) {
           if (pUpEased >= 0.85) {
             kineticBg.style.display = 'none';
@@ -2066,33 +2116,56 @@ function initHero3DModel() {
     // Section 3 Background Image (fondo ecosistema.jpeg) Transition
     const sec3BgWrapper = document.getElementById('sec3-bg-wrapper');
     if (sec3BgWrapper) {
-      if (currentScrollLerp >= T_SPIN_END) {
+      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.81) {
         const pBgSec3 = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
         const pBgEased = Math.sin((pBgSec3 * Math.PI) / 2);
         sec3BgWrapper.style.opacity = pBgEased.toFixed(3);
+        sec3BgWrapper.style.filter = 'none';
+      } else if (currentScrollLerp >= 0.81 && currentScrollLerp < 0.84) {
+        // Desaparición en blur sincronizada con la aparición en blur de Ejecución (0.81 -> 0.84)
+        const pBlurOut = (currentScrollLerp - 0.81) / 0.03;
+        const pBlurOutEased = Math.sin((pBlurOut * Math.PI) / 2);
+        sec3BgWrapper.style.opacity = Math.max(0, 1.0 - pBlurOutEased).toFixed(3);
+        sec3BgWrapper.style.filter = `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
+      } else if (currentScrollLerp >= 0.84) {
+        sec3BgWrapper.style.opacity = '0';
+        sec3BgWrapper.style.filter = 'blur(20px)';
       } else {
         sec3BgWrapper.style.opacity = '0';
+        sec3BgWrapper.style.filter = 'none';
       }
     }
 
-    // Flanking Assets Animation (poligonal02 from left, liquid01 from right, both 50% visible at rest)
+    // Flanking Assets Animation (Entrance 0.65->0.70, Rest 0.70->0.84, Retreat 0.84->0.96)
     const flankLeft = document.getElementById('sec3-flank-left');
     const flankRight = document.getElementById('sec3-flank-right');
     if (flankLeft && flankRight) {
-      if (currentScrollLerp >= T_SPIN_END) {
-        // Flancos entran rápidamente y alcanzan su posición definitiva al 83.5% de scroll (0.80 -> 0.835)
+      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.84) {
+        // Entrada de flancos: poligonal02 (-100% -> -50%), liquid01 (+100% -> +50%)
         const pFlank = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
         const pFlankEased = Math.sin((pFlank * Math.PI) / 2);
 
-        // poligonal02 entra de izquierda a derecha: -100% -> -50% (translate3d para aceleración por GPU)
         const leftX = -100 + (pFlankEased * 50);
         flankLeft.style.transform = `translate3d(${leftX.toFixed(2)}%, -50%, 0)`;
         flankLeft.style.opacity = pFlankEased.toFixed(3);
 
-        // liquid01 entra de derecha a izquierda: +100% -> +50% (translate3d para aceleración por GPU)
         const rightX = 100 - (pFlankEased * 50);
         flankRight.style.transform = `translate3d(${rightX.toFixed(2)}%, -50%, 0)`;
         flankRight.style.opacity = (pFlankEased * 0.80).toFixed(3);
+      } else if (currentScrollLerp >= 0.84) {
+        // Retirada de flancos hacia los lados conforme ScrollExpand se expande (al contrario como entraron)
+        const pRetreat = Math.min(1.0, (currentScrollLerp - 0.84) / 0.10);
+        const pRetreatEased = Math.sin((pRetreat * Math.PI) / 2);
+
+        // poligonal02 se retira hacia la izquierda: -50% -> -100%
+        const leftX = -50 - (pRetreatEased * 50);
+        flankLeft.style.transform = `translate3d(${leftX.toFixed(2)}%, -50%, 0)`;
+        flankLeft.style.opacity = Math.max(0, 1.0 - pRetreatEased).toFixed(3);
+
+        // liquid01 se retira hacia la derecha: +50% -> +100%
+        const rightX = 50 + (pRetreatEased * 50);
+        flankRight.style.transform = `translate3d(${rightX.toFixed(2)}%, -50%, 0)`;
+        flankRight.style.opacity = Math.max(0, (1.0 - pRetreatEased) * 0.80).toFixed(3);
       } else {
         flankLeft.style.opacity = '0';
         flankLeft.style.transform = 'translate3d(-100%, -50%, 0)';
@@ -2101,16 +2174,18 @@ function initHero3DModel() {
       }
     }
 
+    // Section 3 Ecosistema Container & Cards Stream
     const sec3Container = document.getElementById('seccion-3-ecosistema');
     const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
     if (sec3Container) {
-      if (currentScrollLerp >= 0.830) {
+      if (currentScrollLerp >= 0.70 && currentScrollLerp < 0.81) {
         sec3Container.style.opacity = '1';
+        sec3Container.style.filter = 'none';
         sec3Container.style.pointerEvents = 'auto';
 
-        // Escalonamiento secuencial ágil para la revelación inicial de las 6 tarjetas
-        const cardStarts = [0.830, 0.836, 0.842, 0.848, 0.854, 0.860];
-        const cardDuration = 0.016;
+        // Escalonamiento secuencial ágil para la revelación de las 6 tarjetas
+        const cardStarts = [0.700, 0.705, 0.710, 0.715, 0.720, 0.725];
+        const cardDuration = 0.014;
 
         for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
@@ -2128,20 +2203,39 @@ function initHero3DModel() {
           }
         }
 
-        // Sincronización continua e instantánea del scroll de tarjetas con el scroll general
+        // Sincronización continua e instantánea del scroll de tarjetas (0.725 -> 0.81)
         if (sec3ScrollContainer && !isUserInteractingSec3) {
           const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
           if (maxInternalScroll > 0) {
-            if (currentScrollLerp <= 0.860) {
+            if (currentScrollLerp <= 0.725) {
               sec3ScrollContainer.scrollTop = 0;
             } else {
-              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.860) / (1.0 - 0.860)));
+              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.725) / (0.81 - 0.725)));
               sec3ScrollContainer.scrollTop = pScrollCards * maxInternalScroll;
             }
           }
         }
+      } else if (currentScrollLerp >= 0.81 && currentScrollLerp < 0.84) {
+        // Desaparición en blur de Ecosistema exactamente mientras Ejecución aparece en blur (0.81 -> 0.84)
+        const pBlurOut = (currentScrollLerp - 0.81) / 0.03;
+        const pBlurOutEased = Math.sin((pBlurOut * Math.PI) / 2);
+        sec3Container.style.opacity = Math.max(0, 1.0 - pBlurOutEased).toFixed(3);
+        sec3Container.style.filter = `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
+        sec3Container.style.pointerEvents = pBlurOutEased > 0.4 ? 'none' : 'auto';
+
+        if (sec3ScrollContainer && !isUserInteractingSec3) {
+          const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
+          if (maxInternalScroll > 0) {
+            sec3ScrollContainer.scrollTop = maxInternalScroll;
+          }
+        }
+      } else if (currentScrollLerp >= 0.84) {
+        sec3Container.style.opacity = '0';
+        sec3Container.style.filter = 'blur(20px)';
+        sec3Container.style.pointerEvents = 'none';
       } else {
         sec3Container.style.opacity = '0';
+        sec3Container.style.filter = 'none';
         sec3Container.style.pointerEvents = 'none';
 
         if (sec3ScrollContainer && !isUserInteractingSec3) {
@@ -2158,44 +2252,150 @@ function initHero3DModel() {
       }
     }
 
+    // ==================== LAYER 50: SCROLL EXPAND PORTAL ANIMATION (03 // EJECUCIÓN) ====================
+    const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+    const expandFrame = document.getElementById('scroll-expand-frame');
+    const expandVideo = document.getElementById('scroll-expand-video');
+    const ejecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
+
+    if (expandWrapper && expandFrame && expandVideo) {
+      if (currentScrollLerp < 0.81) {
+        expandWrapper.style.opacity = '0';
+        expandWrapper.style.filter = 'blur(20px)';
+        expandWrapper.style.pointerEvents = 'none';
+        expandFrame.style.width = '44vw';
+        expandFrame.style.height = '58vh';
+        expandFrame.style.borderRadius = '24px';
+        expandVideo.style.transform = 'scale(1.35)';
+        if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
+      } else if (currentScrollLerp < 0.84) {
+        // Aparición con efecto blur después de la última tarjeta (0.81 -> 0.84)
+        const pEntry = (currentScrollLerp - 0.81) / 0.03;
+        const pEntryEased = Math.sin((pEntry * Math.PI) / 2);
+        expandWrapper.style.opacity = pEntryEased.toFixed(3);
+        expandWrapper.style.filter = `blur(${((1.0 - pEntryEased) * 20).toFixed(1)}px)`;
+        expandWrapper.style.pointerEvents = 'none';
+        expandFrame.style.width = '44vw';
+        expandFrame.style.height = '58vh';
+        expandFrame.style.borderRadius = '24px';
+        expandVideo.style.transform = 'scale(1.35)';
+        if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
+      } else {
+        // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x) (0.84 -> 0.96)
+        expandWrapper.style.opacity = '1';
+        expandWrapper.style.filter = 'none';
+
+        const pExp = Math.min(1.0, (currentScrollLerp - 0.84) / 0.12);
+        const pExpEased = Math.sin((pExp * Math.PI) / 2);
+
+        const curW = 44 + (pExpEased * 56);
+        const curH = 58 + (pExpEased * 42);
+        const curRad = (1.0 - pExpEased) * 24;
+        const curZoom = 1.35 - (pExpEased * 0.35);
+
+        expandFrame.style.width = `${curW.toFixed(2)}vw`;
+        expandFrame.style.height = `${curH.toFixed(2)}vh`;
+        expandFrame.style.borderRadius = `${curRad.toFixed(1)}px`;
+        expandVideo.style.transform = `scale(${curZoom.toFixed(3)})`;
+
+        expandWrapper.style.pointerEvents = pExpEased > 0.85 ? 'auto' : 'none';
+
+        if (pExpEased < 0.95 && ejecucionScrollContainer) {
+          ejecucionScrollContainer.scrollTop = 0;
+        }
+      }
+    }
+
     // ==================== BOTTOM DOCK NAV SYNCHRONIZED FADE & ACTIVE STATE ====================
     if (bottomDock) {
       let dockOpacity = 0;
       if (currentScrollLerp < T_REVEAL_START) {
-        // Hero: Se desvanece al mismo ritmo exacto que los textos del Hero
         dockOpacity = Math.max(0, 1.0 - currentScrollLerp * 8.0);
         updateActiveDockItem(null);
       } else if (currentScrollLerp < T_REVEAL_END) {
-        // Apertura Sección 2: Vuelve a aparecer suavemente conforme se abre el plano
         const pOpen = (currentScrollLerp - T_REVEAL_START) / (T_REVEAL_END - T_REVEAL_START);
         dockOpacity = Math.min(1.0, Math.max(0, pOpen));
         updateActiveDockItem(0);
       } else if (currentScrollLerp < T_EXIT_START) {
-        // Sección 2 Abierta: 100% visible con 01 // Manifiesto activo
         dockOpacity = 1.0;
         updateActiveDockItem(0);
       } else if (currentScrollLerp < T_EXIT_END) {
-        // Cierre Sección 2: Se desvanece junto con el cierre de la cortina
         const pClose = (currentScrollLerp - T_EXIT_START) / (T_EXIT_END - T_EXIT_START);
         dockOpacity = Math.max(0, 1.0 - pClose * 1.5);
         updateActiveDockItem(null);
-      } else if (currentScrollLerp < T_PHONE_ZOOM_START + 0.05) {
-        // Breve transición hacia el smartphone
+      } else if (currentScrollLerp < 0.70) {
+        // Mientras el smartphone está visible, emerge y gira en 3D (0.34 a 0.70), el contenedor fijo inferior se oculta por completo
         dockOpacity = 0;
         updateActiveDockItem(null);
-      } else if (currentScrollLerp < T_PHONE_ZOOM_END) {
-        // Smartphone emerge y se centra: el dock reaparece suavemente con 02 // Ecosistema activo
-        const pDockEcosistema = (currentScrollLerp - (T_PHONE_ZOOM_START + 0.05)) / (T_PHONE_ZOOM_END - (T_PHONE_ZOOM_START + 0.05));
+      } else if (currentScrollLerp < 0.74) {
+        // Ecosistema reaparece gradualmente cuando el smartphone sale hacia arriba (0.70 -> 0.74)
+        const pDockEcosistema = (currentScrollLerp - 0.70) / 0.04;
         dockOpacity = Math.min(1.0, Math.max(0, pDockEcosistema));
         updateActiveDockItem(1);
-      } else {
-        // Ecosistema completo (Smartphone 3D, giro 360 y flujo de tarjetas): Dock 100% visible con 02 // Ecosistema activo
+      } else if (currentScrollLerp < 0.84) {
+        // Ecosistema activo (flujo de tarjetas)
         dockOpacity = 1.0;
         updateActiveDockItem(1);
+      } else {
+        // 03 // Ejecución activa (ScrollExpand abierto)
+        // Visible en la portada; se oculta conforme nos desplazamos hacia la galería flotante
+        const internalScroll = document.getElementById('sec-ejecucion-scroll-container');
+        if (internalScroll && internalScroll.scrollTop > 40) {
+          const pGalleryFade = Math.min(1.0, (internalScroll.scrollTop - 40) / 220);
+          dockOpacity = Math.max(0, 1.0 - pGalleryFade);
+        } else {
+          dockOpacity = 1.0;
+        }
+        updateActiveDockItem(2);
       }
       bottomDock.style.opacity = dockOpacity.toFixed(3);
       bottomDock.style.transform = `translate(-50%, ${(1.0 - dockOpacity) * 20}px)`;
       bottomDock.style.pointerEvents = dockOpacity > 0.4 ? 'auto' : 'none';
+    }
+
+    // ==================== DYNAMIC HEADER THEME (WHITE LIQUID GLASS VS TRANSPARENT FLOATING VS DARK CYBER GLASS) ====================
+    const globalHeader = document.getElementById('main-global-header');
+    if (globalHeader) {
+      // Check if Section 05 Metodología is revealed in the execution container
+      let isMetodologiaRevealed = false;
+      const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+      if (metodologiaWrapper && metodologiaWrapper.style.transform && !metodologiaWrapper.style.transform.includes('100%')) {
+        const match = metodologiaWrapper.style.transform.match(/translate3d\(0,\s*([0-9.]+)%,\s*0\)/);
+        if (match && parseFloat(match[1]) < 60) {
+          isMetodologiaRevealed = true;
+        } else if (metodologiaWrapper.style.transform.includes('0%')) {
+          isMetodologiaRevealed = true;
+        }
+      }
+
+      // White Liquid Glass Header in:
+      // - 01 // Manifiesto (0.08 <= currentScrollLerp < 0.34)
+      // - 02 // Ecosistema (0.70 <= currentScrollLerp < 0.84)
+      // - 05 // Metodología (When curtain is revealed)
+      const isWhiteHeaderPhase = (currentScrollLerp >= T_REVEAL_START && currentScrollLerp < T_PHONE_ZOOM_START) ||
+                                 (currentScrollLerp >= 0.70 && currentScrollLerp < 0.84) ||
+                                 isMetodologiaRevealed;
+      
+      // Transparent Floating Header during Smartphone Zoom & 360 Spin (0.34 <= currentScrollLerp < 0.70)
+      const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.70;
+
+      if (isWhiteHeaderPhase) {
+        if (!globalHeader.classList.contains('glass-nav-white-liquid')) {
+          globalHeader.classList.add('glass-nav-white-liquid');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
+        }
+      } else if (isSmartphoneSpinPhase) {
+        if (!globalHeader.classList.contains('glass-nav-transparent')) {
+          globalHeader.classList.add('glass-nav-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid');
+        }
+      } else {
+        // Dark Cyber Glass in Hero (0.0 - 0.08) and 03 // Ejecución / Galería (0.84 - 1.0)
+        if (!globalHeader.classList.contains('glass-nav-dark')) {
+          globalHeader.classList.add('glass-nav-dark');
+          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent');
+        }
+      }
     }
 
     renderer.render(scene, camera);
@@ -2457,7 +2657,7 @@ function scrollToSection2() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  const targetY = trackTop + maxScroll * 0.22;
+  const targetY = trackTop + maxScroll * 0.18;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -2492,8 +2692,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 60% (0.60): Smartphone 3D centrado frontalmente con fondo cinético (Etapa Ecosistema)
-  const targetY = trackTop + maxScroll * 0.60;
+  // Posición al 50% (0.50): Smartphone 3D centrado frontalmente con fondo cinético (Etapa Ecosistema)
+  const targetY = trackTop + maxScroll * 0.50;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -2520,6 +2720,42 @@ function scrollToSection3() {
   requestAnimationFrame(step);
 }
 window.scrollToSection3 = scrollToSection3;
+
+// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 03 (EJECUCIÓN) ====================
+function scrollToSectionEjecucion() {
+  const track = document.getElementById('hero-scroll-track');
+  if (!track) return;
+  const trackRect = track.getBoundingClientRect();
+  const trackTop = window.scrollY + trackRect.top;
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  // Posición al 96% (0.96): ScrollExpand completamente abierto a pantalla completa
+  const targetY = trackTop + maxScroll * 0.96;
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const duration = 1800; // 1.8s smooth cinematic glide
+  let startTime = null;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function step(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1.0);
+    const easeProgress = easeInOutCubic(progress);
+
+    window.scrollTo(0, startY + distance * easeProgress);
+
+    if (progress < 1.0) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+window.scrollToSectionEjecucion = scrollToSectionEjecucion;
 
 // ==================== INITIALIZE HERO RIPPLE DISTORTION (REACT BITS) ====================
 function initHeroRippleDistortion() {
@@ -2579,5 +2815,806 @@ function initSec3Topography() {
   });
 }
 window.initSec3Topography = initSec3Topography;
+
+// ==================== MATRIZ MODAL (25 BLOQUES) LOGIC CON FOTOS Y DEGRADADO ARMÓNICO ====================
+const matriz25Data = [
+  // FILA 1: Espectro Verde Lima / Cyber Lime (Núcleo Operativo)
+  {
+    id: 1,
+    code: 'BLK-01',
+    category: 'operativo',
+    file: 'imagotipoGreen.png',
+    title: 'Vector Core Imagotype',
+    desc: 'Núcleo de identidad e integración modular de alta velocidad para conversión y tracking activo.',
+    kpi1: '+320% Impacto',
+    kpi2: '5.2x ROI',
+    kpi3: '1 Semana',
+    color: '#c3f400',
+    tint: 'rgba(195, 244, 0, 0.45)'
+  },
+  {
+    id: 2,
+    code: 'BLK-02',
+    category: 'operativo',
+    file: 'Vector Inside Isologo.png',
+    title: 'Isologo Kinetic Engine',
+    desc: 'Sincronizador vectorial reactivo para aceleración de funnel y retención de usuarios.',
+    kpi1: '+290% Retención',
+    kpi2: '4.9x ROI',
+    kpi3: '2 Semanas',
+    color: '#b0f000',
+    tint: 'rgba(176, 240, 0, 0.45)'
+  },
+  {
+    id: 3,
+    code: 'BLK-03',
+    category: 'operativo',
+    file: 'lobo02.png',
+    title: 'Cyber Wolf Vanguard',
+    desc: 'Módulo de tracción táctica y posicionamiento de marca con telemetría predictiva.',
+    kpi1: '+340% Conversión',
+    kpi2: '5.4x ROI',
+    kpi3: '2 Semanas',
+    color: '#84e600',
+    tint: 'rgba(132, 230, 0, 0.45)'
+  },
+  {
+    id: 4,
+    code: 'BLK-04',
+    category: 'operativo',
+    file: 'Circuit_board_and_data_flow_202608261320.jpeg',
+    title: 'Neural Circuit Flow',
+    desc: 'Topología de red de baja latencia para enrutamiento inteligente de datos de adquisición.',
+    kpi1: '+380% Telemetría',
+    kpi2: '6.1x ROI',
+    kpi3: '3 Semanas',
+    color: '#34d399',
+    tint: 'rgba(52, 211, 153, 0.45)'
+  },
+  {
+    id: 5,
+    code: 'BLK-05',
+    category: 'operativo',
+    file: 'LOGO 4GUARD.jpeg',
+    title: '4Guard Security Layer',
+    desc: 'Blindaje perimetral y validación biométrica/criptográfica de eventos transaccionales.',
+    kpi1: '99.99% Uptime',
+    kpi2: '4.6x ROI',
+    kpi3: '1 Semana',
+    color: '#10b981',
+    tint: 'rgba(16, 185, 129, 0.45)'
+  },
+
+  // FILA 2: Transición Verde a Cyan & Azul Eléctrico (Puente Operativo / Cognitivo)
+  {
+    id: 6,
+    code: 'BLK-06',
+    category: 'operativo',
+    file: 'SyborX Logo White.svg',
+    title: 'SyborX Cyber Mesh',
+    desc: 'Conectores API para orquestación multi-canal con microservicios desacoplados.',
+    kpi1: '+260% Sincronía',
+    kpi2: '4.2x ROI',
+    kpi3: '2 Semanas',
+    color: '#06b6d4',
+    tint: 'rgba(6, 182, 212, 0.45)'
+  },
+  {
+    id: 7,
+    code: 'BLK-07',
+    category: 'cognitivo',
+    file: 'Gemini_Generated_Image_b9fxdjb9fxdjb9fx.png',
+    title: 'Quantum Interface Node',
+    desc: 'Motor de renderizado y visualización tridimensional optimizado por aceleración GPU.',
+    kpi1: '60 FPS Ultra',
+    kpi2: '5.0x ROI',
+    kpi3: '3 Semanas',
+    color: '#0ea5e9',
+    tint: 'rgba(14, 165, 233, 0.45)'
+  },
+  {
+    id: 8,
+    code: 'BLK-08',
+    category: 'cognitivo',
+    file: 'SmbtK1.svg',
+    title: 'Smart Behavioral Kernel',
+    desc: 'Segmentación psicográfica en tiempo real y personalización dinámica del viaje de usuario.',
+    kpi1: '+310% Engagement',
+    kpi2: '4.8x ROI',
+    kpi3: '2 Semanas',
+    color: '#38bdf8',
+    tint: 'rgba(56, 189, 248, 0.45)'
+  },
+  {
+    id: 9,
+    code: 'BLK-09',
+    category: 'cognitivo',
+    file: 'Logo aida.png',
+    title: 'AIDA Conversion Funnel',
+    desc: 'Automatización holística de Atención, Interés, Deseo y Acción con disparadores inteligentes.',
+    kpi1: '+275% Cierre',
+    kpi2: '4.7x ROI',
+    kpi3: '2 Semanas',
+    color: '#3b82f6',
+    tint: 'rgba(59, 130, 246, 0.45)'
+  },
+  {
+    id: 10,
+    code: 'BLK-10',
+    category: 'cognitivo',
+    file: 'integritus2.svg',
+    title: 'Integritus Data Trust',
+    desc: 'Capa de trazabilidad inmutable y conciliación continua de métricas financieras.',
+    kpi1: '100% Precisión',
+    kpi2: '5.1x ROI',
+    kpi3: '3 Semanas',
+    color: '#2563eb',
+    tint: 'rgba(37, 99, 235, 0.45)'
+  },
+
+  // FILA 3: Azul Cognitivo Profundo -> Índigo -> Violeta (Núcleo Cognitivo)
+  {
+    id: 11,
+    code: 'BLK-11',
+    category: 'cognitivo',
+    file: 'Gemini_Generated_Image_q0r58zq0r58zq0r5.jpeg',
+    title: 'Cognitive Cloud Cluster',
+    desc: 'Clúster de inferencia distribuida para analítica predictiva de alto rendimiento.',
+    kpi1: '+410% Capacidad',
+    kpi2: '5.8x ROI',
+    kpi3: '3 Semanas',
+    color: '#433dae',
+    tint: 'rgba(67, 61, 174, 0.50)'
+  },
+  {
+    id: 12,
+    code: 'BLK-12',
+    category: 'cognitivo',
+    file: '52e4285a050dd168c90a3df236ebedfa.jpg',
+    title: 'Predictive Pipeline Array',
+    desc: 'Canalizaciones de scoring y lead routing automatizado para equipos de ventas estratégicas.',
+    kpi1: '+350% Velocidad',
+    kpi2: '5.3x ROI',
+    kpi3: '2 Semanas',
+    color: '#4f46e5',
+    tint: 'rgba(79, 70, 229, 0.45)'
+  },
+  {
+    id: 13,
+    code: 'BLK-13',
+    category: 'cognitivo',
+    file: '8388d28c9479d74bc7172d828307dd08.jpg',
+    title: 'Realtime Analytics Grid',
+    desc: 'Matriz de tableros ejecutivos con visualización instantánea de ratios de tracción.',
+    kpi1: '<10ms Latencia',
+    kpi2: '4.5x ROI',
+    kpi3: '2 Semanas',
+    color: '#6366f1',
+    tint: 'rgba(99, 102, 241, 0.45)'
+  },
+  {
+    id: 14,
+    code: 'BLK-14',
+    category: 'cognitivo',
+    file: 'd399b1a5bfab57de3bbba91441225b04.jpg',
+    title: 'Deep Learning Synapse',
+    desc: 'Algoritmos de ajuste dinámico de precios y ofertas personalizadas por intención de compra.',
+    kpi1: '+295% Margen',
+    kpi2: '5.6x ROI',
+    kpi3: '3 Semanas',
+    color: '#7c3aed',
+    tint: 'rgba(124, 58, 237, 0.45)'
+  },
+  {
+    id: 15,
+    code: 'BLK-15',
+    category: 'expansivo',
+    file: 'karloz vazquez logo.svg',
+    title: 'KV Strategic Architecture',
+    desc: 'Dirección de diseño de sistemas exponenciales y consultoría de conversión premium.',
+    kpi1: '+450% Escala',
+    kpi2: '6.5x ROI',
+    kpi3: '2 Semanas',
+    color: '#8b5cf6',
+    tint: 'rgba(139, 92, 246, 0.45)'
+  },
+
+  // FILA 4: Púrpura y Violeta Radiante (Núcleo Expansivo)
+  {
+    id: 16,
+    code: 'BLK-16',
+    category: 'expansivo',
+    file: 'poligonal02.png',
+    title: 'Polygonal 3D Matrix',
+    desc: 'Infraestructura espacial de alto impacto visual para inmersión sensorial y branding de élite.',
+    kpi1: '+380% Recordación',
+    kpi2: '5.7x ROI',
+    kpi3: '3 Semanas',
+    color: '#9d4edd',
+    tint: 'rgba(157, 78, 221, 0.45)'
+  },
+  {
+    id: 17,
+    code: 'BLK-17',
+    category: 'expansivo',
+    file: 'liquid01.png',
+    title: 'Liquid Metal Dynamic Scale',
+    desc: 'Arquitectura elástica adaptable a picos de tráfico masivo sin degradación de rendimiento.',
+    kpi1: '10x Concurrencia',
+    kpi2: '5.9x ROI',
+    kpi3: '2 Semanas',
+    color: '#a855f7',
+    tint: 'rgba(168, 85, 247, 0.45)'
+  },
+  {
+    id: 18,
+    code: 'BLK-18',
+    category: 'expansivo',
+    file: 'Brevemente02.png',
+    title: 'High-Speed Content Hub',
+    desc: 'Distribución multiformato de micro-contenidos de alta conversión para adquisición orgánica.',
+    kpi1: '+310% Tráfico',
+    kpi2: '4.4x ROI',
+    kpi3: '1 Semana',
+    color: '#b235e6',
+    tint: 'rgba(178, 53, 230, 0.45)'
+  },
+  {
+    id: 19,
+    code: 'BLK-19',
+    category: 'expansivo',
+    file: 'logo-diamonds.jpg',
+    title: 'Diamonds Luxury Vault',
+    desc: 'Ecosistema de monetización para productos de alto ticket con funnel de exclusividad.',
+    kpi1: '+420% Ticket Prom.',
+    kpi2: '6.2x ROI',
+    kpi3: '3 Semanas',
+    color: '#c026d3',
+    tint: 'rgba(192, 38, 211, 0.45)'
+  },
+  {
+    id: 20,
+    code: 'BLK-20',
+    category: 'expansivo',
+    file: '0f9bae2c281d0acad623fe111ef13bc4.jpg',
+    title: 'Omni-channel Router',
+    desc: 'Sincronización multi-plataforma de inventario, prospectos y transacciones globales.',
+    kpi1: '+285% Sincronía',
+    kpi2: '4.8x ROI',
+    kpi3: '2 Semanas',
+    color: '#d946ef',
+    tint: 'rgba(217, 70, 239, 0.45)'
+  },
+
+  // FILA 5: Magenta, Fucsia y Rosa Obsidian (Horizonte Expansivo)
+  {
+    id: 21,
+    code: 'BLK-21',
+    category: 'expansivo',
+    file: '76c339f1cb04a378b73d3c2df9a91bcd.jpg',
+    title: 'Multi-tier CDN Mesh',
+    desc: 'Aceleración de entrega perimetral con servidores edge distribuidos en 45 regiones globales.',
+    kpi1: '99.999% SLA',
+    kpi2: '5.1x ROI',
+    kpi3: '2 Semanas',
+    color: '#e879f9',
+    tint: 'rgba(232, 121, 249, 0.45)'
+  },
+  {
+    id: 22,
+    code: 'BLK-22',
+    category: 'expansivo',
+    file: 'images.jpeg',
+    title: 'High-Volume Ledger',
+    desc: 'Base de datos transaccional con procesamiento paralelo de miles de operaciones por segundo.',
+    kpi1: '12k TPS',
+    kpi2: '5.5x ROI',
+    kpi3: '3 Semanas',
+    color: '#f43f5e',
+    tint: 'rgba(244, 63, 94, 0.45)'
+  },
+  {
+    id: 23,
+    code: 'BLK-23',
+    category: 'expansivo',
+    file: 'images (1).jpeg',
+    title: 'Global Conversion Gateway',
+    desc: 'Pasarela multi-divisa y procesador inteligente de pagos transfronterizos sin fricción.',
+    kpi1: '+330% Checkout',
+    kpi2: '5.8x ROI',
+    kpi3: '2 Semanas',
+    color: '#ec4899',
+    tint: 'rgba(236, 72, 153, 0.45)'
+  },
+  {
+    id: 24,
+    code: 'BLK-24',
+    category: 'expansivo',
+    file: 'IMG_0828.JPG',
+    title: 'Executive Mission Control',
+    desc: 'Consola central de supervisión operativa y gobernanza de inteligencia de negocios.',
+    kpi1: '100% Control',
+    kpi2: '6.0x ROI',
+    kpi3: '3 Semanas',
+    color: '#db2777',
+    tint: 'rgba(219, 39, 119, 0.45)'
+  },
+  {
+    id: 25,
+    code: 'BLK-25',
+    category: 'expansivo',
+    file: 'Captura de pantalla 2026-08-30 a la(s) 6.54.20 p.m..png',
+    title: 'Vector Inside 3.0 Core OS',
+    desc: 'Sistema operativo unificado de aceleración digital, diseño cinemático y tracción predecible.',
+    kpi1: '+500% Expansión',
+    kpi2: '7.2x ROI',
+    kpi3: '3 Semanas',
+    color: '#be185d',
+    tint: 'rgba(190, 24, 93, 0.45)'
+  }
+];
+
+// ==================== FLOATING GALLERY (25 BLOQUES) ENGINE ====================
+class FloatingGallery {
+  constructor(rootId, data) {
+    this.root = document.getElementById(rootId);
+    this.data = data;
+    if (!this.root || !this.data || this.data.length === 0) return;
+
+    this.speed = 36; // px/sec baseline downward drift
+    this.reach = 280; // cursor repulsion radius
+    this.force = 110; // cursor repulsion force
+    this.zoomedIndex = null;
+    this.filter = 'all';
+
+    this.particles = [];
+    this.nodes = [];
+    this.pointer = { x: 0, y: 0, active: false };
+    this.size = { w: 0, h: 0 };
+    this.rafId = 0;
+    this.lastTime = performance.now();
+
+    this.initDOM();
+    this.initEvents();
+    this.measure();
+    this.startLoop();
+  }
+
+  hash01(i) {
+    const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  }
+
+  initDOM() {
+    this.root.innerHTML = '';
+    this.nodes = [];
+
+    const colX = [8, 28, 50, 72, 92];
+
+    this.data.forEach((item, i) => {
+      const col = i % 5;
+      const row = Math.floor(i / 5);
+      const xPct = colX[col];
+      const yPct = row * 58 + (col % 2 === 1 ? 29 : 0);
+
+      const node = document.createElement('div');
+      node.className = 'floating-gallery-card group absolute top-0 left-0 cursor-pointer select-none overflow-hidden rounded-2xl border will-change-transform';
+      node.style.width = `220px`;
+      node.style.height = `275px`;
+      node.style.borderColor = `${item.color}55`;
+      node.style.background = '#0b0b0d';
+      node.style.boxShadow = `0 12px 35px rgba(0,0,0,0.65), 0 0 15px ${item.color}22`;
+      node.style.transform = 'translate3d(-9999px, -9999px, 0)';
+
+      const encodedFile = encodeURIComponent(item.file);
+
+      node.innerHTML = `
+        <!-- Background Image with adjusted framing -->
+        <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <img src="ejecucion/Matriz%2025/${encodedFile}" alt="${item.title}"
+            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
+          
+          <!-- Color Tone Filter Overlay matching the block's exact color & category -->
+          <div class="absolute inset-0 pointer-events-none"
+            style="background: linear-gradient(135deg, ${item.color}35, ${item.color}85); mix-blend-mode: multiply;"></div>
+
+          <!-- Dark Vignette Gradient for cyber readability -->
+          <div class="absolute inset-0 bg-gradient-to-t from-vector-black/95 via-vector-black/35 to-vector-black/60 pointer-events-none"></div>
+        </div>
+
+        <!-- Top Code Badge & Glow Status Dot -->
+        <div class="relative z-10 p-3 flex justify-between items-center pointer-events-none">
+          <span class="font-mono text-[9px] sm:text-[10px] font-bold text-white bg-black/75 backdrop-blur-sm px-2 py-0.5 rounded border border-white/15">
+            ${item.code}
+          </span>
+          <div class="w-2.5 h-2.5 rounded-full border border-black/40 shadow-[0_0_10px_${item.color}]" style="background-color: ${item.color}"></div>
+        </div>
+
+        <!-- Center/Bottom Details (Title, Category, Description & KPIs on Zoom) -->
+        <div class="relative z-10 p-3 sm:p-3.5 mt-auto flex flex-col justify-end pointer-events-none bg-gradient-to-t from-vector-black/95 via-vector-black/80 to-transparent">
+          <span class="font-mono text-[8px] uppercase tracking-widest font-bold mb-0.5" style="color: ${item.color}">
+            ${item.category}
+          </span>
+          <h4 class="font-display font-black text-xs sm:text-sm uppercase text-white leading-tight mb-1 group-hover:text-vector-lime transition-colors">
+            ${item.title}
+          </h4>
+
+          <!-- Expanded Live HUD Details (Revealed smoothly on Center Zoom) -->
+          <div class="floating-card-details opacity-0 max-h-0 overflow-hidden transition-all duration-300">
+            <p class="font-body text-[11px] text-neutral-300 leading-snug my-2 border-t border-white/10 pt-2">
+              ${item.desc}
+            </p>
+            <div class="grid grid-cols-3 gap-1.5 font-mono text-[10px] pt-1">
+              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
+                <span class="text-text-muted block text-[8px]">ACEL.</span>
+                <span class="text-vector-lime font-bold">${item.kpi1}</span>
+              </div>
+              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
+                <span class="text-text-muted block text-[8px]">ROI</span>
+                <span class="text-white font-bold">${item.kpi2}</span>
+              </div>
+              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
+                <span class="text-text-muted block text-[8px]">TIEMPO</span>
+                <span class="text-white font-bold">${item.kpi3}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      node.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleZoom(i);
+      });
+
+      this.root.appendChild(node);
+      this.nodes.push(node);
+    });
+  }
+
+  initEvents() {
+    this.root.addEventListener('pointermove', (e) => {
+      const rect = this.root.getBoundingClientRect();
+      this.pointer.x = e.clientX - rect.left;
+      this.pointer.y = e.clientY - rect.top;
+      this.pointer.active = true;
+    });
+
+    this.root.addEventListener('pointerleave', () => {
+      this.pointer.active = false;
+    });
+
+    this.root.addEventListener('click', () => {
+      if (this.zoomedIndex !== null) {
+        this.toggleZoom(null);
+      }
+    });
+
+    window.addEventListener('resize', () => this.measure());
+
+    if (window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => this.measure());
+      this.resizeObserver.observe(this.root);
+    }
+  }
+
+  measure() {
+    const rect = this.root ? this.root.getBoundingClientRect() : {};
+    const measuredW = rect.width || (this.root ? this.root.offsetWidth : 0) || window.innerWidth;
+    const measuredH = rect.height || (this.root ? this.root.offsetHeight : 0) || (window.innerHeight - 100);
+    this.size.w = measuredW > 0 ? measuredW : window.innerWidth;
+    this.size.h = measuredH > 0 ? measuredH : (window.innerHeight - 100);
+    this.seed();
+  }
+
+  seed() {
+    const W = this.size.w || window.innerWidth || 1400;
+    const H = this.size.h || (window.innerHeight - 100) || 700;
+    this.size.w = W;
+    this.size.h = H;
+
+    // Organic non-grid scatter coordinates (% of container width & virtual height track)
+    const scatterLayout = [
+      { x: 12, y: 4,   w: 220, h: 280 },
+      { x: 44, y: 16,  w: 250, h: 215 },
+      { x: 78, y: 8,   w: 215, h: 275 },
+      { x: 25, y: 42,  w: 240, h: 240 },
+      { x: 90, y: 32,  w: 220, h: 290 },
+
+      { x: 60, y: 48,  w: 255, h: 210 },
+      { x: 7,  y: 68,  w: 230, h: 270 },
+      { x: 38, y: 84,  w: 210, h: 260 },
+      { x: 75, y: 74,  w: 245, h: 230 },
+      { x: 92, y: 95,  w: 215, h: 280 },
+
+      { x: 18, y: 114, w: 250, h: 210 },
+      { x: 50, y: 122, w: 220, h: 285 },
+      { x: 70, y: 138, w: 240, h: 240 },
+      { x: 30, y: 152, w: 210, h: 270 },
+      { x: 86, y: 158, w: 235, h: 250 },
+
+      { x: 9,  y: 178, w: 220, h: 280 },
+      { x: 46, y: 190, w: 255, h: 210 },
+      { x: 78, y: 204, w: 210, h: 270 },
+      { x: 22, y: 222, w: 240, h: 240 },
+      { x: 93, y: 220, w: 220, h: 290 },
+
+      { x: 58, y: 246, w: 250, h: 220 },
+      { x: 14, y: 262, w: 230, h: 270 },
+      { x: 42, y: 278, w: 210, h: 260 },
+      { x: 82, y: 292, w: 245, h: 230 },
+      { x: 89, y: 312, w: 215, h: 280 }
+    ];
+
+    // Responsive scaling factor for cards based on viewport
+    const scaleFactor = Math.min(1.15, Math.max(0.85, W / 1400));
+
+    this.particles = this.data.map((item, i) => {
+      const slot = scatterLayout[i % scatterLayout.length];
+      const cardW = Math.round(slot.w * scaleFactor);
+      const cardH = Math.round(slot.h * scaleFactor);
+
+      const node = this.nodes[i];
+      if (node) {
+        node.style.width = `${cardW}px`;
+        node.style.height = `${cardH}px`;
+      }
+
+      const prev = this.particles[i];
+      return {
+        x: (slot.x / 100) * W - cardW / 2,
+        y: prev ? prev.y : (slot.y / 100) * H - cardH / 2,
+        dx: prev ? prev.dx : 0,
+        dy: prev ? prev.dy : 0,
+        z: prev ? prev.z : 0,
+        targetZ: prev ? prev.targetZ : 0,
+        w: cardW,
+        h: cardH,
+        // Individual organic pacing & multidirectional floating waves
+        mult: 0.70 + this.hash01(i * 17) * 0.65,
+        swaySpeed: 0.6 + this.hash01(i * 23) * 0.8,
+        swayAmpX: 16 + this.hash01(i * 31) * 22,
+        swayPhase: this.hash01(i * 37) * Math.PI * 2,
+        rotAmp: (this.hash01(i * 41) - 0.5) * 5.5
+      };
+    });
+  }
+
+  toggleZoom(index) {
+    if (this.zoomedIndex === index || index === null) {
+      this.zoomedIndex = null;
+    } else {
+      this.zoomedIndex = index;
+    }
+
+    this.nodes.forEach((node, i) => {
+      const details = node.querySelector('.floating-card-details');
+      if (this.zoomedIndex === i) {
+        node.classList.add('border-vector-lime', 'shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_50px_rgba(195,244,0,0.35)]');
+        if (details) {
+          details.classList.remove('opacity-0', 'max-h-0');
+          details.classList.add('opacity-100', 'max-h-96');
+        }
+      } else {
+        node.classList.remove('border-vector-lime', 'shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_50px_rgba(195,244,0,0.35)]');
+        if (details) {
+          details.classList.add('opacity-0', 'max-h-0');
+          details.classList.remove('opacity-100', 'max-h-96');
+        }
+      }
+    });
+  }
+
+  setFilter(filter) {
+    this.filter = filter;
+    this.data.forEach((item, i) => {
+      const node = this.nodes[i];
+      if (!node) return;
+      if (this.filter === 'all' || item.category === this.filter) {
+        node.style.opacity = '1';
+        node.style.pointerEvents = 'auto';
+      } else {
+        node.style.opacity = '0.15';
+        node.style.pointerEvents = 'none';
+      }
+    });
+  }
+
+  startLoop() {
+    const loop = (now) => {
+      this.rafId = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+      this.lastTime = now;
+
+      // Real-time container width adaptation during expansion
+      const rect = this.root ? this.root.getBoundingClientRect() : {};
+      const curW = rect.width || (this.root ? this.root.offsetWidth : 0) || window.innerWidth;
+      const curH = rect.height || (this.root ? this.root.offsetHeight : 0) || (window.innerHeight - 100);
+      if (curW > 0 && Math.abs(curW - this.size.w) > 4) {
+        this.size.w = curW;
+        this.size.h = curH;
+        this.seed();
+      }
+
+      const W = this.size.w || window.innerWidth;
+      const H = this.size.h || (window.innerHeight - 100);
+      if (!W || !H) return;
+
+      const R = this.reach;
+      const F = this.force;
+      const drift = this.speed;
+      const p = this.pointer;
+      const zi = this.zoomedIndex;
+      const kOut = 1 - Math.exp(-8 * dt);
+      const totalSpan = H * 3.4;
+
+      for (let i = 0; i < this.particles.length; i++) {
+        const a = this.particles[i];
+        const node = this.nodes[i];
+        if (!node) continue;
+        const frozen = zi === i;
+
+        if (!frozen) {
+          a.y += drift * a.mult * dt;
+          if (a.y > H + 80) {
+            a.y -= totalSpan;
+          } else if (a.y < -totalSpan + H + 80) {
+            a.y += totalSpan;
+          }
+        }
+
+        let tx = 0;
+        let ty = 0;
+        if (p.active && !frozen && F > 0) {
+          const cx = a.x + a.w / 2;
+          const cy = a.y + a.h / 2;
+          let vx = cx - p.x;
+          let vy = cy - p.y;
+          const d = Math.hypot(vx, vy);
+          if (d < R && d > 0.001) {
+            const inv = 1 / d;
+            const fall = 1 - d / R;
+            const push = F * fall * fall;
+            tx = vx * inv * push;
+            ty = vy * inv * push;
+          }
+        }
+        a.dx += (tx - a.dx) * kOut;
+        a.dy += (ty - a.dy) * kOut;
+
+        const targetZ = frozen ? 1 : 0;
+        a.z += (targetZ - a.z) * 0.14;
+
+        // Multidirectional fluid floating motion (sinusoidal sway & micro-tilt)
+        const timeSec = now * 0.001;
+        const swayX = Math.sin(timeSec * a.swaySpeed + a.swayPhase) * a.swayAmpX;
+        const swayY = Math.cos(timeSec * 0.8 * a.swaySpeed + a.swayPhase) * 9;
+        const rotDeg = (1.0 - a.z) * a.rotAmp * Math.sin(timeSec * 0.7 * a.swaySpeed + a.swayPhase);
+
+        const baseX = a.x + a.dx + (swayX * (1.0 - a.z));
+        const baseY = a.y + a.dy + (swayY * (1.0 - a.z));
+        const z = a.z;
+        const px = baseX + ((W - a.w) / 2 - baseX) * z;
+        const py = baseY + ((H - a.h) / 2 - baseY) * z;
+
+        const fit = Math.min(1.85, (W * 0.85) / Math.max(1, a.w), (H * 0.82) / Math.max(1, a.h));
+        const s = 1 + (fit - 1) * z;
+
+        node.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0) scale(${s.toFixed(3)}) rotate(${rotDeg.toFixed(2)}deg)`;
+        node.style.zIndex = z > 0.01 ? '999' : '10';
+      }
+    };
+
+    this.rafId = requestAnimationFrame(loop);
+  }
+}
+
+// Smooth scroll to the 25-block matrix within the execution internal container
+function scrollToEjecucionMatriz() {
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const track = document.getElementById('sec-matriz-25-track');
+  if (container && track) {
+    const targetTop = track.offsetTop + 10;
+    container.scrollTo({ top: targetTop, behavior: 'smooth' });
+    updateActiveDockItem(3);
+  }
+}
+window.scrollToEjecucionMatriz = scrollToEjecucionMatriz;
+
+// ==================== SMOOTH SCROLL NAVIGATION WITHIN EXPANDED EXECUTION / METODOLOGÍA ====================
+function scrollToMetodologia() {
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const track = document.getElementById('sec-matriz-25-track');
+  if (container && track) {
+    const targetTop = track.offsetTop + (track.offsetHeight - container.clientHeight);
+    container.scrollTo({ top: targetTop, behavior: 'smooth' });
+    updateActiveDockItem(4);
+  }
+}
+window.scrollToMetodologia = scrollToMetodologia;
+window.triggerLaserMetodologiaTransition = scrollToMetodologia;
+window.triggerLaserEvidenciaTransition = scrollToEjecucionMatriz;
+
+// Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología)
+function initExecutionInternalScrollListener() {
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const track = document.getElementById('sec-matriz-25-track');
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+
+  if (container && track && metodologiaWrapper) {
+    const updateCurtain = () => {
+      const scrollY = container.scrollTop;
+      const trackTop = track.offsetTop;
+      const scrollableDistance = track.offsetHeight - container.clientHeight;
+
+      if (scrollY < trackTop - 100) {
+        // In Section 03 Cover
+        metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+        metodologiaWrapper.style.pointerEvents = 'none';
+        updateActiveDockItem(2); // 03 // Ejecución
+      } else if (scrollableDistance > 0 && scrollY >= trackTop) {
+        const pTrack = Math.min(1.0, Math.max(0, (scrollY - trackTop) / scrollableDistance));
+
+        // pTrack 0.0 -> 0.25: Floating Gallery pinned in full view
+        // pTrack 0.25 -> 0.85: Section 05 curtain slides UP from 100% to 0%
+        // pTrack 0.85 -> 1.0: Section 05 fully pinned & visible
+        if (pTrack < 0.25) {
+          metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'none';
+          updateActiveDockItem(3); // 04 // Evidencia (Floating Gallery)
+        } else if (pTrack < 0.85) {
+          const pCurtain = (pTrack - 0.25) / (0.85 - 0.25);
+          const yPct = (1.0 - pCurtain) * 100;
+          metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
+          metodologiaWrapper.style.pointerEvents = pCurtain > 0.6 ? 'auto' : 'none';
+          updateActiveDockItem(pCurtain > 0.5 ? 4 : 3);
+        } else {
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          updateActiveDockItem(4); // 05 // Metodología
+        }
+      } else {
+        metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+        metodologiaWrapper.style.pointerEvents = 'none';
+      }
+    };
+
+    container.addEventListener('scroll', updateCurtain, { passive: true });
+    updateCurtain();
+  }
+}
+
+// Initialize Floating Gallery Events & Instance
+function initFloatingGallery() {
+  window.floatingGalleryInstance = new FloatingGallery('floating-gallery-root', matriz25Data);
+
+  const filterBtns = document.querySelectorAll('.matriz-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => {
+        if (b.dataset.filter === btn.dataset.filter) {
+          b.classList.add('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+          b.classList.remove('bg-surface-dark', 'text-white');
+        } else {
+          b.classList.remove('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+          b.classList.add('bg-surface-dark', 'text-white');
+        }
+      });
+      if (window.floatingGalleryInstance) {
+        window.floatingGalleryInstance.setFilter(btn.dataset.filter);
+      }
+    });
+  });
+
+  initExecutionInternalScrollListener();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFloatingGallery);
+} else {
+  initFloatingGallery();
+}
+
+
 
 

@@ -92,25 +92,26 @@
   </div>
 
   <!-- ==================== HEADER & NAVIGATION ==================== -->
-  <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300">
+  <header id="main-global-header"
+    class="fixed top-0 left-0 w-full z-50 glass-nav glass-nav-dark transition-all duration-500">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
       <!-- Brand Logo -->
       <a href="index.html" class="flex items-center gap-3 group z-10">
-        <img src="Vector%20Inside%20imagotipo.svg" alt="Vector Inside Logo"
-          class="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105" />
+        <img id="header-brand-logo" src="Vector%20Inside%20imagotipo.svg" alt="Vector Inside Logo"
+          class="brand-logo-img h-8 sm:h-9 w-auto object-contain transition-all duration-300 group-hover:scale-105" />
       </a>
 
       <!-- Center Headline in Header (Centrado) -->
       <div
-        class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1">
+        class="header-center-headline hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1 transition-all duration-300">
         <span>Aceleración Digital // Diseño desde el Núcleo</span>
       </div>
 
       <!-- Header Right CTA Button -->
       <div class="flex items-center gap-3 ml-auto z-10">
-        <a href="diagnostico/index.html" class="btn-pill-nuclear group" id="header-pill-nav-btn">
-          <span class="btn-pill-bg"></span>
-          <span class="btn-pill-label">
+        <a href="diagnostico/index.html" class="btn-pill-nuclear header-cta-btn group" id="header-pill-nav-btn">
+          <span class="btn-pill-bg transition-colors duration-300"></span>
+          <span class="btn-pill-label transition-colors duration-300">
             <span class="pulse-dot mr-2"></span>
             <span>AUDITORÍA NUCLEAR</span>
           </span>
@@ -126,30 +127,29 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // Manifiesto</a>
     <a href="javascript:void(0)" onclick="scrollToSection3()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // Ecosistema</a>
-    <a href="javascript:void(0)"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">03 // Ejecución</a>
-    <a href="javascript:void(0)"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">04 // Evidencia</a>
-    <a href="javascript:void(0)"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">05 // Metodología</a>
-    <a href="javascript:void(0)"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-default">06 // Diagnóstico</a>
+    <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // Ejecución</a>
+    <a href="javascript:void(0)" onclick="triggerLaserEvidenciaTransition()"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Evidencia</a>
+    <a href="javascript:void(0)" onclick="triggerLaserMetodologiaTransition()"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Metodología</a>
+    <a href="diagnostico/index.html"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">06 // Diagnóstico</a>
   </nav>
 
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
-  <div id="hero-scroll-track" class="relative w-full h-[560vh] bg-black">
+  <div id="hero-scroll-track" class="relative w-full h-[720vh] bg-black">
     <!-- Pinned Sticky Viewport Window -->
     <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-20 px-6">
 
       <!-- ==================== HERO BACKGROUND VIDEO: Silver Silk Cloth Billowing ==================== -->
       <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <video id="hero-bg-video"
-          src="./Silver_silk_cloth_billowing_1080p_202608301525.mp4"
-          autoplay loop muted playsinline
-          class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
+        <video id="hero-bg-video" src="./Silver_silk_cloth_billowing_1080p_202608301525.mp4" autoplay loop muted
+          playsinline class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
         </video>
         <!-- Dark gradient vignette overlay for depth & typography contrast -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none">
+        </div>
       </div>
 
       <!-- Background 3D Canvas Layer -->
@@ -182,16 +182,15 @@
                     </clipPath>
                   </defs>
                   <!-- Outline stroke layer for both words -->
-                  <text x="0" y="75" text-anchor="start" class="stroke-draw-path font-display font-black"
-                    font-size="95" font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF"
-                    stroke-width="3.5" stroke-dasharray="3500" stroke-dashoffset="3500">
+                  <text x="0" y="75" text-anchor="start" class="stroke-draw-path font-display font-black" font-size="95"
+                    font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="3.5"
+                    stroke-dasharray="3500" stroke-dashoffset="3500">
                     <tspan x="0" y="75">DISEÑAMOS</tspan>
                     <tspan x="0" y="155">INSTINTO.</tspan>
                   </text>
                   <!-- Fill layer for both words with inverted split clip -->
-                  <text x="0" y="75" text-anchor="start" class="stroke-fill-path font-display font-black"
-                    font-size="95" font-weight="900" letter-spacing="-3.5" fill="#FFFFFF"
-                    clip-path="url(#stroke-text-clip)">
+                  <text x="0" y="75" text-anchor="start" class="stroke-fill-path font-display font-black" font-size="95"
+                    font-weight="900" letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
                     <tspan x="0" y="75">DISEÑAMOS</tspan>
                     <tspan x="0" y="155">INSTINTO.</tspan>
                   </text>
@@ -318,13 +317,13 @@
               </div>
 
               <!-- 03 Ejecución -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-operative-purple transition-all group block shadow-sm cursor-default">
+              <div onclick="scrollToSectionEjecucion()"
+                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-operative-purple transition-all group block shadow-sm cursor-pointer">
                 <span class="font-mono text-[10px] text-operative-purple-dark font-bold block mb-1">03 //</span>
                 <p
                   class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple transition-colors">
                   Ejecución</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Matriz 40 Bloques</p>
+                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Matriz </p>
               </div>
 
               <!-- 04 Evidencia -->
@@ -377,13 +376,6 @@
 
         </div>
 
-        <!-- Section 2 Footer inside fixed layer -->
-        <div
-          class="border-t border-black/10 pt-4 text-center font-mono text-[11px] text-neutral-500 max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>VECTOR INSIDE 3.0 // ARQUITECTURA INTEGRAL DE CRECIMIENTO</span>
-          <span>SYS_V.3.0.34</span>
-        </div>
-
       </div>
 
       <!-- ==================== LAYER 32: KINETIC TEXT GRID BACKGROUND (APPEAR TEXT - ORIGINKIT) ==================== -->
@@ -434,7 +426,7 @@
 
       <!-- ==================== LAYER 38: SECTION 3 BACKGROUND (FONDO ECOSISTEMA) ==================== -->
       <div id="sec3-bg-wrapper"
-        class="absolute inset-0 w-full h-full pointer-events-none z-[38] overflow-hidden opacity-0 transition-opacity duration-300">
+        class="absolute inset-0 w-full h-full pointer-events-none z-[38] overflow-hidden opacity-0 transition-none will-change-[filter,opacity]">
         <img src="fondo%20ecosistema.jpeg?v=3.0.1" alt="Fondo Ecosistema"
           class="w-full h-full object-cover object-center select-none" />
         <!-- Dark gradient overlay for contrast with text and cards -->
@@ -458,7 +450,7 @@
 
       <!-- ==================== LAYER 40: SECTION 3 ECOSISTEMA OVERLAY ==================== -->
       <div id="seccion-3-ecosistema"
-        class="absolute inset-0 z-[40] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-4 sm:px-6 max-w-7xl mx-auto transition-opacity duration-300">
+        class="absolute inset-0 z-[40] w-full h-full pointer-events-none opacity-0 flex flex-col justify-between pt-24 pb-32 px-4 sm:px-6 max-w-7xl mx-auto transition-none will-change-[filter,opacity]">
 
         <!-- Top Header for Section 3 -->
         <div class="relative z-10 flex items-center justify-between border-b border-white/15 pb-4">
@@ -491,7 +483,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">01 // NÚCLEO
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">01
+                      // NÚCLEO
                       ESTRUCTURAL</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">LATENCIA 0.02s</span>
@@ -500,7 +494,8 @@
                   ECOSISTEMA <span class="text-vector-lime">SIN FRICCIÓN</span>
                 </h3>
                 <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
-                  Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto a
+                  Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto
+                  a
                   cliente de alto valor.
                 </p>
                 <div
@@ -516,7 +511,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">03 // MOTOR
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">03
+                      // MOTOR
                       DE CONVERSIÓN</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">TIEMPO REAL</span>
@@ -541,7 +538,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">05 //
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">05
+                      //
                       ORQUESTACIÓN DE DATOS</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">PIPELINES 24/7</span>
@@ -550,7 +549,8 @@
                   PIPELINES <span class="text-vector-lime">& CRM PREDICTIVO</span>
                 </h3>
                 <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
-                  Sincronización bidireccional continua entre marketing, ventas y analítica que reduce el trabajo manual en un 70%.
+                  Sincronización bidireccional continua entre marketing, ventas y analítica que reduce el trabajo manual
+                  en un 70%.
                 </p>
                 <div
                   class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
@@ -570,7 +570,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">02 //
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">02
+                      //
                       SINCRONIZACIÓN TOTAL</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">OMNICANAL</span>
@@ -595,7 +597,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">04 //
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">04
+                      //
                       INTELIGENCIA OPERATIVA</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">TELEMETRÍA 24/7</span>
@@ -620,7 +624,9 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
-                    <span class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">06 //
+                    <span
+                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">06
+                      //
                       ESCALABILIDAD MODULAR</span>
                   </div>
                   <span class="font-mono text-[10px] text-text-muted">EXPANSIÓN 3.4x</span>
@@ -629,7 +635,8 @@
                   CRECIMIENTO <span class="text-operative-purple">EXPONENCIAL</span>
                 </h3>
                 <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
-                  Infraestructura tridimensional desacoplada que permite escalar el volumen transaccional sin fricción operativa.
+                  Infraestructura tridimensional desacoplada que permite escalar el volumen transaccional sin fricción
+                  operativa.
                 </p>
                 <div
                   class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
@@ -643,11 +650,287 @@
           </div>
         </div>
 
-        <!-- Section 3 Footer -->
-        <div
-          class="border-t border-white/10 pt-4 text-center font-mono text-[11px] text-text-muted flex items-center justify-between">
-          <span>VECTOR INSIDE 3.0 // CONTROL OPERATIVO TOTAL</span>
-          <span class="text-vector-lime font-bold">DESLIZA PARA CONTINUAR</span>
+      </div>
+
+      <!-- ==================== LAYER 50: SCROLL EXPAND PORTAL (03 // EJECUCIÓN) ==================== -->
+      <div id="sec-scroll-expand-wrapper"
+        class="absolute inset-0 z-[50] w-full h-full pointer-events-none flex items-center justify-center overflow-hidden opacity-0 will-change-transform">
+
+        <!-- Expanding Frame (Starts width: 44vw, height: 58vh, radius: 24px -> Expands to 100vw, 100vh, 0px) -->
+        <div id="scroll-expand-frame"
+          class="relative overflow-hidden border border-vector-lime/40 shadow-[0_0_90px_rgba(195,244,0,0.22),0_30px_100px_rgba(0,0,0,0.95)] bg-vector-black flex flex-col justify-between transition-none will-change-transform"
+          style="width: 44vw; height: 58vh; border-radius: 24px;">
+
+          <!-- Inner Background Media (Video Dashboard with scale 1.35 -> 1.0) -->
+          <div id="scroll-expand-media-wrapper"
+            class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
+            <video id="scroll-expand-video" src="dashboard.mp4" autoplay loop muted playsinline
+              class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
+            <!-- Overlay Scrim Gradient for high contrast -->
+            <div id="scroll-expand-scrim"
+              class="absolute inset-0 bg-gradient-to-t from-vector-black/95 via-vector-black/60 to-vector-black/80 pointer-events-none z-10">
+            </div>
+          </div>
+
+          <!-- Internal Scrollable Container for 03 // EJECUCIÓN -->
+          <div id="sec-ejecucion-scroll-container"
+            class="relative z-20 w-full h-full overflow-y-auto custom-scrollbar flex flex-col justify-between pointer-events-auto">
+
+            <!-- Sticky Top Meta Header -->
+            <div id="scroll-expand-header"
+              class="sticky top-0 z-30 w-full p-4 sm:p-5 px-6 sm:px-8 flex items-center justify-between border-b border-white/15 backdrop-blur-xl bg-vector-black/80">
+              <div class="flex items-center gap-3">
+                <span
+                  class="font-mono text-xs font-bold text-vector-black bg-vector-lime px-3 py-1 uppercase tracking-widest border border-vector-lime">
+                  03 // EJECUCIÓN
+                </span>
+                <span class="text-text-muted font-mono text-xs hidden sm:inline">// ARQUITECTURAS DESPLEGADAS EN
+                  PRODUCCIÓN</span>
+              </div>
+              <span class="font-mono text-xs text-vector-lime flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-vector-lime animate-ping"></span>
+                <span class="font-bold tracking-wider">MATRIZ 25 BLOQUES</span>
+              </span>
+            </div>
+
+            <!-- Stage 1: Main Cover Content for 03 // Ejecución -->
+            <div id="scroll-expand-body"
+              class="relative z-20 max-w-6xl w-full mx-auto px-6 sm:px-10 py-12 sm:py-16 flex flex-col justify-center items-start text-left min-h-[82vh]">
+
+              <div
+                class="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-dark/90 border border-vector-lime/30 font-mono text-xs text-vector-lime mb-4">
+                <span class="w-1.5 h-1.5 bg-vector-lime"></span>
+                <span>PORTADA DE EJECUCIÓN // SYS_V3.0</span>
+              </div>
+
+              <h2
+                class="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white leading-[0.95] mb-4">
+                Arquitecturas <span class="text-vector-lime">Desplegadas</span> &<br class="hidden sm:inline" />
+                Matriz de Casos Reales
+              </h2>
+
+              <p class="font-body text-xs sm:text-sm md:text-base text-neutral-300 max-w-2xl leading-relaxed mb-6">
+                Infraestructura tecnológica modular que acelera la captura, conversión y retención con telemetría en
+                tiempo real y 0% fricción operativa.
+              </p>
+
+              <!-- Quick Teaser KPI Grid -->
+              <div
+                class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 w-full max-w-3xl mb-6 sm:mb-8 font-mono text-xs">
+                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
+                  <span class="text-text-muted block text-[10px] uppercase">Aceleración</span>
+                  <span class="text-vector-lime text-base sm:text-xl font-bold">+280%</span>
+                </div>
+                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
+                  <span class="text-text-muted block text-[10px] uppercase">Retorno ROI</span>
+                  <span class="text-vector-lime text-base sm:text-xl font-bold">4.8x ROI</span>
+                </div>
+                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
+                  <span class="text-text-muted block text-[10px] uppercase">Despliegue</span>
+                  <span class="text-white text-base sm:text-xl font-bold">3 Semanas</span>
+                </div>
+                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
+                  <span class="text-text-muted block text-[10px] uppercase">Bloques Activos</span>
+                  <span class="text-operative-purple text-base sm:text-xl font-bold">25 Módulos</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Stage 2: Floating Gallery & Metodología Scrollytelling Pinned Curtain Track -->
+            <div id="sec-matriz-25-track" class="relative w-full min-h-[260vh]">
+
+              <!-- Layer 1 (Back / Pinned): Floating Gallery (Sticky Fullscreen Viewport) -->
+              <div id="sec-matriz-25-wrapper"
+                class="sticky top-0 z-10 w-full h-screen flex flex-col justify-between border-t border-white/15 overflow-hidden bg-vector-black">
+
+                <!-- Top Controls Bar: Badge, Title & Filters -->
+                <div
+                  class="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 pointer-events-auto">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="font-mono text-xs font-bold text-vector-black bg-vector-lime px-2.5 py-0.5 uppercase tracking-widest">
+                      04 EVIDENCIA // GALERÍA FLOTANTE
+                    </span>
+                    <div>
+                      <h3 class="font-display font-black text-lg sm:text-xl uppercase text-white tracking-tight">
+                        Sistemas Modulares & Casos Reales
+                      </h3>
+                      <p class="font-mono text-[11px] text-text-muted hidden sm:block">
+                        // HAZ CLIC EN CUALQUIER TARJETA PARA CENTRARLA Y EXPANDIR TELEMETRÍA
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Filter Buttons -->
+                  <div class="flex items-center gap-1.5 font-mono text-[11px] overflow-x-auto pb-1">
+                    <button
+                      class="matriz-filter-btn active px-3.5 py-1.5 border border-vector-lime bg-vector-lime text-vector-black font-bold cursor-pointer transition-all"
+                      data-filter="all">TODOS (25)</button>
+                    <button
+                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-vector-lime cursor-pointer transition-all"
+                      data-filter="operativo">OPERATIVO</button>
+                    <button
+                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-cognitive-blue cursor-pointer transition-all"
+                      data-filter="cognitivo">COGNITIVO</button>
+                    <button
+                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-operative-purple cursor-pointer transition-all"
+                      data-filter="expansivo">EXPANSIVO</button>
+                  </div>
+                </div>
+
+                <!-- Floating Gallery Canvas / Root Container (Touching bottom edge cleanly) -->
+                <div id="floating-gallery-root"
+                  class="relative w-full flex-1 min-h-[520px] overflow-hidden select-none pointer-events-auto"
+                  style="isolation: isolate; touch-action: none;">
+                  <!-- 25 Floating Cards dynamically rendered & animated by rAF physics loop -->
+                </div>
+
+              </div>
+
+              <!-- Layer 2 (Front / Revealing Curtain): 05 // METODOLOGÍA (White Liquid Glass Curtain) -->
+              <div id="sec-metodologia-wrapper"
+                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-y-auto pointer-events-none will-change-transform flex flex-col justify-center"
+                style="transform: translate3d(0, 100%, 0);">
+
+                <!-- Background Abstract Liquid Flow Motion Video -->
+                <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                  <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-60">
+                    <source src="Abstract_liquid_flow_motion_1080p_202608301513.mp4" type="video/mp4">
+                  </video>
+                  <!-- White Liquid Frosted Glass Overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-b from-white/90 via-white/75 to-white/95 backdrop-blur-[2px]">
+                  </div>
+                </div>
+
+                <!-- Main Stage 05 // Metodología -->
+                <div id="sec-metodologia-stage"
+                  class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 py-8 transition-all duration-300">
+                  <!-- Section Header -->
+                  <div class="flex flex-wrap items-end justify-between gap-6 border-b border-black/15 pb-6 mb-8">
+                    <div>
+                      <div class="flex items-center gap-3 mb-2">
+                        <span
+                          class="font-mono text-xs font-bold text-vector-lime bg-[#0b0b0d] px-3 py-1 uppercase tracking-widest shadow-sm">
+                          05 // METODOLOGÍA
+                        </span>
+                        <span class="text-neutral-600 font-mono text-xs font-semibold">// EL PIPELINE VECTOR // 4 FASES</span>
+                      </div>
+                      <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-[#0b0b0d]">
+                        Ingeniería de Aceleración en 4 Fases
+                      </h2>
+                    </div>
+                    <p class="font-mono text-xs text-neutral-700 max-w-md font-medium">
+                      Un proceso sistemático, medible y sin sorpresas diseñado para ejecutar en ciclos rápidos de alto
+                      impacto y tracción predecible.
+                    </p>
+                  </div>
+
+                  <!-- 4 Phases Interactive Journey Cards (White Brutalist Liquid Glass) -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+                    <!-- Phase 1 -->
+                    <div
+                      class="phase-card bg-white/85 backdrop-blur-xl p-6 sm:p-7 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      <div>
+                        <div class="flex justify-between items-center mb-4">
+                          <span class="font-mono text-xs text-black font-extrabold uppercase tracking-widest">FASE 01</span>
+                          <span
+                            class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA 1</span>
+                        </div>
+                        <h3
+                          class="font-display font-black text-lg sm:text-xl uppercase mb-2 text-[#0b0b0d] group-hover:text-black transition-colors">
+                          Diagnóstico Nuclear</h3>
+                        <p class="text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
+                          Auditoría profunda de cuellos de botella, latencias operativas y fugas de conversión en tus
+                          flujos actuales.
+                        </p>
+                      </div>
+                      <div
+                        class="p-3 bg-neutral-100/90 border-l-3 border-[#0b0b0d] font-mono text-[11px] text-neutral-900 rounded-r">
+                        <strong class="text-black font-bold">Entregable:</strong> Matriz de Fricción & Blueprint.
+                      </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div
+                      class="phase-card bg-white/85 backdrop-blur-xl p-6 sm:p-7 border border-black/15 hover:border-operative-purple transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      <div>
+                        <div class="flex justify-between items-center mb-4">
+                          <span class="font-mono text-xs text-operative-purple font-extrabold uppercase tracking-widest">FASE 02</span>
+                          <span
+                            class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA 2-3</span>
+                        </div>
+                        <h3
+                          class="font-display font-black text-lg sm:text-xl uppercase mb-2 text-[#0b0b0d] group-hover:text-operative-purple transition-colors">
+                          Arquitectura</h3>
+                        <p class="text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
+                          Diseño del plano maestro: estructura de bases de datos, integraciones de IA y dirección de arte
+                          vanguardista.
+                        </p>
+                      </div>
+                      <div
+                        class="p-3 bg-neutral-100/90 border-l-3 border-operative-purple font-mono text-[11px] text-neutral-900 rounded-r">
+                        <strong class="text-operative-purple font-bold">Entregable:</strong> Prototipos & Blueprint.
+                      </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div
+                      class="phase-card bg-white/85 backdrop-blur-xl p-6 sm:p-7 border border-black/15 hover:border-cognitive-blue transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      <div>
+                        <div class="flex justify-between items-center mb-4">
+                          <span class="font-mono text-xs text-cognitive-blue font-extrabold uppercase tracking-widest">FASE 03</span>
+                          <span
+                            class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA 4-6</span>
+                        </div>
+                        <h3
+                          class="font-display font-black text-lg sm:text-xl uppercase mb-2 text-[#0b0b0d] group-hover:text-cognitive-blue transition-colors">
+                          Despliegue</h3>
+                        <p class="text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
+                          Implementación de código limpio, automatizaciones, conexión de modelos y puesta en marcha sin
+                          interrumpir la operación.
+                        </p>
+                      </div>
+                      <div
+                        class="p-3 bg-neutral-100/90 border-l-3 border-cognitive-blue font-mono text-[11px] text-neutral-900 rounded-r">
+                        <strong class="text-cognitive-blue font-bold">Entregable:</strong> Ecosistema Operativo.
+                      </div>
+                    </div>
+
+                    <!-- Phase 4 -->
+                    <div
+                      class="phase-card bg-white/85 backdrop-blur-xl p-6 sm:p-7 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      <div>
+                        <div class="flex justify-between items-center mb-4">
+                          <span class="font-mono text-xs text-black font-extrabold uppercase tracking-widest">FASE 04</span>
+                          <span
+                            class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">CONTINUO</span>
+                        </div>
+                        <h3
+                          class="font-display font-black text-lg sm:text-xl uppercase mb-2 text-[#0b0b0d] group-hover:text-black transition-colors">
+                          Aceleración</h3>
+                        <p class="text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
+                          Monitoreo en tiempo real, optimización de algoritmos de conversión y escalamiento exponencial
+                          continuo.
+                        </p>
+                      </div>
+                      <div
+                        class="p-3 bg-neutral-100/90 border-l-3 border-[#0b0b0d] font-mono text-[11px] text-neutral-900 rounded-r">
+                        <strong class="text-black font-bold">Entregable:</strong> Reportes & Optimización.
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
 
       </div>
