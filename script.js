@@ -3718,33 +3718,32 @@ class RubikCubeScene {
   constructor(container, cfg) {
     this.container = container;
     this.cfg = Object.assign({
-      color: "#60B959",
-      cubeGrid: 4,
-      dotsPerFace: 6,
-      dotSize: 5,
-      dragSensitivity: 0.2,
-      rotation: { x: -12, y: 12, z: 12 },
-      duration: 0.75,
-      sizePercent: 96
+      color: "#58F306",
+      cubeGrid: 3,
+      dotsPerFace: 5,
+      dotSize: 4.8,
+      dragSensitivity: 0.28,
+      rotation: { x: -14, y: 16, z: 10 },
+      duration: 0.65,
+      sizePercent: 100
     }, cfg);
 
     this.canvas = document.createElement("canvas");
-    this.canvas.style.position = "absolute";
-    this.canvas.style.inset = "0";
-    this.canvas.style.width = "100%";
-    this.canvas.style.height = "100%";
-    this.canvas.style.zIndex = "30";
-    this.canvas.style.cursor = "grab";
-    this.canvas.style.touchAction = "none";
+    this.canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;display:block;";
     container.appendChild(this.canvas);
 
     const ctx = this.canvas.getContext("2d");
     if (!ctx) throw new Error("2D context unavailable");
     this.ctx = ctx;
 
-    this.dpr = 1;
-    this.width = 1;
-    this.height = 1;
+    // Resolve size immediately from container
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = container.getBoundingClientRect();
+    this.width = Math.max(rect.width || container.offsetWidth || 100, 10);
+    this.height = Math.max(rect.height || container.offsetHeight || 100, 10);
+    // Set physical canvas size
+    this.canvas.width = Math.floor(this.width * this.dpr);
+    this.canvas.height = Math.floor(this.height * this.dpr);
 
     this.shell = buildRubikShell(this.clampGrid(this.cfg.cubeGrid), this.clampDots(this.cfg.dotsPerFace));
     this.adoptShell();
@@ -3767,7 +3766,7 @@ class RubikCubeScene {
     this.turnTarget = 0;
     this.turnProgress = 0;
     this.turnStartTime = 0;
-    this.turnDuration = (this.cfg.duration || 0.75) * 1000;
+    this.turnDuration = (this.cfg.duration || 0.65) * 1000;
     this.turnMembers = [];
     this.lastMove = null;
 
@@ -3818,7 +3817,7 @@ class RubikCubeScene {
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
 
-      const sens = (this.cfg.dragSensitivity || 0.2) * 0.008;
+      const sens = (this.cfg.dragSensitivity || 0.28) * 0.008;
       this.ay += dx * sens;
       this.ax += dy * sens;
     };
@@ -3915,13 +3914,12 @@ class RubikCubeScene {
   }
 
   step(now) {
-    if (this.width <= 1 || this.height <= 1) {
+    // Auto-recover size if canvas lost dimensions
+    if (this.width < 10 || this.height < 10) {
       const rect = this.container.getBoundingClientRect();
-      const w = rect.width || this.container.offsetWidth || 74;
-      const h = rect.height || this.container.offsetHeight || 74;
-      if (w > 1 && h > 1) {
-        this.setSize(w, h);
-      }
+      const w = rect.width || this.container.offsetWidth || 100;
+      const h = rect.height || this.container.offsetHeight || 100;
+      if (w >= 10 && h >= 10) this.setSize(w, h);
     }
 
     let dt = (now - this.lastT) / 1000;
@@ -3955,17 +3953,21 @@ class RubikCubeScene {
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
-    if (w <= 0 || h <= 0) return;
+    if (w < 10 || h < 10) return;
 
-    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
+    // Draw in PHYSICAL pixels (canvas.width x canvas.height)
+    // ctx.resetTransform() resets any accidental transforms
+    const pw = Math.floor(w * this.dpr);
+    const ph = Math.floor(h * this.dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, pw, ph);
     ctx.fillStyle = "#080808";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, pw, ph);
 
-    const cx = w / 2;
-    const cy = h / 2;
-    const sizePct = Math.max(20, Math.min(200, Math.round(this.cfg.sizePercent || 100)));
-    const scale = Math.min(w, h) * 0.32 * (sizePct / 100);
+    // All drawing coordinates must be in PHYSICAL pixels
+    const cx = pw / 2;
+    const cy = ph / 2;
+    const scale = Math.min(pw, ph) * 0.38;
 
     const cax = Math.cos(this.ax);
     const sax = Math.sin(this.ax);
@@ -4012,17 +4014,19 @@ class RubikCubeScene {
     const order = this.order;
     order.sort((a, b) => this.depth[a] - this.depth[b]);
 
-    ctx.fillStyle = this.cfg.color || "#58F306";
-    ctx.shadowColor = this.cfg.color || "#58F306";
-    ctx.shadowBlur = 6;
-    const baseDot = (this.cfg.dotSize || 5);
+    const color = this.cfg.color || "#58F306";
+    const baseDot = (this.cfg.dotSize || 4.8) * this.dpr;
+
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8 * this.dpr;
 
     for (let o = 0; o < count; o++) {
       const i = order[o];
       const t = (this.depth[i] + HALF_DIAG) / (2 * HALF_DIAG);
       const tc = t < 0 ? 0 : t > 1 ? 1 : t;
-      ctx.globalAlpha = 0.55 + 0.45 * tc;
-      const r = Math.max(1.8, baseDot * (0.65 + 0.55 * tc));
+      ctx.globalAlpha = 0.5 + 0.5 * tc;
+      const r = Math.max(1.5 * this.dpr, baseDot * (0.6 + 0.5 * tc));
       ctx.beginPath();
       ctx.arc(this.pxp[i], this.pyp[i], r, 0, Math.PI * 2);
       ctx.fill();
@@ -4036,6 +4040,11 @@ class RubikCubeScene {
 function initRubikCube() {
   const container = document.getElementById("rubik-cube-root");
   if (!container) return;
+
+  // Ensure container is positioned for absolute child
+  if (getComputedStyle(container).position === "static") {
+    container.style.position = "relative";
+  }
 
   try {
     const scene = new RubikCubeScene(container, {
@@ -4052,14 +4061,16 @@ function initRubikCube() {
 
     const updateSize = () => {
       const rect = container.getBoundingClientRect();
-      const w = rect.width || container.offsetWidth || 74;
-      const h = rect.height || container.offsetHeight || 74;
+      const w = rect.width || container.offsetWidth || 100;
+      const h = rect.height || container.offsetHeight || 100;
       if (w > 0 && h > 0) {
         scene.setSize(w, h);
       }
     };
 
-    updateSize();
+    // Update size after a brief delay to let layout settle
+    setTimeout(updateSize, 50);
+    setTimeout(updateSize, 200);
     window.addEventListener("resize", updateSize);
 
     if (window.ResizeObserver) {
