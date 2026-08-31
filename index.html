@@ -137,7 +137,7 @@
   </nav>
 
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
-  <div id="hero-scroll-track" class="relative w-full h-[520vh] bg-black">
+  <div id="hero-scroll-track" class="relative w-full h-[560vh] bg-black">
     <!-- Pinned Sticky Viewport Window -->
     <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-20 px-6">
 
@@ -308,8 +308,8 @@
               </div>
 
               <!-- 02 Ecosistema -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-black transition-all group block shadow-sm cursor-default">
+              <div onclick="scrollToSection3()"
+                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-black transition-all group block shadow-sm cursor-pointer">
                 <span class="font-mono text-[10px] text-vector-black font-bold block mb-1">02 //</span>
                 <p
                   class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple-dark transition-colors">
@@ -432,6 +432,15 @@
         </div>
       </div>
 
+      <!-- ==================== LAYER 38: SECTION 3 BACKGROUND (FONDO ECOSISTEMA) ==================== -->
+      <div id="sec3-bg-wrapper"
+        class="absolute inset-0 w-full h-full pointer-events-none z-[38] overflow-hidden opacity-0 transition-opacity duration-300">
+        <img src="fondo%20ecosistema.jpeg?v=3.0.1" alt="Fondo Ecosistema"
+          class="w-full h-full object-cover object-center select-none" />
+        <!-- Dark gradient overlay for contrast with text and cards -->
+        <div class="absolute inset-0 bg-black/45 pointer-events-none"></div>
+      </div>
+
       <!-- ==================== LAYER 39: SECTION 3 FLANKING ASSETS (POLYGONAL LEFT & LIQUID RIGHT) ==================== -->
       <div id="sec3-flanks-wrapper" class="absolute inset-0 w-full h-full pointer-events-none z-[39] overflow-hidden">
         <!-- Left Flank: poligonal02.png (Entra de izquierda a derecha, 50% visible) -->
@@ -469,12 +478,12 @@
 
         <!-- Section 3 Cascading Dual-Column Stream with Internal Scroll (Horizontally Compressed) -->
         <div id="sec3-cards-scroll-container"
-          class="relative z-10 w-full max-w-[760px] mx-auto my-auto overflow-y-hidden max-h-[calc(100vh-220px)] pointer-events-auto pr-3 pt-4 pb-20 custom-scrollbar">
+          class="relative z-10 w-full max-w-[760px] mx-auto my-auto overflow-y-auto max-h-[calc(100vh-220px)] pointer-events-auto pr-3 pt-4 pb-20 custom-scrollbar">
 
           <div id="sec3-cards-stream" class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 overflow-visible">
 
             <!-- Column 1 (Left Stream - Generous Vertical Separation) -->
-            <div class="flex flex-col gap-8 sm:gap-10 lg:gap-12 pb-12">
+            <div class="flex flex-col gap-16 sm:gap-20 lg:gap-24 pb-32">
 
               <!-- Card 01 (Col 1, Item 0) -->
               <div id="sec3-card-0"
@@ -553,7 +562,7 @@
             </div>
 
             <!-- Column 2 (Right Stream - Staggered Offset & Generous Separation) -->
-            <div class="flex flex-col gap-8 sm:gap-10 lg:gap-12 md:mt-16 pb-12">
+            <div class="flex flex-col gap-16 sm:gap-20 lg:gap-24 md:mt-24 pb-32">
 
               <!-- Card 02 (Col 2, Item 1) -->
               <div id="sec3-card-1"

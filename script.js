@@ -1549,6 +1549,68 @@ function initHero3DModel() {
     }, { passive: true });
   }
 
+  // ==================== BIDIRECTIONAL SCROLL CONTROLLER FOR SECTION 3 (ECOSISTEMA) ====================
+  let isUserInteractingSec3 = false;
+  let sec3InteractionTimer = null;
+  const sec3EcosystemElem = document.getElementById('seccion-3-ecosistema');
+  const sec3ScrollContainerElem = document.getElementById('sec3-cards-scroll-container');
+
+  if (sec3EcosystemElem) {
+    // Forward wheel events inside ecosystem directly to window scroll for seamless global sync
+    sec3EcosystemElem.addEventListener('wheel', (e) => {
+      window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+      e.preventDefault();
+    }, { passive: false });
+
+    // Touch support for mobile touchscreens & trackpads
+    let sec3TouchStartY = 0;
+    sec3EcosystemElem.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        sec3TouchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    sec3EcosystemElem.addEventListener('touchmove', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = sec3TouchStartY - currentY; // > 0 = drag up / scroll down, < 0 = drag down / scroll up
+      sec3TouchStartY = currentY;
+      window.scrollBy({ top: deltaY, behavior: 'auto' });
+    }, { passive: true });
+  }
+
+  if (sec3ScrollContainerElem) {
+    // If the user manually scrolls or drags the scrollbar of the cards container
+    sec3ScrollContainerElem.addEventListener('scroll', () => {
+      if (isUserInteractingSec3) {
+        const maxInternalScroll = sec3ScrollContainerElem.scrollHeight - sec3ScrollContainerElem.clientHeight;
+        if (maxInternalScroll > 0) {
+          const ratio = Math.max(0, Math.min(1.0, sec3ScrollContainerElem.scrollTop / maxInternalScroll));
+          const targetProgress = 0.865 + ratio * (1.0 - 0.865);
+          const track = document.getElementById('hero-scroll-track');
+          if (track) {
+            const trackRect = track.getBoundingClientRect();
+            const trackTop = window.scrollY + trackRect.top;
+            const maxScroll = track.offsetHeight - window.innerHeight;
+            window.scrollTo(0, trackTop + targetProgress * maxScroll);
+          }
+        }
+      }
+    }, { passive: true });
+
+    sec3ScrollContainerElem.addEventListener('pointerdown', () => {
+      isUserInteractingSec3 = true;
+    });
+    window.addEventListener('pointerup', () => {
+      if (isUserInteractingSec3) {
+        clearTimeout(sec3InteractionTimer);
+        sec3InteractionTimer = setTimeout(() => {
+          isUserInteractingSec3 = false;
+        }, 150);
+      }
+    });
+  }
+
   // Smooth scroll tracking variables & Exact Deep Eye Cavity Target for poligonal-30-08-26.glb
   let currentScrollLerp = 0;
   const targetEyePos = new THREE.Vector3(0.85, 0.40, 1.05); // Calibrated exact target for poligonal-30-08-26.glb
@@ -1568,10 +1630,6 @@ function initHero3DModel() {
       }
     });
   }
-
-  // State variables for Section 3 internal scroll delayed activation (1 second delay after reaching position)
-  let sec3ScrollUnlockTimer = null;
-  let isSec3InternalScrollEnabled = false;
 
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
   function animate() {
@@ -2005,6 +2063,18 @@ function initHero3DModel() {
       }
     }
 
+    // Section 3 Background Image (fondo ecosistema.jpeg) Transition
+    const sec3BgWrapper = document.getElementById('sec3-bg-wrapper');
+    if (sec3BgWrapper) {
+      if (currentScrollLerp >= T_SPIN_END) {
+        const pBgSec3 = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
+        const pBgEased = Math.sin((pBgSec3 * Math.PI) / 2);
+        sec3BgWrapper.style.opacity = pBgEased.toFixed(3);
+      } else {
+        sec3BgWrapper.style.opacity = '0';
+      }
+    }
+
     // Flanking Assets Animation (poligonal02 from left, liquid01 from right, both 50% visible at rest)
     const flankLeft = document.getElementById('sec3-flank-left');
     const flankRight = document.getElementById('sec3-flank-right');
@@ -2034,24 +2104,13 @@ function initHero3DModel() {
     const sec3Container = document.getElementById('seccion-3-ecosistema');
     const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
     if (sec3Container) {
-      if (currentScrollLerp >= 0.835) {
+      if (currentScrollLerp >= 0.830) {
         sec3Container.style.opacity = '1';
         sec3Container.style.pointerEvents = 'auto';
 
-        // Deshabilitar scroll interno hasta 1 segundo después de que las imágenes laterales toman su posición
-        if (!sec3ScrollUnlockTimer && !isSec3InternalScrollEnabled) {
-          sec3ScrollUnlockTimer = setTimeout(() => {
-            isSec3InternalScrollEnabled = true;
-            if (sec3ScrollContainer) {
-              sec3ScrollContainer.style.overflowY = 'auto';
-            }
-          }, 1000);
-        }
-
-        // Escalonamiento secuencial: Las 6 tarjetas comienzan a aparecer EXACTAMENTE cuando las imágenes laterales ya tomaron posición
-        // La tarjeta 01 aparece primero para asegurar su total visibilidad en el visor
-        const cardStarts = [0.835, 0.845, 0.855, 0.865, 0.875, 0.885];
-        const cardDuration = 0.025;
+        // Escalonamiento secuencial ágil para la revelación inicial de las 6 tarjetas
+        const cardStarts = [0.830, 0.836, 0.842, 0.848, 0.854, 0.860];
+        const cardDuration = 0.016;
 
         for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
@@ -2068,20 +2127,24 @@ function initHero3DModel() {
             }
           }
         }
+
+        // Sincronización continua e instantánea del scroll de tarjetas con el scroll general
+        if (sec3ScrollContainer && !isUserInteractingSec3) {
+          const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
+          if (maxInternalScroll > 0) {
+            if (currentScrollLerp <= 0.860) {
+              sec3ScrollContainer.scrollTop = 0;
+            } else {
+              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.860) / (1.0 - 0.860)));
+              sec3ScrollContainer.scrollTop = pScrollCards * maxInternalScroll;
+            }
+          }
+        }
       } else {
         sec3Container.style.opacity = '0';
         sec3Container.style.pointerEvents = 'none';
 
-        // Reset scroll unlock timer and lock internal scroll when scrolling back
-        if (sec3ScrollUnlockTimer) {
-          clearTimeout(sec3ScrollUnlockTimer);
-          sec3ScrollUnlockTimer = null;
-        }
-        if (isSec3InternalScrollEnabled) {
-          isSec3InternalScrollEnabled = false;
-        }
-        if (sec3ScrollContainer) {
-          sec3ScrollContainer.style.overflowY = 'hidden';
+        if (sec3ScrollContainer && !isUserInteractingSec3) {
           sec3ScrollContainer.scrollTop = 0;
         }
 
@@ -2116,14 +2179,18 @@ function initHero3DModel() {
         const pClose = (currentScrollLerp - T_EXIT_START) / (T_EXIT_END - T_EXIT_START);
         dockOpacity = Math.max(0, 1.0 - pClose * 1.5);
         updateActiveDockItem(null);
-      } else if (currentScrollLerp < T_SPIN_END) {
-        // Transición Smartphone 3D (Zoom out y giro)
+      } else if (currentScrollLerp < T_PHONE_ZOOM_START + 0.05) {
+        // Breve transición hacia el smartphone
         dockOpacity = 0;
         updateActiveDockItem(null);
+      } else if (currentScrollLerp < T_PHONE_ZOOM_END) {
+        // Smartphone emerge y se centra: el dock reaparece suavemente con 02 // Ecosistema activo
+        const pDockEcosistema = (currentScrollLerp - (T_PHONE_ZOOM_START + 0.05)) / (T_PHONE_ZOOM_END - (T_PHONE_ZOOM_START + 0.05));
+        dockOpacity = Math.min(1.0, Math.max(0, pDockEcosistema));
+        updateActiveDockItem(1);
       } else {
-        // Sección 3 Desplegada: Vuelve a aparecer con 02 // Ecosistema activo
-        const pSec3 = (currentScrollLerp - T_SPIN_END) / (1.0 - T_SPIN_END);
-        dockOpacity = Math.min(1.0, pSec3 * 2.0);
+        // Ecosistema completo (Smartphone 3D, giro 360 y flujo de tarjetas): Dock 100% visible con 02 // Ecosistema activo
+        dockOpacity = 1.0;
         updateActiveDockItem(1);
       }
       bottomDock.style.opacity = dockOpacity.toFixed(3);
@@ -2425,8 +2492,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 85%: Flancos laterales fijados y tarjeta 01 plenamente visible en el visor
-  const targetY = trackTop + maxScroll * 0.85;
+  // Posición al 60% (0.60): Smartphone 3D centrado frontalmente con fondo cinético (Etapa Ecosistema)
+  const targetY = trackTop + maxScroll * 0.60;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
