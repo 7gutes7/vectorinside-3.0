@@ -3639,32 +3639,6 @@ function initExecutionInternalScrollListener() {
   }
 }
 
-// Initialize Floating Gallery Events & Instance
-function initFloatingGallery() {
-  window.floatingGalleryInstance = new FloatingGallery('floating-gallery-root', matriz25Data);
-
-  const filterBtns = document.querySelectorAll('.matriz-filter-btn');
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => {
-        if (b.dataset.filter === btn.dataset.filter) {
-          b.classList.add('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
-          b.classList.remove('bg-surface-dark', 'text-white');
-        } else {
-          b.classList.remove('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
-          b.classList.add('bg-surface-dark', 'text-white');
-        }
-      });
-      if (window.floatingGalleryInstance) {
-        window.floatingGalleryInstance.setFilter(btn.dataset.filter);
-      }
-    });
-  });
-
-  initExecutionInternalScrollListener();
-  initRubikCube();
-}
-
 // ==================== ORIGINKIT 3D PARTICLE RUBIK CUBE SCENE ====================
 function latticeCoord(i, n) {
   return n <= 1 ? 0 : -1 + (2 * i) / (n - 1);
@@ -3943,8 +3917,10 @@ class RubikCubeScene {
   step(now) {
     if (this.width <= 1 || this.height <= 1) {
       const rect = this.container.getBoundingClientRect();
-      if (rect.width > 1 && rect.height > 1) {
-        this.setSize(rect.width, rect.height);
+      const w = rect.width || this.container.offsetWidth || 74;
+      const h = rect.height || this.container.offsetHeight || 74;
+      if (w > 1 && h > 1) {
+        this.setSize(w, h);
       }
     }
 
@@ -4061,37 +4037,74 @@ function initRubikCube() {
   const container = document.getElementById("rubik-cube-root");
   if (!container) return;
 
-  const scene = new RubikCubeScene(container, {
-    color: "#60B959",
-    cubeGrid: 4,
-    dotsPerFace: 6,
-    dotSize: 4.5,
-    dragSensitivity: 0.2,
-    rotation: { x: -12, y: 12, z: 12 },
-    sizePercent: 96,
-    duration: 0.75
-  });
+  try {
+    const scene = new RubikCubeScene(container, {
+      color: "#60B959",
+      cubeGrid: 4,
+      dotsPerFace: 6,
+      dotSize: 4.5,
+      dragSensitivity: 0.2,
+      rotation: { x: -12, y: 12, z: 12 },
+      sizePercent: 96,
+      duration: 0.75
+    });
+    window.rubikSceneInstance = scene;
 
-  const updateSize = () => {
-    const rect = container.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      scene.setSize(rect.width, rect.height);
+    const updateSize = () => {
+      const rect = container.getBoundingClientRect();
+      const w = rect.width || container.offsetWidth || 74;
+      const h = rect.height || container.offsetHeight || 74;
+      if (w > 0 && h > 0) {
+        scene.setSize(w, h);
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => updateSize());
+      ro.observe(container);
     }
-  };
-
-  updateSize();
-  window.addEventListener("resize", updateSize);
-
-  if (window.ResizeObserver) {
-    const ro = new ResizeObserver(() => updateSize());
-    ro.observe(container);
+  } catch (e) {
+    console.error("RubikCube init error:", e);
   }
 }
 
+// Initialize Floating Gallery Events & Instance
+function initFloatingGallery() {
+  window.floatingGalleryInstance = new FloatingGallery('floating-gallery-root', matriz25Data);
+
+  const filterBtns = document.querySelectorAll('.matriz-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => {
+        if (b.dataset.filter === btn.dataset.filter) {
+          b.classList.add('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+          b.classList.remove('bg-surface-dark', 'text-white');
+        } else {
+          b.classList.remove('active', 'bg-vector-lime', 'text-vector-black', 'font-bold');
+          b.classList.add('bg-surface-dark', 'text-white');
+        }
+      });
+      if (window.floatingGalleryInstance) {
+        window.floatingGalleryInstance.setFilter(btn.dataset.filter);
+      }
+    });
+  });
+
+  initExecutionInternalScrollListener();
+  initRubikCube();
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initFloatingGallery);
+  document.addEventListener('DOMContentLoaded', () => {
+    initFloatingGallery();
+    initRubikCube();
+  });
 } else {
   initFloatingGallery();
+  initRubikCube();
 }
 
 
