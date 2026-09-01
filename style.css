@@ -662,5 +662,26 @@ body {
   background: rgba(195, 244, 0, 0.85);
 }
 
+/* ==================== 06 // DIAGNÓSTICO SCROLL DISPLACEMENT & CONTRACTION ==================== */
+#sec-06-diagnostico {
+  position: relative;
+  width: 100%;
+  opacity: 0;
+  transform: translate3d(0, 90px, 0);
+  filter: blur(18px);
+  will-change: transform, opacity, filter;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.8s ease,
+              filter 0.8s ease;
+  pointer-events: none;
+}
+
+#sec-06-diagnostico.diag-active {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+  filter: blur(0px) !important;
+  pointer-events: auto !important;
+}
+
 
 

@@ -3276,361 +3276,8 @@ const matriz25Data = [
     tint: 'rgba(190, 24, 93, 0.45)'
   }
 ];
-
-// ==================== FLOATING GALLERY (25 BLOQUES) ENGINE ====================
-class FloatingGallery {
-  constructor(rootId, data) {
-    this.root = document.getElementById(rootId);
-    this.data = data;
-    if (!this.root || !this.data || this.data.length === 0) return;
-
-    this.speed = 36; // px/sec baseline downward drift
-    this.reach = 280; // cursor repulsion radius
-    this.force = 110; // cursor repulsion force
-    this.zoomedIndex = null;
-    this.filter = 'all';
-
-    this.particles = [];
-    this.nodes = [];
-    this.pointer = { x: 0, y: 0, active: false };
-    this.size = { w: 0, h: 0 };
-    this.rafId = 0;
-    this.lastTime = performance.now();
-
-    this.initDOM();
-    this.initEvents();
-    this.measure();
-    this.startLoop();
-  }
-
-  hash01(i) {
-    const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-    return s - Math.floor(s);
-  }
-
-  initDOM() {
-    this.root.innerHTML = '';
-    this.nodes = [];
-
-    const colX = [8, 28, 50, 72, 92];
-
-    this.data.forEach((item, i) => {
-      const col = i % 5;
-      const row = Math.floor(i / 5);
-      const xPct = colX[col];
-      const yPct = row * 58 + (col % 2 === 1 ? 29 : 0);
-
-      const node = document.createElement('div');
-      node.className = 'floating-gallery-card group absolute top-0 left-0 cursor-pointer select-none overflow-hidden rounded-2xl border will-change-transform';
-      node.style.width = `220px`;
-      node.style.height = `275px`;
-      node.style.borderColor = `${item.color}55`;
-      node.style.background = '#0b0b0d';
-      node.style.boxShadow = `0 12px 35px rgba(0,0,0,0.65), 0 0 15px ${item.color}22`;
-      node.style.transform = 'translate3d(-9999px, -9999px, 0)';
-
-      const encodedFile = encodeURIComponent(item.file);
-
-      node.innerHTML = `
-        <!-- Background Image with adjusted framing -->
-        <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <img src="ejecucion/Matriz%2025/${encodedFile}" alt="${item.title}"
-            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
-          
-          <!-- Color Tone Filter Overlay matching the block's exact color & category -->
-          <div class="absolute inset-0 pointer-events-none"
-            style="background: linear-gradient(135deg, ${item.color}35, ${item.color}85); mix-blend-mode: multiply;"></div>
-
-          <!-- Dark Vignette Gradient for cyber readability -->
-          <div class="absolute inset-0 bg-gradient-to-t from-vector-black/95 via-vector-black/35 to-vector-black/60 pointer-events-none"></div>
-        </div>
-
-        <!-- Top Code Badge & Glow Status Dot -->
-        <div class="relative z-10 p-3 flex justify-between items-center pointer-events-none">
-          <span class="font-mono text-[9px] sm:text-[10px] font-bold text-white bg-black/75 backdrop-blur-sm px-2 py-0.5 rounded border border-white/15">
-            ${item.code}
-          </span>
-          <div class="w-2.5 h-2.5 rounded-full border border-black/40 shadow-[0_0_10px_${item.color}]" style="background-color: ${item.color}"></div>
-        </div>
-
-        <!-- Center/Bottom Details (Title, Category, Description & KPIs on Zoom) -->
-        <div class="relative z-10 p-3 sm:p-3.5 mt-auto flex flex-col justify-end pointer-events-none bg-gradient-to-t from-vector-black/95 via-vector-black/80 to-transparent">
-          <span class="font-mono text-[8px] uppercase tracking-widest font-bold mb-0.5" style="color: ${item.color}">
-            ${item.category}
-          </span>
-          <h4 class="font-display font-black text-xs sm:text-sm uppercase text-white leading-tight mb-1 group-hover:text-vector-lime transition-colors">
-            ${item.title}
-          </h4>
-
-          <!-- Expanded Live HUD Details (Revealed smoothly on Center Zoom) -->
-          <div class="floating-card-details opacity-0 max-h-0 overflow-hidden transition-all duration-300">
-            <p class="font-body text-[11px] text-neutral-300 leading-snug my-2 border-t border-white/10 pt-2">
-              ${item.desc}
-            </p>
-            <div class="grid grid-cols-3 gap-1.5 font-mono text-[10px] pt-1">
-              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
-                <span class="text-text-muted block text-[8px]">ACEL.</span>
-                <span class="text-vector-lime font-bold">${item.kpi1}</span>
-              </div>
-              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
-                <span class="text-text-muted block text-[8px]">ROI</span>
-                <span class="text-white font-bold">${item.kpi2}</span>
-              </div>
-              <div class="bg-black/60 p-1.5 rounded border border-white/10 text-center">
-                <span class="text-text-muted block text-[8px]">TIEMPO</span>
-                <span class="text-white font-bold">${item.kpi3}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      node.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.toggleZoom(i);
-      });
-
-      this.root.appendChild(node);
-      this.nodes.push(node);
-    });
-  }
-
-  initEvents() {
-    this.root.addEventListener('pointermove', (e) => {
-      const rect = this.root.getBoundingClientRect();
-      this.pointer.x = e.clientX - rect.left;
-      this.pointer.y = e.clientY - rect.top;
-      this.pointer.active = true;
-    });
-
-    this.root.addEventListener('pointerleave', () => {
-      this.pointer.active = false;
-    });
-
-    this.root.addEventListener('click', () => {
-      if (this.zoomedIndex !== null) {
-        this.toggleZoom(null);
-      }
-    });
-
-    window.addEventListener('resize', () => this.measure());
-
-    if (window.ResizeObserver) {
-      this.resizeObserver = new ResizeObserver(() => this.measure());
-      this.resizeObserver.observe(this.root);
-    }
-  }
-
-  measure() {
-    const rect = this.root ? this.root.getBoundingClientRect() : {};
-    const measuredW = rect.width || (this.root ? this.root.offsetWidth : 0) || window.innerWidth;
-    const measuredH = rect.height || (this.root ? this.root.offsetHeight : 0) || (window.innerHeight - 100);
-    this.size.w = measuredW > 0 ? measuredW : window.innerWidth;
-    this.size.h = measuredH > 0 ? measuredH : (window.innerHeight - 100);
-    this.seed();
-  }
-
-  seed() {
-    const W = this.size.w || window.innerWidth || 1400;
-    const H = this.size.h || (window.innerHeight - 100) || 700;
-    this.size.w = W;
-    this.size.h = H;
-
-    // Organic non-grid scatter coordinates (% of container width & virtual height track)
-    const scatterLayout = [
-      { x: 12, y: 4,   w: 220, h: 280 },
-      { x: 44, y: 16,  w: 250, h: 215 },
-      { x: 78, y: 8,   w: 215, h: 275 },
-      { x: 25, y: 42,  w: 240, h: 240 },
-      { x: 90, y: 32,  w: 220, h: 290 },
-
-      { x: 60, y: 48,  w: 255, h: 210 },
-      { x: 7,  y: 68,  w: 230, h: 270 },
-      { x: 38, y: 84,  w: 210, h: 260 },
-      { x: 75, y: 74,  w: 245, h: 230 },
-      { x: 92, y: 95,  w: 215, h: 280 },
-
-      { x: 18, y: 114, w: 250, h: 210 },
-      { x: 50, y: 122, w: 220, h: 285 },
-      { x: 70, y: 138, w: 240, h: 240 },
-      { x: 30, y: 152, w: 210, h: 270 },
-      { x: 86, y: 158, w: 235, h: 250 },
-
-      { x: 9,  y: 178, w: 220, h: 280 },
-      { x: 46, y: 190, w: 255, h: 210 },
-      { x: 78, y: 204, w: 210, h: 270 },
-      { x: 22, y: 222, w: 240, h: 240 },
-      { x: 93, y: 220, w: 220, h: 290 },
-
-      { x: 58, y: 246, w: 250, h: 220 },
-      { x: 14, y: 262, w: 230, h: 270 },
-      { x: 42, y: 278, w: 210, h: 260 },
-      { x: 82, y: 292, w: 245, h: 230 },
-      { x: 89, y: 312, w: 215, h: 280 }
-    ];
-
-    // Responsive scaling factor for cards based on viewport
-    const scaleFactor = Math.min(1.15, Math.max(0.85, W / 1400));
-
-    this.particles = this.data.map((item, i) => {
-      const slot = scatterLayout[i % scatterLayout.length];
-      const cardW = Math.round(slot.w * scaleFactor);
-      const cardH = Math.round(slot.h * scaleFactor);
-
-      const node = this.nodes[i];
-      if (node) {
-        node.style.width = `${cardW}px`;
-        node.style.height = `${cardH}px`;
-      }
-
-      const prev = this.particles[i];
-      return {
-        x: (slot.x / 100) * W - cardW / 2,
-        y: prev ? prev.y : (slot.y / 100) * H - cardH / 2,
-        dx: prev ? prev.dx : 0,
-        dy: prev ? prev.dy : 0,
-        z: prev ? prev.z : 0,
-        targetZ: prev ? prev.targetZ : 0,
-        w: cardW,
-        h: cardH,
-        // Individual organic pacing & multidirectional floating waves
-        mult: 0.70 + this.hash01(i * 17) * 0.65,
-        swaySpeed: 0.6 + this.hash01(i * 23) * 0.8,
-        swayAmpX: 16 + this.hash01(i * 31) * 22,
-        swayPhase: this.hash01(i * 37) * Math.PI * 2,
-        rotAmp: (this.hash01(i * 41) - 0.5) * 5.5
-      };
-    });
-  }
-
-  toggleZoom(index) {
-    if (this.zoomedIndex === index || index === null) {
-      this.zoomedIndex = null;
-    } else {
-      this.zoomedIndex = index;
-    }
-
-    this.nodes.forEach((node, i) => {
-      const details = node.querySelector('.floating-card-details');
-      if (this.zoomedIndex === i) {
-        node.classList.add('border-vector-lime', 'shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_50px_rgba(195,244,0,0.35)]');
-        if (details) {
-          details.classList.remove('opacity-0', 'max-h-0');
-          details.classList.add('opacity-100', 'max-h-96');
-        }
-      } else {
-        node.classList.remove('border-vector-lime', 'shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_50px_rgba(195,244,0,0.35)]');
-        if (details) {
-          details.classList.add('opacity-0', 'max-h-0');
-          details.classList.remove('opacity-100', 'max-h-96');
-        }
-      }
-    });
-  }
-
-  setFilter(filter) {
-    this.filter = filter;
-    this.data.forEach((item, i) => {
-      const node = this.nodes[i];
-      if (!node) return;
-      if (this.filter === 'all' || item.category === this.filter) {
-        node.style.opacity = '1';
-        node.style.pointerEvents = 'auto';
-      } else {
-        node.style.opacity = '0.15';
-        node.style.pointerEvents = 'none';
-      }
-    });
-  }
-
-  startLoop() {
-    const loop = (now) => {
-      this.rafId = requestAnimationFrame(loop);
-      const dt = Math.min(0.05, (now - this.lastTime) / 1000);
-      this.lastTime = now;
-
-      // Real-time container width adaptation during expansion
-      const rect = this.root ? this.root.getBoundingClientRect() : {};
-      const curW = rect.width || (this.root ? this.root.offsetWidth : 0) || window.innerWidth;
-      const curH = rect.height || (this.root ? this.root.offsetHeight : 0) || (window.innerHeight - 100);
-      if (curW > 0 && Math.abs(curW - this.size.w) > 4) {
-        this.size.w = curW;
-        this.size.h = curH;
-        this.seed();
-      }
-
-      const W = this.size.w || window.innerWidth;
-      const H = this.size.h || (window.innerHeight - 100);
-      if (!W || !H) return;
-
-      const R = this.reach;
-      const F = this.force;
-      const drift = this.speed;
-      const p = this.pointer;
-      const zi = this.zoomedIndex;
-      const kOut = 1 - Math.exp(-8 * dt);
-      const totalSpan = H * 3.4;
-
-      for (let i = 0; i < this.particles.length; i++) {
-        const a = this.particles[i];
-        const node = this.nodes[i];
-        if (!node) continue;
-        const frozen = zi === i;
-
-        if (!frozen) {
-          a.y += drift * a.mult * dt;
-          if (a.y > H + 80) {
-            a.y -= totalSpan;
-          } else if (a.y < -totalSpan + H + 80) {
-            a.y += totalSpan;
-          }
-        }
-
-        let tx = 0;
-        let ty = 0;
-        if (p.active && !frozen && F > 0) {
-          const cx = a.x + a.w / 2;
-          const cy = a.y + a.h / 2;
-          let vx = cx - p.x;
-          let vy = cy - p.y;
-          const d = Math.hypot(vx, vy);
-          if (d < R && d > 0.001) {
-            const inv = 1 / d;
-            const fall = 1 - d / R;
-            const push = F * fall * fall;
-            tx = vx * inv * push;
-            ty = vy * inv * push;
-          }
-        }
-        a.dx += (tx - a.dx) * kOut;
-        a.dy += (ty - a.dy) * kOut;
-
-        const targetZ = frozen ? 1 : 0;
-        a.z += (targetZ - a.z) * 0.14;
-
-        // Multidirectional fluid floating motion (sinusoidal sway & micro-tilt)
-        const timeSec = now * 0.001;
-        const swayX = Math.sin(timeSec * a.swaySpeed + a.swayPhase) * a.swayAmpX;
-        const swayY = Math.cos(timeSec * 0.8 * a.swaySpeed + a.swayPhase) * 9;
-        const rotDeg = (1.0 - a.z) * a.rotAmp * Math.sin(timeSec * 0.7 * a.swaySpeed + a.swayPhase);
-
-        const baseX = a.x + a.dx + (swayX * (1.0 - a.z));
-        const baseY = a.y + a.dy + (swayY * (1.0 - a.z));
-        const z = a.z;
-        const px = baseX + ((W - a.w) / 2 - baseX) * z;
-        const py = baseY + ((H - a.h) / 2 - baseY) * z;
-
-        const fit = Math.min(1.85, (W * 0.85) / Math.max(1, a.w), (H * 0.82) / Math.max(1, a.h));
-        const s = 1 + (fit - 1) * z;
-
-        node.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0) scale(${s.toFixed(3)}) rotate(${rotDeg.toFixed(2)}deg)`;
-        node.style.zIndex = z > 0.01 ? '999' : '10';
-      }
-    };
-
-    this.rafId = requestAnimationFrame(loop);
-  }
-}
+// ==================== 04 EVIDENCIA // 3D DEPTH CAROUSEL ====================
+// DepthCarousel is loaded from DepthCarousel.js and initialized in initFloatingGallery() below.
 
 // Bottom dock active-item helper (global — shared by the top-level scroll handlers below).
 // Previously this only existed nested inside initHero3DModel, so scrollToGaleriaFlotante,
@@ -3739,7 +3386,7 @@ function scrollToMetodologia() {
   const internalTarget = () => {
     if (!matrixTrack) return 3000;
     const scrollable = matrixTrack.offsetHeight - container.clientHeight;
-    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.92);
+    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.58);
   };
 
   if (mainTrack) {
@@ -3775,10 +3422,14 @@ window.scrollToMetodologia = scrollToMetodologia;
 window.triggerLaserMetodologiaTransition = scrollToMetodologia;
 
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología)
+// Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología) + Isotipo 3D Zoom
 function initExecutionInternalScrollListener() {
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const track = document.getElementById('sec-matriz-25-track');
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  const stage = document.getElementById('sec-metodologia-stage');
+  const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+  const videoWrapper = videoBg ? videoBg.parentElement : null;
 
   if (container && track && metodologiaWrapper) {
     const updateCurtain = () => {
@@ -3787,34 +3438,81 @@ function initExecutionInternalScrollListener() {
       const scrollableDistance = track.offsetHeight - container.clientHeight;
 
       if (scrollY < trackTop - 100) {
-        // In Section 03 Cover
+        // En Sección 03 Cover
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
+        window.__vectorIsotipoVisible = false;
+        window.__vectorIsotipoProgress = 0;
         updateActiveDockItem(2); // 03 // Ejecución
       } else if (scrollableDistance > 0 && scrollY >= trackTop) {
         const pTrack = Math.min(1.0, Math.max(0, (scrollY - trackTop) / scrollableDistance));
 
-        // pTrack 0.0 -> 0.25: Floating Gallery pinned in full view
-        // pTrack 0.25 -> 0.85: Section 05 curtain slides UP from 100% to 0%
-        // pTrack 0.85 -> 1.0: Section 05 fully pinned & visible
-        if (pTrack < 0.25) {
+        // pTrack 0.0 -> 0.20: Galería Flotante visible
+        // pTrack 0.20 -> 0.50: Cortina Sección 05 sube de 100% a 0%
+        // pTrack 0.50 -> 0.65: Sección 05 fija/activa (blanca, tarjetas visibles, isotipo en slot)
+        // pTrack 0.65 -> 1.0: SECCIÓN 5 FIJA, SE DESVANECE A NEGRO, EL ISOTIPO 3D VIAJA AL CENTRO Y CRECE A PANTALLA COMPLETA
+        if (pTrack < 0.20) {
           metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
           metodologiaWrapper.style.pointerEvents = 'none';
-          updateActiveDockItem(3); // 04 // Evidencia (Floating Gallery)
-        } else if (pTrack < 0.85) {
-          const pCurtain = (pTrack - 0.25) / (0.85 - 0.25);
+          window.__vectorIsotipoVisible = false;
+          window.__vectorIsotipoProgress = 0;
+          updateActiveDockItem(3); // 04 // Evidencia (Galería)
+        } else if (pTrack < 0.50) {
+          const pCurtain = (pTrack - 0.20) / (0.50 - 0.20);
           const yPct = (1.0 - pCurtain) * 100;
           metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
           metodologiaWrapper.style.pointerEvents = pCurtain > 0.6 ? 'auto' : 'none';
+          metodologiaWrapper.style.backgroundColor = '#ffffff';
+          if (stage) {
+            stage.style.opacity = '1';
+            stage.style.transform = 'none';
+            stage.style.pointerEvents = 'auto';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '1';
+          // El isotipo permanece completamente oculto mientras la Sección 5 sube y se acomoda
+          window.__vectorIsotipoVisible = false;
+          window.__vectorIsotipoProgress = 0;
           updateActiveDockItem(pCurtain > 0.5 ? 4 : 3);
-        } else {
+        } else if (pTrack < 0.65) {
+          // La Sección 5 YA ESTÁ EN SU POSICIÓN FIJA (translate3d 0%): HASTA ESTE MOMENTO APARECE EL ISOTIPO
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#ffffff';
+          if (stage) {
+            stage.style.opacity = '1';
+            stage.style.transform = 'none';
+            stage.style.pointerEvents = 'auto';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '1';
+          window.__vectorIsotipoVisible = true;
+          window.__vectorIsotipoProgress = 0;
           updateActiveDockItem(4); // 05 // Metodología
+        } else {
+          // Sección 5 fija, desvanecimiento a negro, viaje del isotipo al centro, ultra zoom y salida tras bambalinas
+          const pTransit = (pTrack - 0.65) / (1.0 - 0.65);
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+
+          const fadeStage = Math.max(0, 1.0 - pTransit / 0.35);
+          if (stage) {
+            stage.style.opacity = fadeStage.toFixed(3);
+            stage.style.transform = `translateY(${(-40 * (1 - fadeStage)).toFixed(1)}px) scale(${(0.96 + 0.04 * fadeStage).toFixed(4)})`;
+            stage.style.pointerEvents = fadeStage < 0.1 ? 'none' : 'auto';
+          }
+          if (videoWrapper) {
+            videoWrapper.style.opacity = fadeStage.toFixed(3);
+          }
+          metodologiaWrapper.style.backgroundColor = '#000000';
+
+          window.__vectorIsotipoVisible = true;
+          window.__vectorIsotipoProgress = pTransit;
+          updateActiveDockItem(4);
         }
       } else {
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
+        window.__vectorIsotipoVisible = false;
+        window.__vectorIsotipoProgress = 0;
       }
     };
 
@@ -3828,13 +3526,11 @@ function initVectorIsotipo() {
   const canvas = document.getElementById('vector-isotipo-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
-  const container = canvas.parentElement;
-  if (!container) return;
-
+  const slot = document.getElementById('vector-isotipo-slot');
   const scene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-  camera.position.set(0, 0, 4.2);
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 5.0);
 
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -3846,13 +3542,11 @@ function initVectorIsotipo() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
   function syncSize() {
-    const w = container.clientWidth || 140;
-    const h = container.clientHeight || 140;
-    if (w > 0 && h > 0) {
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h, false);
-    }
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
   }
   syncSize();
   window.addEventListener('resize', syncSize);
@@ -3861,12 +3555,12 @@ function initVectorIsotipo() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
   scene.add(ambientLight);
 
-  const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
-  dirLight1.position.set(4, 6, 5);
+  const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
+  dirLight1.position.set(5, 7, 6);
   scene.add(dirLight1);
 
-  const dirLight2 = new THREE.DirectionalLight(0xc3f400, 1.8);
-  dirLight2.position.set(-4, -3, 3);
+  const dirLight2 = new THREE.DirectionalLight(0xc3f400, 2.0);
+  dirLight2.position.set(-5, -4, 4);
   scene.add(dirLight2);
 
   const pivotGroup = new THREE.Group();
@@ -3876,9 +3570,9 @@ function initVectorIsotipo() {
   const limeMaterial = new THREE.MeshPhysicalMaterial({
     color: 0xc3f400,          // Color amarillo / lima del proyecto (#c3f400)
     emissive: 0xc3f400,
-    emissiveIntensity: 0.15,  // Brillo sutil distintivo de marca
+    emissiveIntensity: 0.18,  // Brillo sutil distintivo de marca
     metalness: 0.35,
-    roughness: 0.28,
+    roughness: 0.25,
     clearcoat: 0.8,
     clearcoatRoughness: 0.15,
     side: THREE.DoubleSide
@@ -3898,15 +3592,15 @@ function initVectorIsotipo() {
           }
         });
 
-        // Centrar exactamente en el pivote de rotación
+        // Centrar exactamente en el pivote de rotación y normalizar
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        const scale = 2.4 / maxDim;
+        const normScale = 1.0 / maxDim;
 
-        model.scale.set(scale, scale, scale);
-        model.position.sub(center.clone().multiplyScalar(scale));
+        model.scale.set(normScale, normScale, normScale);
+        model.position.sub(center.clone().multiplyScalar(normScale));
 
         pivotGroup.add(model);
       },
@@ -3917,25 +3611,92 @@ function initVectorIsotipo() {
     );
   }
 
-  // Velocidad de rotación: exactamente 20 RPM (20 revoluciones por minuto)
-  const radPerSec = (20 * 2 * Math.PI) / 60; // ~2.094 rad/s
+  const ease = (t) => {
+    t = Math.max(0, Math.min(1, t));
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+  const lerp = (a, b, t) => a + (b - a) * t;
 
-  let lastTime = performance.now();
-  function animate(now) {
+  let currentRotY = 0;
+
+  function animate() {
     requestAnimationFrame(animate);
-    const dt = Math.min(0.05, (now - lastTime) * 0.001);
-    lastTime = now;
+
+    const isVisible = window.__vectorIsotipoVisible;
+    if (!isVisible) {
+      canvas.style.opacity = '0';
+      return;
+    }
+
+    const pTransit = window.__vectorIsotipoProgress || 0.0;
+
+    // Giro dinámico:
+    // Gira únicamente mientras viaja al centro y crece (pTransit: 0 -> 0.72).
+    // Al alcanzar el 72% del recorrido (pantalla completa), el giro se detiene
+    // completamente con la cara frontal alineada recta hacia la pantalla.
+    const pRot = Math.min(1.0, pTransit / 0.72);
+    const easedRot = ease(pRot);
+    const targetRotY = easedRot * Math.PI * 4; // 2 giros completos de 360° concluyendo en orientación frontal exacta (0°)
+
+    currentRotY += (targetRotY - currentRotY) * 0.20;
 
     if (pivotGroup) {
-      pivotGroup.rotation.y += radPerSec * dt;
+      pivotGroup.rotation.y = currentRotY;
     }
+
+    // Calcular proyección de la ranura del header en pantalla
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const vHeight = 2 * Math.tan((45 / 2) * Math.PI / 180) * 5.0; // ~4.142
+    const vWidth = vHeight * (W / H);
+
+    const s = slot ? slot.getBoundingClientRect() : null;
+    const slotW = (s && s.width > 10) ? s.width : 140;
+    const slotH = (s && s.height > 10) ? s.height : 140;
+    const slotCenterX = s ? (s.left + slotW / 2) : (W * 0.25);
+    const slotCenterY = s ? (s.top + slotH / 2) : 100;
+
+    // Convertir pixeles a coordenadas de mundo 3D
+    const slotWorldX = (slotCenterX / W - 0.5) * vWidth;
+    const slotWorldY = -(slotCenterY / H - 0.5) * vHeight;
+
+    const baseWorldScale = (slotW / H) * vHeight * 0.95;
+    const maxWorldScale = Math.max(vWidth, vHeight) * 2.8;
+
+    let curWorldX, curWorldY, curScale, isoOpacity;
+
+    if (pTransit <= 0.78) {
+      // Fase 1: Viaje al centro y crecimiento a pantalla completa
+      const pCentering = Math.min(1.0, pTransit / 0.78);
+      const easedCentering = ease(pCentering);
+      curWorldX = lerp(slotWorldX, 0, easedCentering);
+      curWorldY = lerp(slotWorldY, 0, easedCentering);
+      curScale = lerp(baseWorldScale, maxWorldScale, easedCentering);
+      isoOpacity = 1.0;
+    } else {
+      // Fase 2: Después de dejar de girar, SE ACERCA MÁS, SALE DEL CUADRO
+      // Y SE DESVANECE TRAS BAMBALINAS mientras aparece la Sección 6
+      const pExit = (pTransit - 0.78) / (1.0 - 0.78);
+      const easedExit = ease(pExit);
+      curWorldX = 0;
+      curWorldY = 0;
+      // Ultra zoom que hace que el isotipo traspase y desborde el viewport
+      curScale = lerp(maxWorldScale, maxWorldScale * 8.5, easedExit);
+      // Desvanecimiento suave tras bambalinas
+      isoOpacity = Math.max(0, 1.0 - easedExit * 1.45);
+    }
+
+    canvas.style.opacity = isoOpacity.toFixed(3);
+
+    pivotGroup.position.set(curWorldX, curWorldY, 0);
+    pivotGroup.scale.set(curScale, curScale, curScale);
 
     renderer.render(scene, camera);
   }
   requestAnimationFrame(animate);
 }
 
-/** Live maturity score for the embedded 06 // Diagnóstico test (ported from diagnostico/index.html). */
+/** Live maturity score and scroll displacement for 06 // Diagnóstico test. */
 function initDiagnosticoTest() {
   const sec = document.getElementById('sec-06-diagnostico');
   if (!sec) return;
@@ -3944,6 +3705,23 @@ function initDiagnosticoTest() {
   const scoreStatus = document.getElementById('score-status');
   const scoreExp = document.getElementById('score-explanation');
   const whatsappLink = document.getElementById('whatsapp-cta-link');
+
+  // Control de desplazamiento natural: se desplaza cuando es su turno y se contrae al regresar
+  function checkDiagScroll() {
+    const rect = sec.getBoundingClientRect();
+    const triggerThreshold = window.innerHeight * 0.85;
+
+    if (rect.top <= triggerThreshold && rect.bottom >= 100) {
+      sec.classList.add('diag-active');
+      updateActiveDockItem(5); // 06 // Diagnóstico
+    } else {
+      sec.classList.remove('diag-active');
+    }
+  }
+
+  window.addEventListener('scroll', checkDiagScroll, { passive: true });
+  checkDiagScroll();
+
   if (!scoreNum || !scoreStatus || !scoreExp) return;
 
   function calculateScore() {
@@ -3982,14 +3760,55 @@ function scrollToDiagnostico(e) {
   if (e && e.preventDefault) e.preventDefault();
 
   window.__forceTimelineProgress = null;
-  window.scrollTo({ top: diag.offsetTop, behavior: 'smooth' });
+  const targetY = diag.offsetTop;
+  window.scrollTo({ top: targetY, behavior: 'smooth' });
+  diag.classList.add('diag-active');
   updateActiveDockItem(5);
   return false;
 }
 
 // Initialize Floating Gallery Events & Instance
+// Initialize AccordionGallery for Section 04 // Evidencia
 function initFloatingGallery() {
-  window.floatingGalleryInstance = new FloatingGallery('floating-gallery-root', matriz25Data);
+  const root = document.getElementById('floating-gallery-root');
+  if (!root || typeof AccordionGallery === 'undefined') return;
+
+  const items = matriz25Data.map(item => ({
+    image: `ejecucion/Matriz 25/${encodeURIComponent(item.file)}`,
+    label: item.title,
+    title: item.title,
+    alt: item.title,
+    code: item.code,
+    category: item.category,
+    color: item.color,
+    desc: item.desc,
+    kpi1: item.kpi1,
+    kpi2: item.kpi2,
+    kpi3: item.kpi3,
+    link: '#'
+  }));
+
+  window.accordionGalleryInstance = new AccordionGallery('floating-gallery-root', {
+    items: items,
+    defaultIndex: 2,
+    pageSize: 5,
+    expandRatio: 0.52,
+    trigger: 'hover',
+    accentColor: '#c3f400',
+    overlayColor: '#060010',
+    textColor: '#ffffff',
+    grayscale: true,
+    showLabels: true,
+    duration: 0.6,
+    ease: 'power3.out',
+    parallax: 0.5,
+    tilt: 8,
+    stagger: 0.06,
+    height: 480,
+    gap: 12,
+    radius: 16,
+    showPagination: true
+  });
 
   const filterBtns = document.querySelectorAll('.matriz-filter-btn');
   filterBtns.forEach(btn => {
@@ -4003,8 +3822,8 @@ function initFloatingGallery() {
           b.classList.add('bg-surface-dark', 'text-white');
         }
       });
-      if (window.floatingGalleryInstance) {
-        window.floatingGalleryInstance.setFilter(btn.dataset.filter);
+      if (window.accordionGalleryInstance) {
+        window.accordionGalleryInstance.setFilter(btn.dataset.filter);
       }
     });
   });
