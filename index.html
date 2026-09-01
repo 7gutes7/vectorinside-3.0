@@ -8,8 +8,8 @@
   <meta name="description"
     content="Firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos. Convertimos el caos en arquitectura." />
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind static build (compilado con build-tailwind.sh) -->
+  <link rel="stylesheet" href="tailwind-build.css?v=1" />
 
   <!-- Google Fonts & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,12 +21,15 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.167" />
+  <link rel="stylesheet" href="style.css?v=3.0.168" />
+  <!-- AccordionGallery React Bits CSS -->
+  <link rel="stylesheet" href="AccordionGallery.css?v=3.0.1" />
 
   <!-- Three.js, DRACOLoader, GLTFLoader, GSAP & ScrollTrigger -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.3/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -39,31 +42,9 @@
     window.scrollTo(0, 0);
   </script>
 
-  <!-- Tailwind Configuration extension -->
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'vector-black': '#080808',
-            'vector-lime': '#c3f400',
-            'operative-purple': '#9d4edd',
-            'operative-purple-dark': '#6f00be',
-            'cognitive-blue': '#433dae',
-            'surface-dark': '#131313',
-            'surface-high': '#201f1f',
-            'text-muted': '#c4c9ac'
-          },
-          fontFamily: {
-            display: ['Montserrat', 'sans-serif'],
-            body: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind Configuration extension: ya no aplica en runtime (CDN retirado).
+       El mismo theme vive ahora en tailwind.config.js, usado por build-tailwind.sh
+       para compilar tailwind-build.css. -->
 </head>
 
 <body
@@ -135,6 +116,7 @@
     <a href="javascript:void(0)" onclick="scrollToMetodologia()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Metodología</a>
     <a href="diagnostico/index.html" onclick="return scrollToDiagnostico(event)"
+      id="dock-item-diagnostico"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">06 // Diagnóstico</a>
   </nav>
 
@@ -736,7 +718,7 @@
             </div>
 
             <!-- Stage 2: Floating Gallery & Metodología Scrollytelling Pinned Curtain Track -->
-            <div id="sec-matriz-25-track" class="relative w-full min-h-[260vh]">
+            <div id="sec-matriz-25-track" class="relative w-full min-h-[460vh]">
 
               <!-- Layer 1 (Back / Pinned): Floating Gallery (Sticky Fullscreen Viewport) -->
               <div id="sec-matriz-25-wrapper"
@@ -788,11 +770,11 @@
 
               <!-- Layer 2 (Front / Revealing Curtain): 05 // METODOLOGÍA (White Liquid Glass Curtain) -->
               <div id="sec-metodologia-wrapper"
-                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-y-auto pointer-events-none will-change-transform flex flex-col justify-center"
+                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-y-auto pointer-events-none will-change-transform flex flex-col justify-center transition-colors duration-300"
                 style="transform: translate3d(0, 100%, 0);">
 
                 <!-- Background Abstract Liquid Flow Motion Video -->
-                <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden transition-opacity duration-300">
                   <video id="ejecucion-liquid-flow-video" loop muted playsinline preload="none" class="w-full h-full object-cover opacity-90">
                     <source data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152141/Abstract_liquid_flow_motion_1080p_202608301513.mp4" type="video/mp4">
                   </video>
@@ -819,10 +801,8 @@
                           Ingeniería de Aceleración en 4 Fases
                         </h2>
                       </div>
-                      <!-- 3D Vector Isotipo (Amarillo/Lima girando a 20 RPM) -->
-                      <div id="vector-isotipo-container" class="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] shrink-0 flex items-center justify-center relative">
-                        <canvas id="vector-isotipo-canvas" class="w-full h-full object-contain block"></canvas>
-                      </div>
+                      <!-- 3D Vector Isotipo Header Slot Placeholder -->
+                      <div id="vector-isotipo-slot" class="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] shrink-0 relative" aria-hidden="true"></div>
                     </div>
                     <p class="font-mono text-xs text-neutral-700 max-w-xs font-medium">
                       Un proceso sistemático, medible y sin sorpresas diseñado para ejecutar en ciclos rápidos de alto
@@ -942,10 +922,14 @@
     </div>
   </div>
 
-  <!-- ==================== 06 // DIAGNÓSTICO — INTERACTIVE ASSESSMENT (ported from diagnostico/index.html) ==================== -->
+  <!-- ==================== 3D VECTOR ISOTIPO — FIXED FULLSCREEN 3D OVERLAY LAYER ==================== -->
+  <canvas id="vector-isotipo-canvas"
+    class="fixed inset-0 w-full h-full pointer-events-none z-[45] opacity-0 transition-opacity duration-300"
+    style="display:block;background:transparent;"></canvas>
+
+  <!-- ==================== 06 // DIAGNÓSTICO — INTERACTIVE ASSESSMENT ==================== -->
   <section id="sec-06-diagnostico"
-    class="diag-reveal relative w-full bg-vector-black text-white pt-24 pb-24 px-6 will-change-transform"
-    style="opacity:1;transform:none;">
+    class="diag-reveal relative w-full bg-vector-black text-white pt-24 pb-24 px-6 will-change-transform transition-all duration-300">
     <div class="max-w-7xl mx-auto w-full">
 
       <!-- Top Title -->
@@ -1161,10 +1145,12 @@
   </div>
 
 
+  <!-- AccordionGallery Component (React Bits 1:1) -->
+  <script src="AccordionGallery.js?v=3.0.2"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.199) -->
-  <script src="script.js?v=3.0.199"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.210) -->
+  <script src="script.js?v=3.0.210"></script>
 </body>
 
 </html>

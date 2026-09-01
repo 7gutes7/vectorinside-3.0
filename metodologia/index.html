@@ -7,8 +7,8 @@
   <title>05 // METODOLOGÍA | Vector Inside 3.0</title>
   <meta name="description" content="Metodología y Pipeline de Vector Inside: 4 Fases de aceleración digital sin improvisación." />
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind static build (compilado con build-tailwind.sh) -->
+  <link rel="stylesheet" href="../tailwind-build.css?v=1" />
 
   <!-- Google Fonts & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,29 +19,9 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="../style.css" />
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'vector-black': '#080808',
-            'vector-lime': '#c3f400',
-            'operative-purple': '#9d4edd',
-            'cognitive-blue': '#433dae',
-            'surface-dark': '#131313',
-            'surface-high': '#201f1f',
-            'text-muted': '#c4c9ac'
-          },
-          fontFamily: {
-            display: ['Montserrat', 'sans-serif'],
-            body: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind Configuration extension: ya no aplica en runtime (CDN retirado).
+       El mismo theme vive ahora en ../tailwind.config.js, usado por build-tailwind.sh
+       para compilar tailwind-build.css. -->
 </head>
 
 <body class="bg-vector-black text-white antialiased selection:bg-vector-lime selection:text-vector-black overflow-x-hidden min-h-screen flex flex-col justify-between">
