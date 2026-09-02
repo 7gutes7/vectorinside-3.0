@@ -683,5 +683,20 @@ body {
   pointer-events: auto !important;
 }
 
+/* ==================== CHATBOT LEVITATION ANIMATION ==================== */
+@keyframes chatbotLevitate {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+.animate-chatbot-levitate {
+  animation: chatbotLevitate 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+
 
 

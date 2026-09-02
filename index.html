@@ -21,7 +21,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.168" />
+  <link rel="stylesheet" href="style.css?v=3.0.169" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.1" />
 
@@ -1130,13 +1130,13 @@
 
     </div>
 
-    <!-- Floating Bubble Trigger Button (Transparent Background + Wolf Model +30% Larger: 96px - 110px) -->
+    <!-- Floating Bubble Trigger Button (Transparent Background + Wolf Model +30% Larger + Space Levitation) -->
     <button id="chatbot-trigger-btn"
-      class="group relative w-[96px] h-[96px] sm:w-[110px] sm:h-[110px] bg-transparent border-0 flex items-center justify-center p-0 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer">
+      class="group relative w-[96px] h-[96px] sm:w-[110px] sm:h-[110px] bg-transparent border-0 flex items-center justify-center p-0 transition-transform duration-300 hover:scale-110 active:scale-95 cursor-pointer animate-chatbot-levitate">
       <img src="chatbot-icon.png" alt="Chatbot Vector Inside"
-        class="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(195,244,0,0.6)] group-hover:drop-shadow-[0_0_30px_rgba(195,244,0,0.9)] transition-all duration-300" />
+        class="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(195,244,0,0.6)] group-hover:drop-shadow-[0_0_30px_rgba(195,244,0,0.9)] transition-all duration-300 pointer-events-none" />
       <!-- Online Green Pulse Ping -->
-      <span class="absolute top-1 right-1 flex h-4 w-4">
+      <span class="absolute top-1 right-1 flex h-4 w-4 pointer-events-none">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-80"></span>
         <span class="relative inline-flex rounded-full h-4 w-4 bg-vector-lime border-2 border-vector-black shadow-[0_0_8px_#c3f400]"></span>
       </span>
