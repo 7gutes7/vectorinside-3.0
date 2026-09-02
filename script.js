@@ -3430,6 +3430,11 @@ function initExecutionInternalScrollListener() {
   const stage = document.getElementById('sec-metodologia-stage');
   const videoBg = document.getElementById('ejecucion-liquid-flow-video');
   const videoWrapper = videoBg ? videoBg.parentElement : null;
+  const diagSec = document.getElementById('sec-06-diagnostico');
+  const diagDot = document.getElementById('diag-reveal-dot');
+  const diagLine = document.getElementById('diag-reveal-line');
+  const diagStage = document.getElementById('diag-content-stage');
+  const globalHeader = document.getElementById('main-global-header');
 
   if (container && track && metodologiaWrapper) {
     const updateCurtain = () => {
@@ -3443,22 +3448,30 @@ function initExecutionInternalScrollListener() {
         metodologiaWrapper.style.pointerEvents = 'none';
         window.__vectorIsotipoVisible = false;
         window.__vectorIsotipoProgress = 0;
+        if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+        if (globalHeader) {
+          globalHeader.classList.remove('glass-nav-white-liquid');
+          globalHeader.classList.add('glass-nav-dark');
+        }
         updateActiveDockItem(2); // 03 // Ejecución
       } else if (scrollableDistance > 0 && scrollY >= trackTop) {
         const pTrack = Math.min(1.0, Math.max(0, (scrollY - trackTop) / scrollableDistance));
 
-        // pTrack 0.0 -> 0.20: Galería Flotante visible
-        // pTrack 0.20 -> 0.50: Cortina Sección 05 sube de 100% a 0%
-        // pTrack 0.50 -> 0.65: Sección 05 fija/activa (blanca, tarjetas visibles, isotipo en slot)
-        // pTrack 0.65 -> 1.0: SECCIÓN 5 FIJA, SE DESVANECE A NEGRO, EL ISOTIPO 3D VIAJA AL CENTRO Y CRECE A PANTALLA COMPLETA
-        if (pTrack < 0.20) {
+        if (pTrack < 0.18) {
+          // Sección 04 // Galería visible
           metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
           metodologiaWrapper.style.pointerEvents = 'none';
           window.__vectorIsotipoVisible = false;
           window.__vectorIsotipoProgress = 0;
+          if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid');
+            globalHeader.classList.add('glass-nav-dark');
+          }
           updateActiveDockItem(3); // 04 // Evidencia (Galería)
-        } else if (pTrack < 0.50) {
-          const pCurtain = (pTrack - 0.20) / (0.50 - 0.20);
+        } else if (pTrack < 0.45) {
+          // Cortina Sección 05 sube de 100% a 0%
+          const pCurtain = (pTrack - 0.18) / (0.45 - 0.18);
           const yPct = (1.0 - pCurtain) * 100;
           metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
           metodologiaWrapper.style.pointerEvents = pCurtain > 0.6 ? 'auto' : 'none';
@@ -3469,12 +3482,21 @@ function initExecutionInternalScrollListener() {
             stage.style.pointerEvents = 'auto';
           }
           if (videoWrapper) videoWrapper.style.opacity = '1';
-          // El isotipo permanece completamente oculto mientras la Sección 5 sube y se acomoda
           window.__vectorIsotipoVisible = false;
           window.__vectorIsotipoProgress = 0;
+          if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (globalHeader) {
+            if (pCurtain > 0.5) {
+              globalHeader.classList.add('glass-nav-white-liquid');
+              globalHeader.classList.remove('glass-nav-dark');
+            } else {
+              globalHeader.classList.remove('glass-nav-white-liquid');
+              globalHeader.classList.add('glass-nav-dark');
+            }
+          }
           updateActiveDockItem(pCurtain > 0.5 ? 4 : 3);
-        } else if (pTrack < 0.65) {
-          // La Sección 5 YA ESTÁ EN SU POSICIÓN FIJA (translate3d 0%): HASTA ESTE MOMENTO APARECE EL ISOTIPO
+        } else if (pTrack < 0.60) {
+          // Sección 05 fija/activa (blanca, tarjetas visibles, isotipo en slot)
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
           metodologiaWrapper.style.backgroundColor = '#ffffff';
@@ -3486,33 +3508,120 @@ function initExecutionInternalScrollListener() {
           if (videoWrapper) videoWrapper.style.opacity = '1';
           window.__vectorIsotipoVisible = true;
           window.__vectorIsotipoProgress = 0;
+          if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (globalHeader) {
+            globalHeader.classList.add('glass-nav-white-liquid');
+            globalHeader.classList.remove('glass-nav-dark');
+          }
           updateActiveDockItem(4); // 05 // Metodología
-        } else {
-          // Sección 5 fija, desvanecimiento a negro, viaje del isotipo al centro, ultra zoom y salida tras bambalinas
-          const pTransit = (pTrack - 0.65) / (1.0 - 0.65);
+        } else if (pTrack < 0.72) {
+          // Sección 05 se desvanece a negro, el isotipo 3D viaja al centro y sale tras bambalinas
+          const pTransit = (pTrack - 0.60) / (0.72 - 0.60);
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
 
-          const fadeStage = Math.max(0, 1.0 - pTransit / 0.35);
+          const fadeStage = Math.max(0, 1.0 - pTransit);
           if (stage) {
             stage.style.opacity = fadeStage.toFixed(3);
             stage.style.transform = `translateY(${(-40 * (1 - fadeStage)).toFixed(1)}px) scale(${(0.96 + 0.04 * fadeStage).toFixed(4)})`;
             stage.style.pointerEvents = fadeStage < 0.1 ? 'none' : 'auto';
           }
-          if (videoWrapper) {
-            videoWrapper.style.opacity = fadeStage.toFixed(3);
-          }
-          metodologiaWrapper.style.backgroundColor = '#000000';
+          if (videoWrapper) videoWrapper.style.opacity = fadeStage.toFixed(3);
+          metodologiaWrapper.style.backgroundColor = '#080808';
 
           window.__vectorIsotipoVisible = true;
           window.__vectorIsotipoProgress = pTransit;
+          if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid');
+            globalHeader.classList.add('glass-nav-dark');
+          }
           updateActiveDockItem(4);
+        } else {
+          // ==================== SECCIÓN 06 // DIAGNÓSTICO: PUNTO -> LÍNEA -> PLANO ====================
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          window.__vectorIsotipoVisible = false;
+          window.__vectorIsotipoProgress = 1.0;
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid');
+            globalHeader.classList.add('glass-nav-dark');
+          }
+
+          if (diagSec) {
+            diagSec.style.opacity = '1';
+
+            if (pTrack < 0.78) {
+              // 1. EL PUNTO (aparece y brilla en el centro exacto)
+              const pDot = (pTrack - 0.72) / (0.78 - 0.72);
+              diagSec.style.clipPath = 'inset(50% 0 50% 0)';
+              if (diagDot) {
+                diagDot.style.opacity = (pDot * 1.0).toFixed(2);
+                diagDot.style.transform = `scale(${(0.4 + 1.6 * pDot).toFixed(2)})`;
+              }
+              if (diagLine) {
+                diagLine.style.opacity = '0';
+                diagLine.style.transform = 'scaleX(0)';
+              }
+              if (diagStage) {
+                diagStage.style.clipPath = 'none';
+                diagStage.style.opacity = '0';
+                diagStage.style.transform = 'scale(0.96)';
+              }
+              diagSec.style.pointerEvents = 'none';
+            } else if (pTrack < 0.88) {
+              // 2. LA LÍNEA HORIZONTAL (se abre del centro hacia los extremos izquierdo y derecho)
+              const pLine = (pTrack - 0.78) / (0.88 - 0.78);
+              diagSec.style.clipPath = 'inset(50% 0 50% 0)';
+              if (diagDot) {
+                diagDot.style.opacity = Math.max(0, 1.0 - pLine * 1.8).toFixed(2);
+                diagDot.style.transform = `scale(${Math.max(0, 2.0 - pLine).toFixed(2)})`;
+              }
+              if (diagLine) {
+                diagLine.style.opacity = '1';
+                diagLine.style.transform = `scaleX(${pLine.toFixed(3)})`;
+              }
+              if (diagStage) {
+                diagStage.style.clipPath = 'none';
+                diagStage.style.opacity = (pLine * 0.35).toFixed(2);
+                diagStage.style.transform = `scale(${(0.96 + 0.02 * pLine).toFixed(3)})`;
+              }
+              diagSec.style.pointerEvents = 'none';
+            } else {
+              // 3. EL PLANO VERTICAL (se abre desde la línea central en 50% hacia ARRIBA y hacia ABAJO simultáneamente)
+              const pPlane = Math.min(1.0, (pTrack - 0.88) / (1.0 - 0.88));
+              const insetY = Math.max(0, (1.0 - pPlane) * 50).toFixed(1);
+              diagSec.style.clipPath = `inset(${insetY}% 0 ${insetY}% 0)`;
+              
+              if (diagDot) {
+                diagDot.style.opacity = '0';
+              }
+              if (diagLine) {
+                diagLine.style.opacity = Math.max(0, 1.0 - pPlane * 1.5).toFixed(2);
+                diagLine.style.transform = 'scaleX(1)';
+              }
+              if (diagStage) {
+                diagStage.style.clipPath = 'none';
+                diagStage.style.opacity = (0.35 + 0.65 * pPlane).toFixed(2);
+                diagStage.style.transform = `scale(${(0.98 + 0.02 * pPlane).toFixed(3)})`;
+              }
+              diagSec.style.pointerEvents = pPlane > 0.7 ? 'auto' : 'none';
+            }
+          }
+          updateActiveDockItem(5); // 06 // Diagnóstico
         }
       } else {
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
         window.__vectorIsotipoVisible = false;
         window.__vectorIsotipoProgress = 0;
+        if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
       }
     };
 
@@ -3706,19 +3815,49 @@ function initDiagnosticoTest() {
   const scoreExp = document.getElementById('score-explanation');
   const whatsappLink = document.getElementById('whatsapp-cta-link');
 
-  // Control de desplazamiento natural: se desplaza cuando es su turno y se contrae al regresar
+  // Control de apertura cinemática: Punto -> Línea horizontal -> Expansión vertical del plano
+  let diagRevealed = false;
+
+  function triggerDiagCinematicReveal() {
+    if (diagRevealed) return;
+    diagRevealed = true;
+    sec.classList.remove('diag-step-2', 'diag-step-3', 'diag-active');
+    sec.classList.add('diag-step-1');
+    setTimeout(() => {
+      sec.classList.add('diag-step-2');
+    }, 280);
+    setTimeout(() => {
+      sec.classList.add('diag-step-3', 'diag-active');
+    }, 680);
+  }
+
+  function resetDiagCinematicReveal() {
+    if (!diagRevealed) return;
+    diagRevealed = false;
+    sec.classList.remove('diag-step-1', 'diag-step-2', 'diag-step-3', 'diag-active');
+  }
+
   function checkDiagScroll() {
     const rect = sec.getBoundingClientRect();
-    const triggerThreshold = window.innerHeight * 0.85;
+    const triggerThreshold = window.innerHeight * 0.88;
 
     if (rect.top <= triggerThreshold && rect.bottom >= 100) {
-      sec.classList.add('diag-active');
+      triggerDiagCinematicReveal();
       updateActiveDockItem(5); // 06 // Diagnóstico
-    } else {
-      sec.classList.remove('diag-active');
+    } else if (rect.top > window.innerHeight * 1.2) {
+      resetDiagCinematicReveal();
     }
   }
 
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  const ejecucionContainer = document.getElementById('sec-ejecucion-scroll-container');
+
+  if (metodologiaWrapper) {
+    metodologiaWrapper.addEventListener('scroll', checkDiagScroll, { passive: true });
+  }
+  if (ejecucionContainer) {
+    ejecucionContainer.addEventListener('scroll', checkDiagScroll, { passive: true });
+  }
   window.addEventListener('scroll', checkDiagScroll, { passive: true });
   checkDiagScroll();
 
@@ -3755,17 +3894,63 @@ function initDiagnosticoTest() {
 
 /** Dock link handler: jump straight to the 06 // Diagnóstico test (no page nav). */
 function scrollToDiagnostico(e) {
-  const diag = document.getElementById('sec-06-diagnostico');
-  if (!diag) return true;
   if (e && e.preventDefault) e.preventDefault();
+  const mainTrack = document.getElementById('hero-scroll-track');
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const matrixTrack = document.getElementById('sec-matriz-25-track');
+  const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+  const expandFrame = document.getElementById('scroll-expand-frame');
 
-  window.__forceTimelineProgress = null;
-  const targetY = diag.offsetTop;
-  window.scrollTo({ top: targetY, behavior: 'smooth' });
-  diag.classList.add('diag-active');
-  updateActiveDockItem(5);
+  const forceFullScreenFrame = () => {
+    if (expandWrapper) {
+      expandWrapper.style.opacity = '1';
+      expandWrapper.style.filter = 'none';
+      expandWrapper.style.pointerEvents = 'auto';
+    }
+    if (expandFrame) {
+      expandFrame.style.width = '100vw';
+      expandFrame.style.height = '100vh';
+      expandFrame.style.borderRadius = '0px';
+    }
+  };
+
+  const internalTarget = () => {
+    if (!matrixTrack || !container) return 5000;
+    const scrollable = matrixTrack.offsetHeight - container.clientHeight;
+    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.99);
+  };
+
+  if (mainTrack) {
+    const maxScroll = mainTrack.offsetHeight - window.innerHeight;
+    const targetY = Math.round(maxScroll * 0.995);
+
+    window.__forceTimelineProgress = 0.995;
+    window.__forceTimelineUntil = performance.now() + 1400;
+    setTimeout(() => { window.__forceTimelineProgress = null; }, 1600);
+
+    window.scrollTo(0, targetY);
+
+    const apply = () => {
+      window.scrollTo(0, targetY);
+      forceFullScreenFrame();
+      if (container) container.scrollTop = internalTarget();
+      updateActiveDockItem(5);
+    };
+    const deadline = performance.now() + 1500;
+    const pin = () => {
+      apply();
+      if (performance.now() < deadline) requestAnimationFrame(pin);
+    };
+    requestAnimationFrame(pin);
+    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(apply, t));
+  } else {
+    forceFullScreenFrame();
+    if (container) container.scrollTop = internalTarget();
+    updateActiveDockItem(5);
+  }
   return false;
 }
+window.scrollToDiagnostico = scrollToDiagnostico;
 
 // Initialize Floating Gallery Events & Instance
 // Initialize AccordionGallery for Section 04 // Evidencia

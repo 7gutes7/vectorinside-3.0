@@ -662,25 +662,32 @@ body {
   background: rgba(195, 244, 0, 0.85);
 }
 
-/* ==================== 06 // DIAGNÓSTICO SCROLL DISPLACEMENT & CONTRACTION ==================== */
+/* ==================== 06 // DIAGNÓSTICO LASER POINT -> HORIZONTAL LINE -> VERTICAL PLANE REVEAL ==================== */
 #sec-06-diagnostico {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  opacity: 0;
-  transform: translate3d(0, 90px, 0);
-  filter: blur(18px);
-  will-change: transform, opacity, filter;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.8s ease,
-              filter 0.8s ease;
+  height: 100%;
   pointer-events: none;
+  background-color: #080808;
+  z-index: 30;
+  clip-path: inset(50% 0 50% 0);
+  will-change: clip-path, opacity;
 }
 
-#sec-06-diagnostico.diag-active {
-  opacity: 1 !important;
-  transform: translate3d(0, 0, 0) !important;
-  filter: blur(0px) !important;
-  pointer-events: auto !important;
+#diag-content-stage {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+#diag-reveal-dot {
+  will-change: transform, opacity;
+  box-shadow: 0 0 35px #c3f400, 0 0 70px #c3f400, 0 0 100px #ffffff;
+}
+
+#diag-reveal-line {
+  will-change: transform, opacity;
+  box-shadow: 0 0 25px #c3f400, 0 0 50px #c3f400, 0 0 80px rgba(195, 244, 0, 0.6);
 }
 
 /* ==================== CHATBOT LEVITATION ANIMATION ==================== */
