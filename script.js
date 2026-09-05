@@ -447,11 +447,11 @@ function initTopographicalTerrainShader() {
 
   const quad = new Float32Array([
     -1.0, -1.0,
-     1.0, -1.0,
-    -1.0,  1.0,
-    -1.0,  1.0,
-     1.0, -1.0,
-     1.0,  1.0,
+    1.0, -1.0,
+    -1.0, 1.0,
+    -1.0, 1.0,
+    1.0, -1.0,
+    1.0, 1.0,
   ]);
 
   const buffer = gl.createBuffer();
@@ -727,7 +727,7 @@ function initLazyVideos() {
       video.dataset.lazyLoaded = 'true';
     }
     const p = video.play();
-    if (p && p.catch) p.catch(() => {});
+    if (p && p.catch) p.catch(() => { });
   };
 
   const io = new IntersectionObserver((entries) => {
@@ -1314,9 +1314,9 @@ function initHero3DModel() {
 
             // Identificar 'Sphere'/'Sphere.001' (ojos en poligonal-30-08-26.glb) o 'Grid'
             const isEye = name.toLowerCase().includes('sphere') ||
-                          name.toLowerCase().includes('grid') ||
-                          name.toLowerCase().includes('eye') ||
-                          matName.toLowerCase().includes('eye');
+              name.toLowerCase().includes('grid') ||
+              name.toLowerCase().includes('eye') ||
+              matName.toLowerCase().includes('eye');
 
             if (isEye) {
               console.log("--> OJO IDENTIFICADO EXACTAMENTE:", name, matName);
@@ -1383,7 +1383,7 @@ function initHero3DModel() {
     const playScreenVideo = () => {
       if (screenVideo.paused) {
         const p = screenVideo.play();
-        if (p && p.catch) p.catch(() => {});
+        if (p && p.catch) p.catch(() => { });
       }
     };
     screenVideo.addEventListener('loadeddata', playScreenVideo);
@@ -1406,7 +1406,7 @@ function initHero3DModel() {
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        
+
         // Scale phone to look balanced, sharp and imposing
         const scale = 5.8 / maxDim;
         phone.scale.set(scale, scale, scale);
@@ -2034,7 +2034,7 @@ function initHero3DModel() {
 
             const sec2Vid = document.getElementById('section2-manifesto-video');
             if (sec2Vid && sec2Vid.paused) {
-              sec2Vid.play().catch(() => {});
+              sec2Vid.play().catch(() => { });
             }
           }
 
@@ -2297,14 +2297,17 @@ function initHero3DModel() {
     const sec3Container = document.getElementById('seccion-3-ecosistema');
     const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
     if (sec3Container) {
-      if (currentScrollLerp >= 0.70 && currentScrollLerp < 0.81) {
-        sec3Container.style.opacity = '1';
+      if (currentScrollLerp >= 0.680 && currentScrollLerp < 0.81) {
+        // Entrada sutil y progresiva del contenedor de Ecosistema
+        const pContainerIn = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.680) / 0.035));
+        const pContainerInEased = 0.5 * (1.0 - Math.cos(pContainerIn * Math.PI));
+        sec3Container.style.opacity = pContainerInEased.toFixed(3);
         sec3Container.style.filter = 'none';
-        sec3Container.style.pointerEvents = 'auto';
+        sec3Container.style.pointerEvents = pContainerInEased > 0.6 ? 'auto' : 'none';
 
-        // Escalonamiento secuencial ágil para la revelación de las 6 tarjetas
-        const cardStarts = [0.700, 0.705, 0.710, 0.715, 0.720, 0.725];
-        const cardDuration = 0.014;
+        // Escalonamiento secuencial suave, sutil y progresivo para las 6 tarjetas (0.690 -> 0.745)
+        const cardStarts = [0.690, 0.698, 0.706, 0.714, 0.722, 0.730];
+        const cardDuration = 0.026;
 
         for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
@@ -2312,24 +2315,26 @@ function initHero3DModel() {
             const start = cardStarts[k];
             if (currentScrollLerp < start) {
               card.style.opacity = '0';
-              card.style.transform = 'translateY(80px)';
+              card.style.transform = 'translateY(28px) scale(0.98)';
             } else {
               const pCard = Math.min(1.0, (currentScrollLerp - start) / cardDuration);
-              const pCardEased = Math.sin((pCard * Math.PI) / 2);
+              const pCardEased = 0.5 * (1.0 - Math.cos(pCard * Math.PI));
+              const yOffset = ((1.0 - pCardEased) * 28).toFixed(1);
+              const scaleVal = (0.98 + 0.02 * pCardEased).toFixed(3);
               card.style.opacity = pCardEased.toFixed(3);
-              card.style.transform = `translateY(${((1.0 - pCardEased) * 80).toFixed(1)}px)`;
+              card.style.transform = `translateY(${yOffset}px) scale(${scaleVal})`;
             }
           }
         }
 
-        // Sincronización continua e instantánea del scroll de tarjetas (0.725 -> 0.81)
+        // Sincronización continua y fluida del scroll de tarjetas (0.735 -> 0.81)
         if (sec3ScrollContainer && !isUserInteractingSec3) {
           const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
           if (maxInternalScroll > 0) {
-            if (currentScrollLerp <= 0.725) {
+            if (currentScrollLerp <= 0.735) {
               sec3ScrollContainer.scrollTop = 0;
             } else {
-              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.725) / (0.81 - 0.725)));
+              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.735) / (0.81 - 0.735)));
               sec3ScrollContainer.scrollTop = pScrollCards * maxInternalScroll;
             }
           }
@@ -2365,7 +2370,7 @@ function initHero3DModel() {
           const card = document.getElementById(`sec3-card-${k}`);
           if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'translateY(80px)';
+            card.style.transform = 'translateY(28px) scale(0.98)';
           }
         }
       }
@@ -2492,9 +2497,9 @@ function initHero3DModel() {
       // - 02 // Ecosistema (0.70 <= currentScrollLerp < 0.84)
       // - 05 // Metodología (When curtain is revealed)
       const isWhiteHeaderPhase = (currentScrollLerp >= T_REVEAL_START && currentScrollLerp < T_PHONE_ZOOM_START) ||
-                                 (currentScrollLerp >= 0.70 && currentScrollLerp < 0.84) ||
-                                 isMetodologiaRevealed;
-      
+        (currentScrollLerp >= 0.70 && currentScrollLerp < 0.84) ||
+        isMetodologiaRevealed;
+
       // Transparent Floating Header during Smartphone Zoom & 360 Spin (0.34 <= currentScrollLerp < 0.70)
       const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.70;
 
@@ -2716,7 +2721,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!chatMessages) return;
       const msgDiv = document.createElement('div');
       msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''}`;
-      
+
       if (isUser) {
         msgDiv.innerHTML = `
           <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none p-3 max-w-[80%] leading-relaxed shadow-sm">
@@ -2931,27 +2936,24 @@ function initSec3Topography() {
     fillBands: false,
     opacity: 1,
     grain: true,
-    grainIntensity: 0.05,
-    mouseInteraction: true,
-    mouseRadius: 0.3,
-    mouseStrength: 0.4
+    grainIntensity: 0.05
   });
 }
 window.initSec3Topography = initSec3Topography;
 
 // ==================== MATRIZ MODAL (25 BLOQUES) LOGIC CON FOTOS Y DEGRADADO ARMÓNICO ====================
-const matriz25Data = [
-  // FILA 1: Espectro Verde Lima / Cyber Lime (Núcleo Operativo)
+const matrizData = [
+  // ==================== BLOQUE 1: PROYECTOS OPERATIVOS (5 Módulos // Verde & Lima Neón) ====================
   {
     id: 1,
     code: 'BLK-01',
     category: 'operativo',
-    file: 'imagotipoGreen.png',
-    title: 'Vector Core Imagotype',
-    desc: 'Núcleo de identidad e integración modular de alta velocidad para conversión y tracking activo.',
-    kpi1: '+320% Impacto',
-    kpi2: '5.2x ROI',
-    kpi3: '1 Semana',
+    file: 'Vector Inside Isologo.png',
+    title: 'Vector Inside',
+    desc: 'Firma de arquitectura de crecimiento, diseño cinemático y aceleración digital para marcas de alto impacto.',
+    kpi1: '72h → 14.5h',
+    kpi2: 'Desv: 0.8%',
+    kpi3: 'Estabiliz: 28d',
     color: '#c3f400',
     tint: 'rgba(195, 244, 0, 0.45)'
   },
@@ -2959,66 +2961,63 @@ const matriz25Data = [
     id: 2,
     code: 'BLK-02',
     category: 'operativo',
-    file: 'Vector Inside Isologo.png',
-    title: 'Isologo Kinetic Engine',
-    desc: 'Sincronizador vectorial reactivo para aceleración de funnel y retención de usuarios.',
-    kpi1: '+290% Retención',
-    kpi2: '4.9x ROI',
-    kpi3: '2 Semanas',
-    color: '#b0f000',
-    tint: 'rgba(176, 240, 0, 0.45)'
+    file: 'SyborX Logo White.svg',
+    title: 'SyborX',
+    desc: 'Desarrollo de software a medida, ciberseguridad e integración de automatización inteligente.',
+    kpi1: '14.2% Capital',
+    kpi2: 'Anomalías: <0.4%',
+    kpi3: 'Adopción: 96h',
+    color: '#a3e635',
+    tint: 'rgba(163, 230, 53, 0.45)'
   },
   {
     id: 3,
     code: 'BLK-03',
     category: 'operativo',
-    file: 'lobo02.png',
-    title: 'Cyber Wolf Vanguard',
-    desc: 'Módulo de tracción táctica y posicionamiento de marca con telemetría predictiva.',
-    kpi1: '+340% Conversión',
-    kpi2: '5.4x ROI',
-    kpi3: '2 Semanas',
-    color: '#84e600',
-    tint: 'rgba(132, 230, 0, 0.45)'
+    file: 'Imagotipo2.ai.png',
+    title: 'Lealtix',
+    desc: 'Plataforma de lealtad digital y retención de clientes para la industria HORECA mediante pases en Apple & Google Wallet sin necesidad de apps.',
+    kpi1: '+38.5% Recurrencia',
+    kpi2: 'Retención: +28.4%',
+    kpi3: 'Adopción: 72h',
+    color: '#006a61',
+    tint: 'rgba(0, 106, 97, 0.45)'
   },
   {
     id: 4,
     code: 'BLK-04',
     category: 'operativo',
-    file: 'Circuit_board_and_data_flow_202608261320.jpeg',
-    title: 'Neural Circuit Flow',
-    desc: 'Topología de red de baja latencia para enrutamiento inteligente de datos de adquisición.',
-    kpi1: '+380% Telemetría',
-    kpi2: '6.1x ROI',
-    kpi3: '3 Semanas',
-    color: '#34d399',
-    tint: 'rgba(52, 211, 153, 0.45)'
+    file: 'imagotipo valor Green.png',
+    title: 'Valor Máximo',
+    desc: 'Plataforma de match inmobiliario y conexión estratégica de espacios comerciales con empresarios y emprendedores.',
+    kpi1: '24.1% Margen',
+    kpi2: 'Error Residual: 0.4%',
+    kpi3: 'Estabiliz: 28d',
+    color: '#10b981',
+    tint: 'rgba(16, 185, 129, 0.45)'
   },
   {
     id: 5,
     code: 'BLK-05',
     category: 'operativo',
-    file: 'LOGO 4GUARD.jpeg',
-    title: '4Guard Security Layer',
-    desc: 'Blindaje perimetral y validación biométrica/criptográfica de eventos transaccionales.',
-    kpi1: '99.99% Uptime',
-    kpi2: '4.6x ROI',
-    kpi3: '1 Semana',
-    color: '#10b981',
-    tint: 'rgba(16, 185, 129, 0.45)'
+    file: 'Logo aida.png',
+    title: 'AIDA',
+    desc: 'Framework estratégico de adquisición y conversión comercial estructurado en 4 etapas: Atención, Interés, Deseo y Acción.',
+    kpi1: '96h → 18.5h',
+    kpi2: 'Desv: 0.7%',
+    kpi3: 'Estabiliz: 35d',
+    color: '#34d399',
+    tint: 'rgba(52, 211, 153, 0.45)'
   },
 
-  // FILA 2: Transición Verde a Cyan & Azul Eléctrico (Puente Operativo / Cognitivo)
+  // ==================== BLOQUE 2: PROYECTOS COGNITIVOS Y EXPANSIVOS ====================
   {
     id: 6,
     code: 'BLK-06',
-    category: 'operativo',
-    file: 'SyborX Logo White.svg',
-    title: 'SyborX Cyber Mesh',
-    desc: 'Conectores API para orquestación multi-canal con microservicios desacoplados.',
-    kpi1: '+260% Sincronía',
-    kpi2: '4.2x ROI',
-    kpi3: '2 Semanas',
+    category: 'cognitivo',
+    file: 'SmbtK1.svg',
+    title: 'SimbiotiK',
+    desc: 'Banda de rock alternativo conceptual con experiencia interactiva 3D y WebGL inmersivo.',
     color: '#06b6d4',
     tint: 'rgba(6, 182, 212, 0.45)'
   },
@@ -3026,256 +3025,44 @@ const matriz25Data = [
     id: 7,
     code: 'BLK-07',
     category: 'cognitivo',
-    file: 'Gemini_Generated_Image_b9fxdjb9fxdjb9fx.png',
-    title: 'Quantum Interface Node',
-    desc: 'Motor de renderizado y visualización tridimensional optimizado por aceleración GPU.',
-    kpi1: '60 FPS Ultra',
-    kpi2: '5.0x ROI',
-    kpi3: '3 Semanas',
+    file: 'integritus2.svg',
+    title: 'IntegritUS',
+    desc: 'Consultoría en cumplimiento normativo, gobierno corporativo y auditoría de integridad empresarial.',
     color: '#0ea5e9',
     tint: 'rgba(14, 165, 233, 0.45)'
   },
   {
     id: 8,
     code: 'BLK-08',
-    category: 'cognitivo',
-    file: 'SmbtK1.svg',
-    title: 'Smart Behavioral Kernel',
-    desc: 'Segmentación psicográfica en tiempo real y personalización dinámica del viaje de usuario.',
-    kpi1: '+310% Engagement',
-    kpi2: '4.8x ROI',
-    kpi3: '2 Semanas',
-    color: '#38bdf8',
-    tint: 'rgba(56, 189, 248, 0.45)'
+    category: 'expansivo',
+    file: 'LOGO 4GUARD.jpeg',
+    title: '4Guard',
+    desc: 'Firma de seguridad privada integral, blindaje perimetral y custodia de activos corporativos.',
+    color: '#8b5cf6',
+    tint: 'rgba(139, 92, 246, 0.45)'
   },
   {
     id: 9,
     code: 'BLK-09',
-    category: 'cognitivo',
-    file: 'Logo aida.png',
-    title: 'AIDA Conversion Funnel',
-    desc: 'Automatización holística de Atención, Interés, Deseo y Acción con disparadores inteligentes.',
-    kpi1: '+275% Cierre',
-    kpi2: '4.7x ROI',
-    kpi3: '2 Semanas',
-    color: '#3b82f6',
-    tint: 'rgba(59, 130, 246, 0.45)'
-  },
-  {
-    id: 10,
-    code: 'BLK-10',
-    category: 'cognitivo',
-    file: 'integritus2.svg',
-    title: 'Integritus Data Trust',
-    desc: 'Capa de trazabilidad inmutable y conciliación continua de métricas financieras.',
-    kpi1: '100% Precisión',
-    kpi2: '5.1x ROI',
-    kpi3: '3 Semanas',
-    color: '#2563eb',
-    tint: 'rgba(37, 99, 235, 0.45)'
-  },
-
-  // FILA 3: Azul Cognitivo Profundo -> Índigo -> Violeta (Núcleo Cognitivo)
-  {
-    id: 11,
-    code: 'BLK-11',
-    category: 'cognitivo',
-    file: 'Gemini_Generated_Image_q0r58zq0r58zq0r5.jpeg',
-    title: 'Cognitive Cloud Cluster',
-    desc: 'Clúster de inferencia distribuida para analítica predictiva de alto rendimiento.',
-    kpi1: '+410% Capacidad',
-    kpi2: '5.8x ROI',
-    kpi3: '3 Semanas',
-    color: '#433dae',
-    tint: 'rgba(67, 61, 174, 0.50)'
-  },
-  {
-    id: 12,
-    code: 'BLK-12',
-    category: 'cognitivo',
-    file: '52e4285a050dd168c90a3df236ebedfa.jpg',
-    title: 'Predictive Pipeline Array',
-    desc: 'Canalizaciones de scoring y lead routing automatizado para equipos de ventas estratégicas.',
-    kpi1: '+350% Velocidad',
-    kpi2: '5.3x ROI',
-    kpi3: '2 Semanas',
-    color: '#4f46e5',
-    tint: 'rgba(79, 70, 229, 0.45)'
-  },
-  {
-    id: 13,
-    code: 'BLK-13',
-    category: 'cognitivo',
-    file: '8388d28c9479d74bc7172d828307dd08.jpg',
-    title: 'Realtime Analytics Grid',
-    desc: 'Matriz de tableros ejecutivos con visualización instantánea de ratios de tracción.',
-    kpi1: '<10ms Latencia',
-    kpi2: '4.5x ROI',
-    kpi3: '2 Semanas',
-    color: '#6366f1',
-    tint: 'rgba(99, 102, 241, 0.45)'
-  },
-  {
-    id: 14,
-    code: 'BLK-14',
-    category: 'cognitivo',
-    file: 'd399b1a5bfab57de3bbba91441225b04.jpg',
-    title: 'Deep Learning Synapse',
-    desc: 'Algoritmos de ajuste dinámico de precios y ofertas personalizadas por intención de compra.',
-    kpi1: '+295% Margen',
-    kpi2: '5.6x ROI',
-    kpi3: '3 Semanas',
-    color: '#7c3aed',
-    tint: 'rgba(124, 58, 237, 0.45)'
-  },
-  {
-    id: 15,
-    code: 'BLK-15',
     category: 'expansivo',
     file: 'karloz vazquez logo.svg',
-    title: 'KV Strategic Architecture',
-    desc: 'Dirección de diseño de sistemas exponenciales y consultoría de conversión premium.',
-    kpi1: '+450% Escala',
-    kpi2: '6.5x ROI',
-    kpi3: '2 Semanas',
-    color: '#8b5cf6',
-    tint: 'rgba(139, 92, 246, 0.45)'
-  },
-
-  // FILA 4: Púrpura y Violeta Radiante (Núcleo Expansivo)
-  {
-    id: 16,
-    code: 'BLK-16',
-    category: 'expansivo',
-    file: 'poligonal02.png',
-    title: 'Polygonal 3D Matrix',
-    desc: 'Infraestructura espacial de alto impacto visual para inmersión sensorial y branding de élite.',
-    kpi1: '+380% Recordación',
-    kpi2: '5.7x ROI',
-    kpi3: '3 Semanas',
+    title: 'Karloz Vázquez',
+    desc: 'Estudio de dirección de arte brutalista, diseño conceptual y consultoría de identidad visual.',
     color: '#9d4edd',
     tint: 'rgba(157, 78, 221, 0.45)'
   },
   {
-    id: 17,
-    code: 'BLK-17',
-    category: 'expansivo',
-    file: 'liquid01.png',
-    title: 'Liquid Metal Dynamic Scale',
-    desc: 'Arquitectura elástica adaptable a picos de tráfico masivo sin degradación de rendimiento.',
-    kpi1: '10x Concurrencia',
-    kpi2: '5.9x ROI',
-    kpi3: '2 Semanas',
-    color: '#a855f7',
-    tint: 'rgba(168, 85, 247, 0.45)'
-  },
-  {
-    id: 18,
-    code: 'BLK-18',
+    id: 10,
+    code: 'BLK-10',
     category: 'expansivo',
     file: 'Brevemente02.png',
-    title: 'High-Speed Content Hub',
-    desc: 'Distribución multiformato de micro-contenidos de alta conversión para adquisición orgánica.',
-    kpi1: '+310% Tráfico',
-    kpi2: '4.4x ROI',
-    kpi3: '1 Semana',
-    color: '#b235e6',
-    tint: 'rgba(178, 53, 230, 0.45)'
-  },
-  {
-    id: 19,
-    code: 'BLK-19',
-    category: 'expansivo',
-    file: 'logo-diamonds.jpg',
-    title: 'Diamonds Luxury Vault',
-    desc: 'Ecosistema de monetización para productos de alto ticket con funnel de exclusividad.',
-    kpi1: '+420% Ticket Prom.',
-    kpi2: '6.2x ROI',
-    kpi3: '3 Semanas',
-    color: '#c026d3',
-    tint: 'rgba(192, 38, 211, 0.45)'
-  },
-  {
-    id: 20,
-    code: 'BLK-20',
-    category: 'expansivo',
-    file: '0f9bae2c281d0acad623fe111ef13bc4.jpg',
-    title: 'Omni-channel Router',
-    desc: 'Sincronización multi-plataforma de inventario, prospectos y transacciones globales.',
-    kpi1: '+285% Sincronía',
-    kpi2: '4.8x ROI',
-    kpi3: '2 Semanas',
-    color: '#d946ef',
-    tint: 'rgba(217, 70, 239, 0.45)'
-  },
-
-  // FILA 5: Magenta, Fucsia y Rosa Obsidian (Horizonte Expansivo)
-  {
-    id: 21,
-    code: 'BLK-21',
-    category: 'expansivo',
-    file: '76c339f1cb04a378b73d3c2df9a91bcd.jpg',
-    title: 'Multi-tier CDN Mesh',
-    desc: 'Aceleración de entrega perimetral con servidores edge distribuidos en 45 regiones globales.',
-    kpi1: '99.999% SLA',
-    kpi2: '5.1x ROI',
-    kpi3: '2 Semanas',
-    color: '#e879f9',
-    tint: 'rgba(232, 121, 249, 0.45)'
-  },
-  {
-    id: 22,
-    code: 'BLK-22',
-    category: 'expansivo',
-    file: 'images.jpeg',
-    title: 'High-Volume Ledger',
-    desc: 'Base de datos transaccional con procesamiento paralelo de miles de operaciones por segundo.',
-    kpi1: '12k TPS',
-    kpi2: '5.5x ROI',
-    kpi3: '3 Semanas',
-    color: '#f43f5e',
-    tint: 'rgba(244, 63, 94, 0.45)'
-  },
-  {
-    id: 23,
-    code: 'BLK-23',
-    category: 'expansivo',
-    file: 'images (1).jpeg',
-    title: 'Global Conversion Gateway',
-    desc: 'Pasarela multi-divisa y procesador inteligente de pagos transfronterizos sin fricción.',
-    kpi1: '+330% Checkout',
-    kpi2: '5.8x ROI',
-    kpi3: '2 Semanas',
-    color: '#ec4899',
-    tint: 'rgba(236, 72, 153, 0.45)'
-  },
-  {
-    id: 24,
-    code: 'BLK-24',
-    category: 'expansivo',
-    file: 'IMG_0828.JPG',
-    title: 'Executive Mission Control',
-    desc: 'Consola central de supervisión operativa y gobernanza de inteligencia de negocios.',
-    kpi1: '100% Control',
-    kpi2: '6.0x ROI',
-    kpi3: '3 Semanas',
-    color: '#db2777',
-    tint: 'rgba(219, 39, 119, 0.45)'
-  },
-  {
-    id: 25,
-    code: 'BLK-25',
-    category: 'expansivo',
-    file: 'Captura de pantalla 2026-08-30 a la(s) 6.54.20 p.m..png',
-    title: 'Vector Inside 3.0 Core OS',
-    desc: 'Sistema operativo unificado de aceleración digital, diseño cinemático y tracción predecible.',
-    kpi1: '+500% Expansión',
-    kpi2: '7.2x ROI',
-    kpi3: '3 Semanas',
-    color: '#be185d',
-    tint: 'rgba(190, 24, 93, 0.45)'
+    title: 'BreveMente',
+    desc: 'Software de documentación clínica y asistente inteligente (Brifi) para Terapia Breve Estratégica.',
+    color: '#a855f7',
+    tint: 'rgba(168, 85, 247, 0.45)'
   }
 ];
+const matriz25Data = matrizData;
 // ==================== 04 EVIDENCIA // 3D DEPTH CAROUSEL ====================
 // DepthCarousel is loaded from DepthCarousel.js and initialized in initFloatingGallery() below.
 
@@ -3598,7 +3385,7 @@ function initExecutionInternalScrollListener() {
               const pPlane = Math.min(1.0, (pTrack - 0.88) / (1.0 - 0.88));
               const insetY = Math.max(0, (1.0 - pPlane) * 50).toFixed(1);
               diagSec.style.clipPath = `inset(${insetY}% 0 ${insetY}% 0)`;
-              
+
               if (diagDot) {
                 diagDot.style.opacity = '0';
               }
@@ -3980,9 +3767,9 @@ function initFloatingGallery() {
     expandRatio: 0.52,
     trigger: 'hover',
     accentColor: '#c3f400',
-    overlayColor: '#060010',
+    overlayColor: 'rgba(6, 0, 16, 0.35)',
     textColor: '#ffffff',
-    grayscale: true,
+    grayscale: false,
     showLabels: true,
     duration: 0.6,
     ease: 'power3.out',

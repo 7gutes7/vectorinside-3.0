@@ -172,26 +172,9 @@
             </h4>
 
             ${item.desc ? `
-              <p class="font-body text-[11px] text-neutral-300 leading-snug my-2 line-clamp-2 border-t border-white/10 pt-1.5">
+              <p class="font-body text-[12px] text-neutral-200 leading-relaxed my-2 line-clamp-3 border-t border-white/10 pt-2">
                 ${item.desc}
               </p>
-            ` : ''}
-
-            ${item.kpi1 ? `
-              <div class="grid grid-cols-3 gap-1 font-mono text-[9px] pt-1">
-                <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                  <span class="text-text-muted block text-[8px]">ACEL.</span>
-                  <span class="text-vector-lime font-bold">${item.kpi1}</span>
-                </div>
-                <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                  <span class="text-text-muted block text-[8px]">ROI</span>
-                  <span class="text-white font-bold">${item.kpi2 || '-'}</span>
-                </div>
-                <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                  <span class="text-text-muted block text-[8px]">TIEMPO</span>
-                  <span class="text-white font-bold">${item.kpi3 || '-'}</span>
-                </div>
-              </div>
             ` : ''}
           </div>
         `;

@@ -227,23 +227,7 @@
               <!-- Expanded Details (Revealed smoothly on expanded panel) -->
               <div class="ag-panel__details">
                 ${category ? `<span class="font-mono text-[9px] uppercase tracking-widest font-bold block mb-1" style="color: ${color}">// ${category}</span>` : ''}
-                ${item.desc ? `<p class="font-body text-[11px] text-neutral-300 leading-snug line-clamp-2">${item.desc}</p>` : ''}
-                ${item.kpi1 ? `
-                  <div class="grid grid-cols-3 gap-1.5 font-mono text-[9px] pt-2 mt-1 border-t border-white/10">
-                    <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                      <span class="text-text-muted block text-[8px]">ACEL.</span>
-                      <span class="text-vector-lime font-bold">${item.kpi1}</span>
-                    </div>
-                    <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                      <span class="text-text-muted block text-[8px]">ROI</span>
-                      <span class="text-white font-bold">${item.kpi2 || '-'}</span>
-                    </div>
-                    <div class="bg-black/70 p-1 rounded border border-white/10 text-center">
-                      <span class="text-text-muted block text-[8px]">TIEMPO</span>
-                      <span class="text-white font-bold">${item.kpi3 || '-'}</span>
-                    </div>
-                  </div>
-                ` : ''}
+                ${item.desc ? `<p class="font-body text-[12px] text-neutral-200 leading-relaxed">${item.desc}</p>` : ''}
               </div>
             </span>
           ` : ''}

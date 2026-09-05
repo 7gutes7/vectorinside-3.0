@@ -73,11 +73,12 @@
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
+  background-color: #06050b;
 }
 
 .ag-panel__media {
-  --ag-gray: 1;
-  --ag-dim: 0.35;
+  --ag-gray: 0;
+  --ag-dim: 0.12;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -85,6 +86,7 @@
   height: 100%;
   filter: grayscale(var(--ag-gray));
   will-change: transform, filter;
+  background-color: #08070d;
 }
 
 .accordion-gallery--vertical .ag-panel__media {
@@ -96,9 +98,76 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
   user-select: none;
   -webkit-user-drag: none;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Specific scaling and crisp white background for all transparent logos and vector assets */
+.ag-panel__media img[src$=".svg"],
+.ag-panel__media img[src*="logo"],
+.ag-panel__media img[src*="Logo"],
+.ag-panel__media img[src*="SyborX"],
+.ag-panel__media img[src*="syborx"],
+.ag-panel__media img[src*="SmbtK"],
+.ag-panel__media img[src*="integritus"],
+.ag-panel__media img[src*="karloz"],
+.ag-panel__media img[src*="imagotipo"],
+.ag-panel__media img[src*="Isologo"],
+.ag-panel__media img[src*="VectorInside"],
+.ag-panel__media img[src*="lobo02"],
+.ag-panel__media img[src*="ValorMaximo"],
+.ag-panel__media img[src*="Lealtix"],
+.ag-panel__media img[src*="Brevemente"],
+.ag-panel__media img[src*="SynexIA"],
+.ag-panel__media img[src*="4GUARD"] {
+  object-fit: contain;
+  padding: 28px 18px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+/* Specific 30% reduction and solid white background for BLK-01 and BLK-02 */
+.ag-panel__media img[src*="VectorInsideLogoDark"],
+.ag-panel__media img[src*="VectorInside"],
+.ag-panel__media img[src*="Vector%20Inside%20Isologo"],
+.ag-panel__media img[src*="SyborX"],
+.ag-panel__media img[src*="syborx"] {
+  background-color: #ffffff !important;
+  padding: 52px 38px !important;
+  transform: scale(0.7) !important;
+  transform-origin: center center !important;
+}
+
+/* Specific 25% reduction for Lealtix, Integritus and Karloz Vázquez */
+.ag-panel__media img[src*="Imagotipo2"],
+.ag-panel__media img[src*="imagotipo2"],
+.ag-panel__media img[src*="integritus"],
+.ag-panel__media img[src*="Integritus"],
+.ag-panel__media img[src*="karloz"],
+.ag-panel__media img[src*="Karloz"] {
+  background-color: #ffffff !important;
+  padding: 46px 28px !important;
+  transform: scale(0.75) !important;
+  transform-origin: center center !important;
+}
+
+/* Specific 20% reduction for BLK-05 (AIDA Logo) */
+.ag-panel__media img[src*="aida"],
+.ag-panel__media img[src*="AIDA"] {
+  background-color: #ffffff !important;
+  padding: 44px 28px !important;
+  transform: scale(0.8) !important;
+  transform-origin: center center !important;
+}
+
+/* Specific padding for wide horizontal logos so they never touch borders */
+.ag-panel__media img[src*="SynexIA"],
+.ag-panel__media img[src*="Lealtix"],
+.ag-panel__media img[src*="ValorMaximo"] {
+  padding: 42px 24px !important;
 }
 
 .ag-panel__overlay {
@@ -106,8 +175,9 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, transparent 40%, rgba(6, 0, 16, 0.9) 100%),
-    rgba(6, 0, 16, calc(var(--ag-dim, 0.35)));
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, transparent 40%, rgba(6, 0, 16, 0.94) 100%),
+    rgba(6, 0, 16, calc(var(--ag-dim, 0.08)));
+  transition: opacity 0.3s ease;
 }
 
 .ag-panel__badge {
