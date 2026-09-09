@@ -712,11 +712,14 @@ body {
 }
 
 #chatbot-messages {
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   scrollbar-width: thin;
-  scrollbar-color: rgba(195, 244, 0, 0.5) rgba(255, 255, 255, 0.05);
+  scrollbar-color: rgba(195, 244, 0, 0.6) rgba(255, 255, 255, 0.05);
 }
 
 #chatbot-messages::-webkit-scrollbar {

@@ -2729,13 +2729,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!chatMessages) return;
     requestAnimationFrame(() => {
       chatMessages.scrollTo({
-        top: chatMessages.scrollHeight,
+        top: chatMessages.scrollHeight + 1000,
         behavior: 'smooth'
       });
     });
     setTimeout(() => {
-      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight + 1000;
     }, 80);
+    setTimeout(() => {
+      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight + 1000;
+    }, 250);
   };
 
   const appendMessage = (htmlContent, isUser = false) => {
@@ -3096,18 +3099,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==================== AISLAMIENTO DE SCROLL INTERNO ====================
   // Cuando el cursor esté dentro del chatbot, solo scrollea los mensajes sin mover la web de fondo
   if (chatWindow && chatMessages) {
-    const handleChatWheel = (e) => {
+    // Detener la propagación de eventos de rueda y táctiles hacia el fondo
+    chatWindow.addEventListener('wheel', (e) => {
       e.stopPropagation();
-      // Desplazar los mensajes del chat directamente
-      chatMessages.scrollTop += e.deltaY;
-      // Prevenir que el evento mueva la página principal
-      e.preventDefault();
-    };
+    }, { passive: true });
 
-    chatWindow.addEventListener('wheel', handleChatWheel, { passive: false });
-    chatMessages.addEventListener('wheel', handleChatWheel, { passive: false });
-    
-    // En móviles, evitar que el swipe arrastre la página principal
+    chatMessages.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+
+    // En móviles / trackpads táctiles
     chatWindow.addEventListener('touchmove', (e) => {
       e.stopPropagation();
     }, { passive: true });
