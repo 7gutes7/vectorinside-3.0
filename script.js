@@ -3013,11 +3013,26 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     const mailtoUrl = `mailto:contactovectorinside@gmail.com?subject=${subject}&body=${bodyText}`;
 
-    // Envío en segundo plano (vía Webhook / Mailto)
+    // Envío en segundo plano al Micro-Backend de Google Apps Script (Registra en Sheets + Alerta a Gmail + Auto-respuesta)
+    const APPS_SCRIPT_WEBHOOK = 'https://script.google.com/macros/s/AKfycbw3vZ2dQYYfXf9QMOTFnGUj2CKl61R_iJEEt_kyvaudXT2WRq3BDLZKTfu2rVDRzGVsBQ/exec';
     try {
-      const imgBeacon = new Image();
-      imgBeacon.src = `https://formspree.io/f/xvgzeykw?email=${encodeURIComponent(auditState.email)}&name=${encodeURIComponent(auditState.name)}&phone=${encodeURIComponent(auditState.phone)}&message=${encodeURIComponent(auditState.challenge)}`;
-    } catch (e) {}
+      fetch(APPS_SCRIPT_WEBHOOK, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify({
+          name: auditState.name,
+          services: auditState.services,
+          email: auditState.email,
+          phone: auditState.phone,
+          challenge: auditState.challenge
+        })
+      }).catch(err => console.warn('Google Apps Script dispatch:', err));
+    } catch (e) {
+      console.warn('Webhook error:', e);
+    }
 
     setTimeout(() => {
       appendMessage(`
