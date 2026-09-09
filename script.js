@@ -3078,6 +3078,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
 
+  // ==================== AISLAMIENTO DE SCROLL INTERNO ====================
+  // Cuando el cursor esté dentro del chatbot, solo scrollea los mensajes sin mover la web de fondo
+  if (chatWindow && chatMessages) {
+    const handleChatWheel = (e) => {
+      e.stopPropagation();
+      // Desplazar los mensajes del chat directamente
+      chatMessages.scrollTop += e.deltaY;
+      // Prevenir que el evento mueva la página principal
+      e.preventDefault();
+    };
+
+    chatWindow.addEventListener('wheel', handleChatWheel, { passive: false });
+    chatMessages.addEventListener('wheel', handleChatWheel, { passive: false });
+    
+    // En móviles, evitar que el swipe arrastre la página principal
+    chatWindow.addEventListener('touchmove', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  }
+
   if (chatForm && chatInput) {
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();

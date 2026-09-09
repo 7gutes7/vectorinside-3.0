@@ -705,5 +705,39 @@ body {
   will-change: transform;
 }
 
+/* ==================== CHATBOT ISOLATED SCROLL ENGINE ==================== */
+#chatbot-window {
+  overscroll-behavior: contain !important;
+  touch-action: pan-y;
+}
+
+#chatbot-messages {
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(195, 244, 0, 0.5) rgba(255, 255, 255, 0.05);
+}
+
+#chatbot-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+#chatbot-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+}
+
+#chatbot-messages::-webkit-scrollbar-thumb {
+  background: rgba(195, 244, 0, 0.4);
+  border-radius: 10px;
+  border: 1px solid rgba(195, 244, 0, 0.2);
+}
+
+#chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(195, 244, 0, 0.9);
+  box-shadow: 0 0 10px #c3f400;
+}
+
 
 
