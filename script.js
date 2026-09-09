@@ -2933,7 +2933,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `*WhatsApp:* ${auditState.phone}\n` +
       `*Desafío actual:* ${auditState.challenge}`
     );
-    const waUrl = `https://wa.me/?text=${waText}`;
+    const waUrl = `https://wa.me/527203323957?text=${waText}`;
 
     const subject = encodeURIComponent(`Auditoría Nuclear - ${auditState.name}`);
     const bodyText = encodeURIComponent(
@@ -3936,7 +3936,7 @@ function initDiagnosticoTest() {
 
     if (whatsappLink) {
       const msg = encodeURIComponent('Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ' + total + '/120 - ' + scoreStatus.textContent + ') y me gustaría agendar la sesión estratégica.');
-      whatsappLink.href = 'https://wa.me/?text=' + msg;
+      whatsappLink.href = 'https://wa.me/527203323957?text=' + msg;
     }
   }
 
