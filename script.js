@@ -2725,24 +2725,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const appendMessage = (htmlContent, isUser = false, showAvatar = false) => {
+  const scrollToBottom = () => {
+    if (!chatMessages) return;
+    requestAnimationFrame(() => {
+      chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+    setTimeout(() => {
+      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 80);
+  };
+
+  const appendMessage = (htmlContent, isUser = false) => {
     if (!chatMessages) return null;
     const msgDiv = document.createElement('div');
-    msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''} animate-fade-in`;
+    msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''} animate-fade-in w-full`;
 
     if (isUser) {
       msgDiv.innerHTML = `
-        <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none px-3.5 py-2.5 max-w-[85%] leading-relaxed shadow-sm">
+        <div class="ml-auto bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none px-3.5 py-2.5 max-w-[85%] leading-relaxed shadow-sm">
           <p class="font-sans text-xs">${htmlContent}</p>
-        </div>
-      `;
-    } else if (showAvatar) {
-      msgDiv.innerHTML = `
-        <div class="w-7 h-7 rounded-full overflow-hidden border border-vector-lime/40 shrink-0 bg-vector-black shadow-[0_0_10px_rgba(195,244,0,0.3)]">
-          <img src="chatbot-icon.png" alt="Vector" class="w-full h-full object-cover" />
-        </div>
-        <div class="bg-white/10 border border-white/15 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm max-w-[88%] text-xs font-sans">
-          ${htmlContent}
         </div>
       `;
     } else {
@@ -2753,7 +2757,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
     chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollToBottom();
     return msgDiv;
   };
 
@@ -2775,20 +2779,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(() => {
-      // Solo en el primer mensaje se muestra el avatar del bot
       appendMessage(`
         <div class="space-y-1.5">
           <p class="font-mono text-[10px] text-vector-lime font-bold uppercase tracking-widest">// AUDITORÍA NUCLEAR 3.0</p>
           <p class="font-bold text-sm text-white">Hola, soy Vector.</p>
           <p class="text-neutral-200 text-xs">1. ¿Cuál es tu nombre?</p>
         </div>
-      `, false, true);
+      `);
 
       if (chatInput) {
         chatInput.placeholder = 'Escribe tu nombre aquí...';
         chatInput.focus();
       }
-    }, 200);
+      scrollToBottom();
+    }, 150);
   };
   window.startNuclearAuditFlow = startNuclearAuditFlow;
   window.openNuclearModal = (e) => {
@@ -2801,53 +2805,53 @@ document.addEventListener('DOMContentLoaded', () => {
     auditState.step = 2;
     setTimeout(() => {
       const msg = appendMessage(`
-        <div class="space-y-3">
+        <div class="space-y-2.5">
           <p class="text-neutral-200">Mucho gusto <strong class="text-white">${auditState.name}</strong>, bienvenido a la experiencia <strong class="text-vector-lime">VI</strong>.</p>
           <p class="font-bold text-white text-xs">2. Vector Inside está diseñado para:</p>
           
-          <div id="audit-cards-container" class="space-y-2 font-mono text-xs">
+          <div id="audit-cards-container" class="space-y-1.5 font-mono text-xs">
             
-            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Diseñar o rediseñar tu página web">
-              <div class="flex items-center gap-2.5">
+            <div class="audit-card-option flex items-center justify-between p-2.5 rounded-xl border-2 border-white/20 bg-black/75 hover:border-vector-lime cursor-pointer transition-all select-none" data-value="Diseñar o rediseñar tu página web">
+              <div class="flex items-center gap-2">
                 <span class="text-vector-lime font-bold text-xs">01 //</span>
                 <span class="text-white font-medium text-xs">Diseñar o rediseñar tu página web</span>
               </div>
-              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+              <span class="chk-box w-5 h-5 rounded-md border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
             </div>
 
-            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Branding o rebrandeo de marca">
-              <div class="flex items-center gap-2.5">
+            <div class="audit-card-option flex items-center justify-between p-2.5 rounded-xl border-2 border-white/20 bg-black/75 hover:border-vector-lime cursor-pointer transition-all select-none" data-value="Branding o rebrandeo de marca">
+              <div class="flex items-center gap-2">
                 <span class="text-vector-lime font-bold text-xs">02 //</span>
                 <span class="text-white font-medium text-xs">Branding o rebrandeo de marca</span>
               </div>
-              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+              <span class="chk-box w-5 h-5 rounded-md border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
             </div>
 
-            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Automatización de sistema de ventas">
-              <div class="flex items-center gap-2.5">
+            <div class="audit-card-option flex items-center justify-between p-2.5 rounded-xl border-2 border-white/20 bg-black/75 hover:border-vector-lime cursor-pointer transition-all select-none" data-value="Automatización de sistema de ventas">
+              <div class="flex items-center gap-2">
                 <span class="text-vector-lime font-bold text-xs">03 //</span>
                 <span class="text-white font-medium text-xs">Automatización de sistema de ventas</span>
               </div>
-              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+              <span class="chk-box w-5 h-5 rounded-md border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
             </div>
 
-            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Campañas de marketing">
-              <div class="flex items-center gap-2.5">
+            <div class="audit-card-option flex items-center justify-between p-2.5 rounded-xl border-2 border-white/20 bg-black/75 hover:border-vector-lime cursor-pointer transition-all select-none" data-value="Campañas de marketing">
+              <div class="flex items-center gap-2">
                 <span class="text-vector-lime font-bold text-xs">04 //</span>
                 <span class="text-white font-medium text-xs">Campañas de marketing</span>
               </div>
-              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+              <span class="chk-box w-5 h-5 rounded-md border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
             </div>
 
           </div>
           <p class="text-[10px] text-text-muted italic">(selecciona 1 o más opciones)</p>
 
-          <button type="button" id="audit-step2-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_20px_rgba(195,244,0,0.3)]">
+          <button type="button" id="audit-step2-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_20px_rgba(195,244,0,0.3)] mt-1">
             <span>CONTINUAR</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>
-      `, false, false);
+      `);
 
       if (msg) {
         const cards = msg.querySelectorAll('.audit-card-option');
@@ -2861,7 +2865,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedValues.has(val)) {
               selectedValues.delete(val);
               card.classList.remove('border-vector-lime', 'bg-vector-lime/15', 'shadow-[0_0_15px_rgba(195,244,0,0.25)]');
-              card.classList.add('border-white/20', 'bg-black/70');
+              card.classList.add('border-white/20', 'bg-black/75');
               if (chkBox) {
                 chkBox.classList.remove('bg-vector-lime', 'border-vector-lime');
                 chkBox.classList.add('border-white/40');
@@ -2869,7 +2873,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } else {
               selectedValues.add(val);
-              card.classList.remove('border-white/20', 'bg-black/70');
+              card.classList.remove('border-white/20', 'bg-black/75');
               card.classList.add('border-vector-lime', 'bg-vector-lime/15', 'shadow-[0_0_15px_rgba(195,244,0,0.25)]');
               if (chkBox) {
                 chkBox.classList.remove('border-white/40');
@@ -2899,7 +2903,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (chatInput) {
         chatInput.placeholder = 'Selecciona las opciones arriba o escribe aquí...';
       }
-    }, 400);
+      scrollToBottom();
+    }, 250);
   };
 
   // Paso 3: Captura de Correo y WhatsApp
@@ -2933,7 +2938,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>
-      `, false, false);
+      `);
 
       if (msg) {
         const emailInput = msg.querySelector('#audit-chat-email');
@@ -2958,7 +2963,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (emailInput) emailInput.focus();
       }
-    }, 400);
+      scrollToBottom();
+    }, 250);
   };
 
   // Paso 4: Desafío Principal
@@ -2971,12 +2977,13 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="text-neutral-300">3. Con base en <strong class="text-vector-lime">${servicesStr}</strong>:</p>
           <p class="font-bold text-white text-xs">¿Cuál es el principal desafío que enfrenta tu empresa / negocio actualmente?</p>
         </div>
-      `, false, false);
+      `);
       if (chatInput) {
         chatInput.placeholder = 'Describe brevemente tu principal desafío aquí...';
         chatInput.focus();
       }
-    }, 400);
+      scrollToBottom();
+    }, 250);
   };
 
   // Paso 5: Finalización y Envío de Alertas
@@ -3033,11 +3040,12 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
           </div>
         </div>
-      `, false, false);
+      `);
       if (chatInput) {
         chatInput.placeholder = 'Escribe tu consulta o pide otra auditoría...';
       }
-    }, 500);
+      scrollToBottom();
+    }, 350);
   };
 
   // Manejo de respuestas generales fuera del flujo
