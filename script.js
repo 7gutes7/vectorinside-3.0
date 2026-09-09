@@ -2725,23 +2725,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const appendMessage = (htmlContent, isUser = false) => {
+  const appendMessage = (htmlContent, isUser = false, showAvatar = false) => {
     if (!chatMessages) return null;
     const msgDiv = document.createElement('div');
     msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''} animate-fade-in`;
 
     if (isUser) {
       msgDiv.innerHTML = `
-        <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none p-3 max-w-[85%] leading-relaxed shadow-sm">
+        <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none px-3.5 py-2.5 max-w-[85%] leading-relaxed shadow-sm">
           <p class="font-sans text-xs">${htmlContent}</p>
+        </div>
+      `;
+    } else if (showAvatar) {
+      msgDiv.innerHTML = `
+        <div class="w-7 h-7 rounded-full overflow-hidden border border-vector-lime/40 shrink-0 bg-vector-black shadow-[0_0_10px_rgba(195,244,0,0.3)]">
+          <img src="chatbot-icon.png" alt="Vector" class="w-full h-full object-cover" />
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm max-w-[88%] text-xs font-sans">
+          ${htmlContent}
         </div>
       `;
     } else {
       msgDiv.innerHTML = `
-        <div class="w-7 h-7 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black">
-          <img src="chatbot-icon.png" alt="Vector" class="w-full h-full object-cover" />
-        </div>
-        <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm max-w-[88%] text-xs font-sans">
+        <div class="w-full bg-white/10 border border-white/15 rounded-2xl p-3.5 text-white/95 leading-relaxed shadow-sm text-xs font-sans">
           ${htmlContent}
         </div>
       `;
@@ -2769,13 +2775,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(() => {
+      // Solo en el primer mensaje se muestra el avatar del bot
       appendMessage(`
         <div class="space-y-1.5">
           <p class="font-mono text-[10px] text-vector-lime font-bold uppercase tracking-widest">// AUDITORÍA NUCLEAR 3.0</p>
           <p class="font-bold text-sm text-white">Hola, soy Vector.</p>
-          <p class="text-neutral-300">1. ¿Cuál es tu nombre?</p>
+          <p class="text-neutral-200 text-xs">1. ¿Cuál es tu nombre?</p>
         </div>
-      `);
+      `, false, true);
+
       if (chatInput) {
         chatInput.placeholder = 'Escribe tu nombre aquí...';
         chatInput.focus();
@@ -2788,48 +2796,94 @@ document.addEventListener('DOMContentLoaded', () => {
     startNuclearAuditFlow();
   };
 
-  // Paso 2: Selección de Servicios de Vector Inside
+  // Paso 2: Selección de Servicios de Vector Inside con Tarjetas de Alta Visibilidad
   const proceedToStep2 = () => {
     auditState.step = 2;
     setTimeout(() => {
       const msg = appendMessage(`
-        <div class="space-y-2.5">
-          <p>Mucho gusto <strong>${auditState.name}</strong>, bienvenido a la experiencia VI.</p>
-          <p class="font-semibold text-white">2. Vector Inside está diseñado para:</p>
+        <div class="space-y-3">
+          <p class="text-neutral-200">Mucho gusto <strong class="text-white">${auditState.name}</strong>, bienvenido a la experiencia <strong class="text-vector-lime">VI</strong>.</p>
+          <p class="font-bold text-white text-xs">2. Vector Inside está diseñado para:</p>
           
-          <div id="audit-services-form" class="space-y-2 pt-1 font-mono text-[11px]">
-            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
-              <input type="checkbox" value="Diseñar o rediseñar tu página web" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
-              <span>1. Diseñar o rediseñar tu página web.</span>
-            </label>
-            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
-              <input type="checkbox" value="Branding o rebrandeo de marca" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
-              <span>2. Branding o rebrandeo de marca.</span>
-            </label>
-            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
-              <input type="checkbox" value="Automatización de sistema de ventas" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
-              <span>3. Automatización de sistema de ventas.</span>
-            </label>
-            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
-              <input type="checkbox" value="Campañas de marketing" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
-              <span>4. Campañas de marketing.</span>
-            </label>
-          </div>
-          <p class="text-[10px] text-text-muted italic">(selecciona 1 o más)</p>
+          <div id="audit-cards-container" class="space-y-2 font-mono text-xs">
+            
+            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Diseñar o rediseñar tu página web">
+              <div class="flex items-center gap-2.5">
+                <span class="text-vector-lime font-bold text-xs">01 //</span>
+                <span class="text-white font-medium text-xs">Diseñar o rediseñar tu página web</span>
+              </div>
+              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+            </div>
 
-          <button type="button" id="audit-step2-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(195,244,0,0.25)]">
+            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Branding o rebrandeo de marca">
+              <div class="flex items-center gap-2.5">
+                <span class="text-vector-lime font-bold text-xs">02 //</span>
+                <span class="text-white font-medium text-xs">Branding o rebrandeo de marca</span>
+              </div>
+              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+            </div>
+
+            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Automatización de sistema de ventas">
+              <div class="flex items-center gap-2.5">
+                <span class="text-vector-lime font-bold text-xs">03 //</span>
+                <span class="text-white font-medium text-xs">Automatización de sistema de ventas</span>
+              </div>
+              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+            </div>
+
+            <div class="audit-card-option flex items-center justify-between p-3 rounded-xl border-2 border-white/20 bg-black/70 hover:border-vector-lime cursor-pointer transition-all duration-200 select-none" data-value="Campañas de marketing">
+              <div class="flex items-center gap-2.5">
+                <span class="text-vector-lime font-bold text-xs">04 //</span>
+                <span class="text-white font-medium text-xs">Campañas de marketing</span>
+              </div>
+              <span class="chk-box w-5 h-5 rounded-lg border-2 border-white/40 flex items-center justify-center text-vector-black font-bold text-xs shrink-0 transition-all"></span>
+            </div>
+
+          </div>
+          <p class="text-[10px] text-text-muted italic">(selecciona 1 o más opciones)</p>
+
+          <button type="button" id="audit-step2-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_20px_rgba(195,244,0,0.3)]">
             <span>CONTINUAR</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>
-      `);
+      `, false, false);
 
       if (msg) {
+        const cards = msg.querySelectorAll('.audit-card-option');
+        const selectedValues = new Set();
+
+        cards.forEach(card => {
+          card.addEventListener('click', () => {
+            const val = card.getAttribute('data-value');
+            const chkBox = card.querySelector('.chk-box');
+            
+            if (selectedValues.has(val)) {
+              selectedValues.delete(val);
+              card.classList.remove('border-vector-lime', 'bg-vector-lime/15', 'shadow-[0_0_15px_rgba(195,244,0,0.25)]');
+              card.classList.add('border-white/20', 'bg-black/70');
+              if (chkBox) {
+                chkBox.classList.remove('bg-vector-lime', 'border-vector-lime');
+                chkBox.classList.add('border-white/40');
+                chkBox.textContent = '';
+              }
+            } else {
+              selectedValues.add(val);
+              card.classList.remove('border-white/20', 'bg-black/70');
+              card.classList.add('border-vector-lime', 'bg-vector-lime/15', 'shadow-[0_0_15px_rgba(195,244,0,0.25)]');
+              if (chkBox) {
+                chkBox.classList.remove('border-white/40');
+                chkBox.classList.add('bg-vector-lime', 'border-vector-lime');
+                chkBox.textContent = '✓';
+              }
+            }
+          });
+        });
+
         const btn = msg.querySelector('#audit-step2-btn');
         if (btn) {
           btn.addEventListener('click', () => {
-            const chks = msg.querySelectorAll('.audit-service-chk:checked');
-            const selected = Array.from(chks).map(c => c.value);
+            const selected = Array.from(selectedValues);
             if (selected.length === 0) {
               alert('Por favor selecciona al menos 1 opción para continuar.');
               return;
@@ -2853,27 +2907,33 @@ document.addEventListener('DOMContentLoaded', () => {
     auditState.step = 3;
     setTimeout(() => {
       const msg = appendMessage(`
-        <div class="space-y-2.5">
-          <p class="font-bold text-vector-lime text-xs">PERFECTO</p>
-          <p>Dime a dónde te podemos contactar:</p>
+        <div class="space-y-3">
+          <p class="font-bold text-vector-lime text-xs uppercase tracking-wider">PERFECTO</p>
+          <p class="text-neutral-200">Dime a dónde te podemos contactar:</p>
           
-          <div class="space-y-2 pt-1 font-mono text-xs">
+          <div class="space-y-2.5 pt-1 font-mono text-xs">
             <div>
-              <label class="block text-[10px] text-neutral-400 uppercase mb-1">Correo electrónico:</label>
-              <input type="email" id="audit-chat-email" placeholder="tu@empresa.com" class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none">
+              <label class="block text-[11px] text-neutral-300 font-semibold mb-1 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs text-vector-lime">mail</span>
+                <span>Correo electrónico:</span>
+              </label>
+              <input type="email" id="audit-chat-email" placeholder="tu@empresa.com" class="w-full bg-black/80 border-2 border-white/20 focus:border-vector-lime rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none transition-colors">
             </div>
             <div>
-              <label class="block text-[10px] text-neutral-400 uppercase mb-1">WhatsApp / Teléfono:</label>
-              <input type="tel" id="audit-chat-phone" placeholder="+52 55 1234 5678" class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none">
+              <label class="block text-[11px] text-neutral-300 font-semibold mb-1 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs text-vector-lime">chat</span>
+                <span>WhatsApp / Teléfono:</span>
+              </label>
+              <input type="tel" id="audit-chat-phone" placeholder="+52 55 1234 5678" class="w-full bg-black/80 border-2 border-white/20 focus:border-vector-lime rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none transition-colors">
             </div>
           </div>
 
-          <button type="button" id="audit-step3-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(195,244,0,0.25)]">
+          <button type="button" id="audit-step3-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_20px_rgba(195,244,0,0.3)]">
             <span>CONFIRMAR DATOS</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>
-      `);
+      `, false, false);
 
       if (msg) {
         const emailInput = msg.querySelector('#audit-chat-email');
@@ -2908,10 +2968,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const servicesStr = auditState.services.length > 0 ? auditState.services.join(', ') : 'tus objetivos comerciales';
       appendMessage(`
         <div class="space-y-1.5">
-          <p>3. Con base en <strong>${servicesStr}</strong>:</p>
-          <p class="font-semibold text-white">¿Cuál es el principal desafío que enfrenta tu empresa / negocio actualmente?</p>
+          <p class="text-neutral-300">3. Con base en <strong class="text-vector-lime">${servicesStr}</strong>:</p>
+          <p class="font-bold text-white text-xs">¿Cuál es el principal desafío que enfrenta tu empresa / negocio actualmente?</p>
         </div>
-      `);
+      `, false, false);
       if (chatInput) {
         chatInput.placeholder = 'Describe brevemente tu principal desafío aquí...';
         chatInput.focus();
@@ -2957,13 +3017,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="space-y-3">
           <div class="flex items-center gap-2 text-vector-lime">
             <span class="material-symbols-outlined text-lg">check_circle</span>
-            <span class="font-bold text-xs">SOLICITUD REGISTRADA</span>
+            <span class="font-bold text-xs uppercase tracking-wider">SOLICITUD REGISTRADA</span>
           </div>
-          <p class="leading-relaxed">
+          <p class="leading-relaxed text-neutral-200">
             Te acabo de enviar un mensaje a <strong>${auditState.phone}</strong> y a tu correo <strong>${auditState.email}</strong>. Sigamos conversando por cualquiera de esas dos vías.
           </p>
           <div class="pt-2 flex flex-col gap-2">
-            <a href="${waUrl}" target="_blank" class="btn-vector-primary py-2.5 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl">
+            <a href="${waUrl}" target="_blank" class="btn-vector-primary py-2.5 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl shadow-[0_0_20px_rgba(195,244,0,0.3)]">
               <span class="material-symbols-outlined text-sm">chat</span>
               <span>CONTINUAR EN WHATSAPP</span>
             </a>
@@ -2973,7 +3033,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
           </div>
         </div>
-      `);
+      `, false, false);
       if (chatInput) {
         chatInput.placeholder = 'Escribe tu consulta o pide otra auditoría...';
       }
