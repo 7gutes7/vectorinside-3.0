@@ -91,13 +91,13 @@
 
       <!-- Header Right CTA Button -->
       <div class="flex items-center gap-3 ml-auto z-10">
-        <a href="diagnostico/index.html" class="btn-pill-nuclear header-cta-btn group" id="header-pill-nav-btn">
+        <button type="button" onclick="openNuclearModal(event)" class="btn-pill-nuclear header-cta-btn group cursor-pointer" id="header-pill-nav-btn">
           <span class="btn-pill-bg transition-colors duration-300"></span>
           <span class="btn-pill-label transition-colors duration-300">
             <span class="pulse-dot mr-2"></span>
             <span>AUDITORÍA NUCLEAR</span>
           </span>
-        </a>
+        </button>
       </div>
     </div>
   </header>
@@ -115,7 +115,7 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Evidencia</a>
     <a href="javascript:void(0)" onclick="scrollToMetodologia()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Metodología</a>
-    <a href="diagnostico/index.html" onclick="return scrollToDiagnostico(event)" id="dock-item-diagnostico"
+    <a href="javascript:void(0)" onclick="return scrollToDiagnostico(event)" id="dock-item-diagnostico"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">06 // Diagnóstico</a>
   </nav>
 
@@ -1071,12 +1071,10 @@
                         </div>
 
                         <div class="pt-6 border-t border-white/10">
-                          <a id="whatsapp-cta-link"
-                            href="https://wa.me/?text=Hola%20Vector%20Inside,%20obtuve%20mi%20Diagnostico%20de%20Madurez%20Digital%20y%20quiero%20agendar%20una%20sesion%20estrategica."
-                            target="_blank" rel="noopener"
-                            class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest text-center block uppercase shadow-[0_0_25px_rgba(195,244,0,0.3)]">
+                          <button type="button" onclick="openNuclearModal(event)"
+                            class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest text-center block uppercase shadow-[0_0_25px_rgba(195,244,0,0.3)] hover:shadow-[0_0_35px_rgba(195,244,0,0.6)] cursor-pointer transition-all">
                             AGENDAR AUDITORÍA NUCLEAR
-                          </a>
+                          </button>
                         </div>
                       </div>
 
@@ -1089,11 +1087,11 @@
                         class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">arrow_back</span> 05 // METODOLOGÍA
                       </a>
-                      <a href="diagnostico/index.html"
-                        class="btn-vector-outline px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2">
-                        <span>ABRIR DIAGNÓSTICO COMPLETO</span>
-                        <span class="material-symbols-outlined text-sm">open_in_new</span>
-                      </a>
+                      <button type="button" onclick="openNuclearModal(event)"
+                        class="btn-vector-outline px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2 cursor-pointer hover:border-vector-lime hover:text-vector-lime transition-all">
+                        <span>SOLICITAR AUDITORÍA COMPLETA</span>
+                        <span class="material-symbols-outlined text-sm">bolt</span>
+                      </button>
                     </div>
 
                   </div>
@@ -1214,12 +1212,149 @@
   </div>
 
 
+  <!-- ==================== AUDITORÍA NUCLEAR MODAL FORM ==================== -->
+  <div id="nuclear-modal" class="fixed inset-0 z-[9999] hidden opacity-0 transition-opacity duration-300 pointer-events-none flex items-center justify-center p-4 sm:p-6">
+    <!-- Backdrop Blur Overlay -->
+    <div id="nuclear-modal-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-xl transition-opacity"></div>
+    
+    <!-- Modal Dialog Window -->
+    <div id="nuclear-modal-dialog" class="relative w-full max-w-2xl bg-surface-dark border border-vector-lime/40 rounded-2xl shadow-[0_0_60px_rgba(195,244,0,0.18)] overflow-hidden transform scale-95 transition-all duration-300 z-10">
+      
+      <!-- Top Neon Accent Glow Line -->
+      <div class="h-[3px] w-full bg-gradient-to-r from-transparent via-vector-lime to-transparent"></div>
+
+      <!-- Header -->
+      <div class="p-6 sm:p-8 border-b border-white/10 flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-vector-lime animate-ping"></span>
+            <span class="font-mono text-[10px] sm:text-xs text-vector-lime uppercase tracking-widest font-bold">06 // SOLICITUD DE AUDITORÍA NUCLEAR</span>
+          </div>
+          <h3 class="font-display font-black text-2xl sm:text-3xl uppercase tracking-tight text-white">
+            Diagnóstico Estratégico Directo
+          </h3>
+          <p class="font-mono text-xs text-neutral-400 mt-1.5">
+            Completa tus datos para recibir una radiografía integral de conversión, reducción de fricción y aceleración para tu empresa.
+          </p>
+        </div>
+        <button id="nuclear-modal-close" type="button" class="text-neutral-400 hover:text-vector-lime hover:rotate-90 p-2 transition-all cursor-pointer rounded-lg bg-white/5 border border-white/10 shrink-0">
+          <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
+        <form id="nuclear-audit-form" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Nombre -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+                Nombre Completo <span class="text-vector-lime">*</span>
+              </label>
+              <input type="text" id="audit-name" name="name" required placeholder="Ej. Carlos Valdés"
+                class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none transition-colors" />
+            </div>
+
+            <!-- Empresa / Proyecto -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+                Empresa o Proyecto
+              </label>
+              <input type="text" id="audit-company" name="company" placeholder="Ej. Vector Corp / vector.io"
+                class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none transition-colors" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Email -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+                Correo Electrónico <span class="text-vector-lime">*</span>
+              </label>
+              <input type="email" id="audit-email" name="email" required placeholder="tu@empresa.com"
+                class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none transition-colors" />
+            </div>
+
+            <!-- WhatsApp / Teléfono -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+                WhatsApp / Teléfono <span class="text-vector-lime">*</span>
+              </label>
+              <input type="tel" id="audit-phone" name="phone" required placeholder="+52 55 1234 5678"
+                class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none transition-colors" />
+            </div>
+          </div>
+
+          <!-- Vector de Interés -->
+          <div class="space-y-1.5">
+            <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+              Vector de Enfoque Principal
+            </label>
+            <select id="audit-vector" name="vector"
+              class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors">
+              <option value="Diagnóstico Nuclear Completo">01 // Diagnóstico Nuclear Completo</option>
+              <option value="Arquitectura de Conversión Web 3D">02 // Arquitectura de Conversión Web 3D</option>
+              <option value="Ecosistema Digital con Agentes IA">03 // Ecosistema Digital con Agentes IA</option>
+              <option value="Optimización de Funnel y Reducción de Fricción">04 // Optimización de Funnel y Reducción de Fricción</option>
+            </select>
+          </div>
+
+          <!-- Mensaje / Detalles -->
+          <div class="space-y-1.5">
+            <label class="font-mono text-[11px] text-neutral-300 uppercase tracking-wider block">
+              Detalles o Reto Actual (Opcional)
+            </label>
+            <textarea id="audit-message" name="message" rows="3" placeholder="Describe brevemente tus objetivos comerciales o cuellos de botella actuales..."
+              class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none transition-colors resize-none"></textarea>
+          </div>
+
+          <!-- Direct mail note -->
+          <div class="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-1">
+            <span>// Enviar a: <strong class="text-vector-lime">contactovectorinside@gmail.com</strong></span>
+            <span>Respuesta en &lt; 24h</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="audit-submit-btn"
+            class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest uppercase flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(195,244,0,0.3)] hover:shadow-[0_0_35px_rgba(195,244,0,0.6)] cursor-pointer transition-all">
+            <span class="material-symbols-outlined text-lg">bolt</span>
+            <span>ENVIAR SOLICITUD // AUDITORÍA NUCLEAR</span>
+          </button>
+        </form>
+
+        <!-- Success Message State (Hidden initially) -->
+        <div id="nuclear-modal-success" class="hidden text-center py-8 space-y-5">
+          <div class="w-16 h-16 rounded-full bg-vector-lime/10 border border-vector-lime flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(195,244,0,0.4)]">
+            <span class="material-symbols-outlined text-3xl text-vector-lime">check_circle</span>
+          </div>
+          <div class="space-y-2">
+            <h4 class="font-display font-black text-2xl uppercase text-white">¡Solicitud Registrada!</h4>
+            <p class="font-mono text-xs text-neutral-300 max-w-md mx-auto leading-relaxed">
+              Hemos preparado tu solicitud de Auditoría Nuclear. Nuestro equipo de arquitectos se pondrá en contacto al correo provisto y a <strong>contactovectorinside@gmail.com</strong>.
+            </p>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a id="audit-success-whatsapp" href="#" target="_blank" class="w-full sm:w-auto btn-vector-primary px-6 py-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">chat</span>
+              <span>CONFIRMAR POR WHATSAPP</span>
+            </a>
+            <button type="button" onclick="closeNuclearModal()" class="w-full sm:w-auto btn-vector-outline px-6 py-3 text-xs font-mono tracking-wider">
+              CERRAR
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
   <!-- Accordion Gallery Component -->
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.244) -->
-  <script src="script.js?v=3.0.244"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.245) -->
+  <script src="script.js?v=3.0.245"></script>
 </body>
 
 </html>

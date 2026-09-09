@@ -2751,7 +2751,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (q.includes('arquitectura') || q.includes('conversión') || q.includes('conversion')) {
           answer = "Nuestra <strong>Arquitectura de Conversión</strong> sustituye los parches aislados por una matriz modular de 40 bloques estratégicos de tracción predecible.";
         } else if (q.includes('agendar') || q.includes('sesión') || q.includes('sesion') || q.includes('contacto') || q.includes('cita') || q.includes('correo') || q.includes('email') || q.includes('mail')) {
-          answer = "Puedes reservar directamente una sesión de diagnóstico estratégico con nuestros arquitectos en nuestro módulo de diagnóstico o escribiéndonos a <a href=\"mailto:contactovectorinside@gmail.com\" class=\"text-vector-lime underline font-bold hover:text-white transition-colors\">contactovectorinside@gmail.com</a>.";
+          answer = "Puedes solicitar tu sesión estratégica llenando directamente nuestro <button type=\"button\" onclick=\"openNuclearModal(event)\" class=\"text-vector-lime underline font-bold hover:text-white cursor-pointer inline-block\">Formulario de Auditoría Nuclear aquí</button> o escribiéndonos a <a href=\"mailto:contactovectorinside@gmail.com\" class=\"text-vector-lime underline font-bold hover:text-white transition-colors\">contactovectorinside@gmail.com</a>.";
         }
         appendMessage(answer, false);
       }, 700);
@@ -3803,6 +3803,119 @@ function initFloatingGallery() {
   initExecutionInternalScrollListener();
   initVectorIsotipo();
   initDiagnosticoTest();
+  initNuclearModal();
+}
+
+// ==================== AUDITORÍA NUCLEAR MODAL LOGIC ====================
+function openNuclearModal(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const modal = document.getElementById('nuclear-modal');
+  const dialog = document.getElementById('nuclear-modal-dialog');
+  const auditForm = document.getElementById('nuclear-audit-form');
+  const successView = document.getElementById('nuclear-modal-success');
+  
+  if (!modal) return;
+  
+  // Reset views
+  if (auditForm) auditForm.classList.remove('hidden');
+  if (successView) successView.classList.add('hidden');
+
+  modal.classList.remove('hidden', 'pointer-events-none');
+  requestAnimationFrame(() => {
+    modal.classList.remove('opacity-0');
+    modal.classList.add('opacity-100');
+    if (dialog) {
+      dialog.classList.remove('scale-95');
+      dialog.classList.add('scale-100');
+    }
+  });
+  document.body.style.overflow = 'hidden';
+}
+window.openNuclearModal = openNuclearModal;
+
+function closeNuclearModal() {
+  const modal = document.getElementById('nuclear-modal');
+  const dialog = document.getElementById('nuclear-modal-dialog');
+  if (!modal) return;
+
+  modal.classList.remove('opacity-100');
+  modal.classList.add('opacity-0');
+  if (dialog) {
+    dialog.classList.remove('scale-100');
+    dialog.classList.add('scale-95');
+  }
+  setTimeout(() => {
+    modal.classList.add('hidden', 'pointer-events-none');
+    document.body.style.overflow = '';
+  }, 300);
+}
+window.closeNuclearModal = closeNuclearModal;
+
+function initNuclearModal() {
+  const backdrop = document.getElementById('nuclear-modal-backdrop');
+  const closeBtn = document.getElementById('nuclear-modal-close');
+  const auditForm = document.getElementById('nuclear-audit-form');
+
+  if (backdrop) backdrop.addEventListener('click', closeNuclearModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeNuclearModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNuclearModal();
+  });
+
+  if (auditForm) {
+    auditForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('audit-name')?.value.trim() || 'No especificado';
+      const company = document.getElementById('audit-company')?.value.trim() || 'No especificada';
+      const email = document.getElementById('audit-email')?.value.trim() || 'No especificado';
+      const phone = document.getElementById('audit-phone')?.value.trim() || 'No especificado';
+      const vector = document.getElementById('audit-vector')?.value || 'Diagnóstico Nuclear Completo';
+      const message = document.getElementById('audit-message')?.value.trim() || 'Sin comentarios adicionales';
+
+      const subject = encodeURIComponent(`Solicitud Auditoría Nuclear - ${name} (${company})`);
+      const body = encodeURIComponent(
+        `Hola equipo de Vector Inside 3.0,\n\n` +
+        `Solicito una Auditoría Nuclear con la siguiente información:\n\n` +
+        `• Nombre: ${name}\n` +
+        `• Empresa / Proyecto: ${company}\n` +
+        `• Correo de contacto: ${email}\n` +
+        `• Teléfono / WhatsApp: ${phone}\n` +
+        `• Vector de Enfoque: ${vector}\n` +
+        `• Retos u Objetivos: ${message}\n\n` +
+        `Quedo atento a su respuesta.\n` +
+        `Saludos cordiales,\n${name}`
+      );
+
+      const mailtoUrl = `mailto:contactovectorinside@gmail.com?subject=${subject}&body=${body}`;
+
+      const waText = encodeURIComponent(
+        `⚡ *SOLICITUD AUDITORÍA NUCLEAR // VECTOR INSIDE*\n\n` +
+        `*Nombre:* ${name}\n` +
+        `*Empresa:* ${company}\n` +
+        `*Email:* ${email}\n` +
+        `*Tel:* ${phone}\n` +
+        `*Vector:* ${vector}\n` +
+        `*Detalles:* ${message}`
+      );
+      const waUrl = `https://wa.me/?text=${waText}`;
+
+      const waBtn = document.getElementById('audit-success-whatsapp');
+      if (waBtn) waBtn.href = waUrl;
+
+      // Disparar cliente de correo
+      try {
+        window.location.href = mailtoUrl;
+      } catch (err) {
+        console.warn('Mailto trigger error:', err);
+      }
+
+      // Mostrar pantalla de confirmación dentro del modal
+      auditForm.classList.add('hidden');
+      const successView = document.getElementById('nuclear-modal-success');
+      if (successView) successView.classList.remove('hidden');
+    });
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -3810,11 +3923,13 @@ if (document.readyState === 'loading') {
     initFloatingGallery();
     initVectorIsotipo();
     initDiagnosticoTest();
+    initNuclearModal();
   });
 } else {
   initFloatingGallery();
   initVectorIsotipo();
   initDiagnosticoTest();
+  initNuclearModal();
 }
 
 
