@@ -2750,8 +2750,8 @@ document.addEventListener('DOMContentLoaded', () => {
           answer = "El <strong>Diagnóstico Nuclear</strong> evalúa en tiempo real tus 3 vectores críticos: Adquisición, Conversión y Retención, identificando las fugas exactas de capital en tu funnel.";
         } else if (q.includes('arquitectura') || q.includes('conversión') || q.includes('conversion')) {
           answer = "Nuestra <strong>Arquitectura de Conversión</strong> sustituye los parches aislados por una matriz modular de 40 bloques estratégicos de tracción predecible.";
-        } else if (q.includes('agendar') || q.includes('sesión') || q.includes('contacto') || q.includes('cita')) {
-          answer = "Puedes reservar directamente una sesión de diagnóstico estratégico con nuestros arquitectos en nuestro módulo de diagnóstico o escribiéndonos a <strong>contacto@vectorinside.com</strong>.";
+        } else if (q.includes('agendar') || q.includes('sesión') || q.includes('sesion') || q.includes('contacto') || q.includes('cita') || q.includes('correo') || q.includes('email') || q.includes('mail')) {
+          answer = "Puedes reservar directamente una sesión de diagnóstico estratégico con nuestros arquitectos en nuestro módulo de diagnóstico o escribiéndonos a <a href=\"mailto:contactovectorinside@gmail.com\" class=\"text-vector-lime underline font-bold hover:text-white transition-colors\">contactovectorinside@gmail.com</a>.";
         }
         appendMessage(answer, false);
       }, 700);
