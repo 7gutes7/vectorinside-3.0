@@ -3066,7 +3066,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   };
 
-  if (chatTrigger) chatTrigger.addEventListener('click', () => toggleChat());
+  if (chatTrigger) {
+    chatTrigger.addEventListener('click', () => {
+      const isCurrentlyHidden = chatWindow.classList.contains('hidden');
+      if (isCurrentlyHidden || !auditState.active) {
+        startNuclearAuditFlow();
+      } else {
+        toggleChat(false);
+      }
+    });
+  }
   if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
 
   if (chatForm && chatInput) {
