@@ -2685,7 +2685,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ==================== FLOATING CHATBOT CONTROLLER ====================
+  // ==================== FLOATING CHATBOT & AUDITORÍA NUCLEAR CONTROLLER ====================
   const chatTrigger = document.getElementById('chatbot-trigger-btn');
   const chatWindow = document.getElementById('chatbot-window');
   const chatClose = document.getElementById('chatbot-close-btn');
@@ -2693,89 +2693,354 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput = document.getElementById('chatbot-input');
   const chatMessages = document.getElementById('chatbot-messages');
 
-  if (chatTrigger && chatWindow) {
-    let isOpen = false;
+  // Estado del flujo de Auditoría Nuclear guiado
+  let auditState = {
+    active: false,
+    step: 0,
+    name: '',
+    services: [],
+    email: '',
+    phone: '',
+    challenge: ''
+  };
 
-    const toggleChat = (forceState) => {
-      isOpen = forceState !== undefined ? forceState : !isOpen;
-      if (isOpen) {
-        chatWindow.classList.remove('hidden');
-        setTimeout(() => {
-          chatWindow.classList.remove('opacity-0', 'translate-y-4');
-          chatWindow.classList.add('opacity-100', 'translate-y-0');
-        }, 10);
-        if (chatInput) chatInput.focus();
-      } else {
-        chatWindow.classList.remove('opacity-100', 'translate-y-0');
-        chatWindow.classList.add('opacity-0', 'translate-y-4');
-        setTimeout(() => {
-          chatWindow.classList.add('hidden');
-        }, 300);
-      }
-    };
+  const toggleChat = (forceState) => {
+    if (!chatWindow) return;
+    const isCurrentlyHidden = chatWindow.classList.contains('hidden');
+    const willOpen = forceState !== undefined ? forceState : isCurrentlyHidden;
 
-    chatTrigger.addEventListener('click', () => toggleChat());
-    if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
-
-    const appendMessage = (text, isUser = false) => {
-      if (!chatMessages) return;
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''}`;
-
-      if (isUser) {
-        msgDiv.innerHTML = `
-          <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none p-3 max-w-[80%] leading-relaxed shadow-sm">
-            <p class="font-sans text-xs">${text}</p>
-          </div>
-        `;
-      } else {
-        msgDiv.innerHTML = `
-          <div class="w-6 h-6 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black">
-            <img src="chatbot-icon.png" alt="AI" class="w-full h-full object-cover" />
-          </div>
-          <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3 text-white/90 leading-relaxed shadow-sm max-w-[85%]">
-            <p class="font-sans text-xs">${text}</p>
-          </div>
-        `;
-      }
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    };
-
-    const handleBotResponse = (query) => {
+    if (willOpen) {
+      chatWindow.classList.remove('hidden');
       setTimeout(() => {
-        let answer = "Excelente pregunta. En Vector Inside 3.0 rediseñamos la arquitectura de conversión para eliminar la fricción estructural y escalar tus resultados comerciales de forma predecible.";
-        const q = query.toLowerCase();
-        if (q.includes('diagnóstico') || q.includes('diagnostico')) {
-          answer = "El <strong>Diagnóstico Nuclear</strong> evalúa en tiempo real tus 3 vectores críticos: Adquisición, Conversión y Retención, identificando las fugas exactas de capital en tu funnel.";
-        } else if (q.includes('arquitectura') || q.includes('conversión') || q.includes('conversion')) {
-          answer = "Nuestra <strong>Arquitectura de Conversión</strong> sustituye los parches aislados por una matriz modular de 40 bloques estratégicos de tracción predecible.";
-        } else if (q.includes('agendar') || q.includes('sesión') || q.includes('sesion') || q.includes('contacto') || q.includes('cita') || q.includes('correo') || q.includes('email') || q.includes('mail')) {
-          answer = "Puedes solicitar tu sesión estratégica llenando directamente nuestro <button type=\"button\" onclick=\"openNuclearModal(event)\" class=\"text-vector-lime underline font-bold hover:text-white cursor-pointer inline-block\">Formulario de Auditoría Nuclear aquí</button> o escribiéndonos a <a href=\"mailto:contactovectorinside@gmail.com\" class=\"text-vector-lime underline font-bold hover:text-white transition-colors\">contactovectorinside@gmail.com</a>.";
-        }
-        appendMessage(answer, false);
-      }, 700);
+        chatWindow.classList.remove('opacity-0', 'translate-y-4');
+        chatWindow.classList.add('opacity-100', 'translate-y-0');
+      }, 10);
+      if (chatInput) chatInput.focus();
+    } else {
+      chatWindow.classList.remove('opacity-100', 'translate-y-0');
+      chatWindow.classList.add('opacity-0', 'translate-y-4');
+      setTimeout(() => {
+        chatWindow.classList.add('hidden');
+      }, 300);
+    }
+  };
+
+  const appendMessage = (htmlContent, isUser = false) => {
+    if (!chatMessages) return null;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `flex gap-2.5 items-start ${isUser ? 'justify-end' : ''} animate-fade-in`;
+
+    if (isUser) {
+      msgDiv.innerHTML = `
+        <div class="bg-vector-lime text-vector-black font-semibold rounded-2xl rounded-tr-none p-3 max-w-[85%] leading-relaxed shadow-sm">
+          <p class="font-sans text-xs">${htmlContent}</p>
+        </div>
+      `;
+    } else {
+      msgDiv.innerHTML = `
+        <div class="w-7 h-7 rounded-full overflow-hidden border border-vector-lime/30 shrink-0 bg-vector-black">
+          <img src="chatbot-icon.png" alt="Vector" class="w-full h-full object-cover" />
+        </div>
+        <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none p-3.5 text-white/95 leading-relaxed shadow-sm max-w-[88%] text-xs font-sans">
+          ${htmlContent}
+        </div>
+      `;
+    }
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return msgDiv;
+  };
+
+  // Iniciar el flujo interactivo de Auditoría Nuclear
+  const startNuclearAuditFlow = () => {
+    toggleChat(true);
+    auditState = {
+      active: true,
+      step: 1,
+      name: '',
+      services: [],
+      email: '',
+      phone: '',
+      challenge: ''
     };
 
-    if (chatForm && chatInput) {
-      chatForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = chatInput.value.trim();
-        if (!text) return;
-        appendMessage(text, true);
-        chatInput.value = '';
-        handleBotResponse(text);
-      });
+    if (chatMessages) {
+      chatMessages.innerHTML = '';
     }
 
-    document.querySelectorAll('.chatbot-quick-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const query = btn.getAttribute('data-msg') || btn.textContent.trim();
-        appendMessage(query, true);
-        handleBotResponse(query);
-      });
+    setTimeout(() => {
+      appendMessage(`
+        <div class="space-y-1.5">
+          <p class="font-mono text-[10px] text-vector-lime font-bold uppercase tracking-widest">// AUDITORÍA NUCLEAR 3.0</p>
+          <p class="font-bold text-sm text-white">Hola, soy Vector.</p>
+          <p class="text-neutral-300">1. ¿Cuál es tu nombre?</p>
+        </div>
+      `);
+      if (chatInput) {
+        chatInput.placeholder = 'Escribe tu nombre aquí...';
+        chatInput.focus();
+      }
+    }, 200);
+  };
+  window.startNuclearAuditFlow = startNuclearAuditFlow;
+  window.openNuclearModal = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    startNuclearAuditFlow();
+  };
+
+  // Paso 2: Selección de Servicios de Vector Inside
+  const proceedToStep2 = () => {
+    auditState.step = 2;
+    setTimeout(() => {
+      const msg = appendMessage(`
+        <div class="space-y-2.5">
+          <p>Mucho gusto <strong>${auditState.name}</strong>, bienvenido a la experiencia VI.</p>
+          <p class="font-semibold text-white">2. Vector Inside está diseñado para:</p>
+          
+          <div id="audit-services-form" class="space-y-2 pt-1 font-mono text-[11px]">
+            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
+              <input type="checkbox" value="Diseñar o rediseñar tu página web" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
+              <span>1. Diseñar o rediseñar tu página web.</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
+              <input type="checkbox" value="Branding o rebrandeo de marca" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
+              <span>2. Branding o rebrandeo de marca.</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
+              <input type="checkbox" value="Automatización de sistema de ventas" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
+              <span>3. Automatización de sistema de ventas.</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2 bg-black/40 border border-white/10 rounded-xl hover:border-vector-lime cursor-pointer transition-colors">
+              <input type="checkbox" value="Campañas de marketing" class="audit-service-chk accent-[#c3f400] w-4 h-4 rounded">
+              <span>4. Campañas de marketing.</span>
+            </label>
+          </div>
+          <p class="text-[10px] text-text-muted italic">(selecciona 1 o más)</p>
+
+          <button type="button" id="audit-step2-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(195,244,0,0.25)]">
+            <span>CONTINUAR</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+      `);
+
+      if (msg) {
+        const btn = msg.querySelector('#audit-step2-btn');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const chks = msg.querySelectorAll('.audit-service-chk:checked');
+            const selected = Array.from(chks).map(c => c.value);
+            if (selected.length === 0) {
+              alert('Por favor selecciona al menos 1 opción para continuar.');
+              return;
+            }
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            auditState.services = selected;
+            appendMessage(`Servicios seleccionados: <strong>${selected.join(', ')}</strong>`, true);
+            proceedToStep3();
+          });
+        }
+      }
+      if (chatInput) {
+        chatInput.placeholder = 'Selecciona las opciones arriba o escribe aquí...';
+      }
+    }, 400);
+  };
+
+  // Paso 3: Captura de Correo y WhatsApp
+  const proceedToStep3 = () => {
+    auditState.step = 3;
+    setTimeout(() => {
+      const msg = appendMessage(`
+        <div class="space-y-2.5">
+          <p class="font-bold text-vector-lime text-xs">PERFECTO</p>
+          <p>Dime a dónde te podemos contactar:</p>
+          
+          <div class="space-y-2 pt-1 font-mono text-xs">
+            <div>
+              <label class="block text-[10px] text-neutral-400 uppercase mb-1">Correo electrónico:</label>
+              <input type="email" id="audit-chat-email" placeholder="tu@empresa.com" class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[10px] text-neutral-400 uppercase mb-1">WhatsApp / Teléfono:</label>
+              <input type="tel" id="audit-chat-phone" placeholder="+52 55 1234 5678" class="w-full bg-black/60 border border-white/15 focus:border-vector-lime rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none">
+            </div>
+          </div>
+
+          <button type="button" id="audit-step3-btn" class="w-full btn-vector-primary py-2.5 text-xs font-mono tracking-wider uppercase flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(195,244,0,0.25)]">
+            <span>CONFIRMAR DATOS</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+      `);
+
+      if (msg) {
+        const emailInput = msg.querySelector('#audit-chat-email');
+        const phoneInput = msg.querySelector('#audit-chat-phone');
+        const btn = msg.querySelector('#audit-step3-btn');
+
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const em = emailInput ? emailInput.value.trim() : '';
+            const ph = phoneInput ? phoneInput.value.trim() : '';
+            if (!em || !ph) {
+              alert('Por favor ingresa tanto tu correo como tu WhatsApp para poder contactarte.');
+              return;
+            }
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            auditState.email = em;
+            auditState.phone = ph;
+            appendMessage(`📧 ${em} | 📱 ${ph}`, true);
+            proceedToStep4();
+          });
+        }
+        if (emailInput) emailInput.focus();
+      }
+    }, 400);
+  };
+
+  // Paso 4: Desafío Principal
+  const proceedToStep4 = () => {
+    auditState.step = 4;
+    setTimeout(() => {
+      const servicesStr = auditState.services.length > 0 ? auditState.services.join(', ') : 'tus objetivos comerciales';
+      appendMessage(`
+        <div class="space-y-1.5">
+          <p>3. Con base en <strong>${servicesStr}</strong>:</p>
+          <p class="font-semibold text-white">¿Cuál es el principal desafío que enfrenta tu empresa / negocio actualmente?</p>
+        </div>
+      `);
+      if (chatInput) {
+        chatInput.placeholder = 'Describe brevemente tu principal desafío aquí...';
+        chatInput.focus();
+      }
+    }, 400);
+  };
+
+  // Paso 5: Finalización y Envío de Alertas
+  const proceedToStep5 = () => {
+    auditState.step = 5;
+    auditState.active = false;
+
+    // Generar enlaces directos de respaldo
+    const waText = encodeURIComponent(
+      `⚡ *SOLICITUD AUDITORÍA NUCLEAR // VECTOR INSIDE*\n\n` +
+      `*Nombre:* ${auditState.name}\n` +
+      `*Servicios de interés:* ${auditState.services.join(', ')}\n` +
+      `*Correo:* ${auditState.email}\n` +
+      `*WhatsApp:* ${auditState.phone}\n` +
+      `*Desafío actual:* ${auditState.challenge}`
+    );
+    const waUrl = `https://wa.me/?text=${waText}`;
+
+    const subject = encodeURIComponent(`Auditoría Nuclear - ${auditState.name}`);
+    const bodyText = encodeURIComponent(
+      `Solicitud de Auditoría Nuclear recibida desde el Chatbot:\n\n` +
+      `• Nombre: ${auditState.name}\n` +
+      `• Correo: ${auditState.email}\n` +
+      `• WhatsApp: ${auditState.phone}\n` +
+      `• Enfoque: ${auditState.services.join(', ')}\n` +
+      `• Desafío: ${auditState.challenge}\n`
+    );
+    const mailtoUrl = `mailto:contactovectorinside@gmail.com?subject=${subject}&body=${bodyText}`;
+
+    // Envío en segundo plano (vía Webhook / Mailto)
+    try {
+      const imgBeacon = new Image();
+      imgBeacon.src = `https://formspree.io/f/xvgzeykw?email=${encodeURIComponent(auditState.email)}&name=${encodeURIComponent(auditState.name)}&phone=${encodeURIComponent(auditState.phone)}&message=${encodeURIComponent(auditState.challenge)}`;
+    } catch (e) {}
+
+    setTimeout(() => {
+      appendMessage(`
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 text-vector-lime">
+            <span class="material-symbols-outlined text-lg">check_circle</span>
+            <span class="font-bold text-xs">SOLICITUD REGISTRADA</span>
+          </div>
+          <p class="leading-relaxed">
+            Te acabo de enviar un mensaje a <strong>${auditState.phone}</strong> y a tu correo <strong>${auditState.email}</strong>. Sigamos conversando por cualquiera de esas dos vías.
+          </p>
+          <div class="pt-2 flex flex-col gap-2">
+            <a href="${waUrl}" target="_blank" class="btn-vector-primary py-2.5 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl">
+              <span class="material-symbols-outlined text-sm">chat</span>
+              <span>CONTINUAR EN WHATSAPP</span>
+            </a>
+            <a href="${mailtoUrl}" class="btn-vector-outline py-2 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl text-neutral-300 hover:text-white">
+              <span class="material-symbols-outlined text-sm">mail</span>
+              <span>NOTIFICAR A contactovectorinside@gmail.com</span>
+            </a>
+          </div>
+        </div>
+      `);
+      if (chatInput) {
+        chatInput.placeholder = 'Escribe tu consulta o pide otra auditoría...';
+      }
+    }, 500);
+  };
+
+  // Manejo de respuestas generales fuera del flujo
+  const handleBotResponse = (query) => {
+    setTimeout(() => {
+      let answer = "Excelente pregunta. En Vector Inside 3.0 rediseñamos la arquitectura de conversión para eliminar la fricción estructural y escalar tus resultados comerciales de forma predecible.";
+      const q = query.toLowerCase();
+      if (q.includes('diagnóstico') || q.includes('diagnostico') || q.includes('auditoría') || q.includes('auditoria') || q.includes('nuclear')) {
+        startNuclearAuditFlow();
+        return;
+      } else if (q.includes('arquitectura') || q.includes('conversión') || q.includes('conversion')) {
+        answer = "Nuestra <strong>Arquitectura de Conversión</strong> sustituye los parches aislados por una matriz modular de 40 bloques estratégicos de tracción predecible.";
+      } else if (q.includes('agendar') || q.includes('sesión') || q.includes('sesion') || q.includes('contacto') || q.includes('cita') || q.includes('correo') || q.includes('email') || q.includes('mail')) {
+        startNuclearAuditFlow();
+        return;
+      }
+      appendMessage(answer, false);
+    }, 500);
+  };
+
+  if (chatTrigger) chatTrigger.addEventListener('click', () => toggleChat());
+  if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
+
+  if (chatForm && chatInput) {
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      // Si estamos en un paso activo del flujo guiado
+      if (auditState.active) {
+        if (auditState.step === 1) {
+          auditState.name = text;
+          appendMessage(text, true);
+          chatInput.value = '';
+          proceedToStep2();
+          return;
+        } else if (auditState.step === 4) {
+          auditState.challenge = text;
+          appendMessage(text, true);
+          chatInput.value = '';
+          proceedToStep5();
+          return;
+        }
+      }
+
+      appendMessage(text, true);
+      chatInput.value = '';
+      handleBotResponse(text);
     });
   }
+
+  document.querySelectorAll('.chatbot-quick-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const query = btn.getAttribute('data-msg') || btn.textContent.trim();
+      if (query.includes('Diagnóstico') || query.includes('Agendar') || query.includes('sesión')) {
+        startNuclearAuditFlow();
+      } else {
+        appendMessage(query, true);
+        handleBotResponse(query);
+      }
+    });
+  });
 });
 
 // ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 (MANIFIESTO) ====================
@@ -3803,119 +4068,6 @@ function initFloatingGallery() {
   initExecutionInternalScrollListener();
   initVectorIsotipo();
   initDiagnosticoTest();
-  initNuclearModal();
-}
-
-// ==================== AUDITORÍA NUCLEAR MODAL LOGIC ====================
-function openNuclearModal(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  const modal = document.getElementById('nuclear-modal');
-  const dialog = document.getElementById('nuclear-modal-dialog');
-  const auditForm = document.getElementById('nuclear-audit-form');
-  const successView = document.getElementById('nuclear-modal-success');
-  
-  if (!modal) return;
-  
-  // Reset views
-  if (auditForm) auditForm.classList.remove('hidden');
-  if (successView) successView.classList.add('hidden');
-
-  modal.classList.remove('hidden', 'pointer-events-none');
-  requestAnimationFrame(() => {
-    modal.classList.remove('opacity-0');
-    modal.classList.add('opacity-100');
-    if (dialog) {
-      dialog.classList.remove('scale-95');
-      dialog.classList.add('scale-100');
-    }
-  });
-  document.body.style.overflow = 'hidden';
-}
-window.openNuclearModal = openNuclearModal;
-
-function closeNuclearModal() {
-  const modal = document.getElementById('nuclear-modal');
-  const dialog = document.getElementById('nuclear-modal-dialog');
-  if (!modal) return;
-
-  modal.classList.remove('opacity-100');
-  modal.classList.add('opacity-0');
-  if (dialog) {
-    dialog.classList.remove('scale-100');
-    dialog.classList.add('scale-95');
-  }
-  setTimeout(() => {
-    modal.classList.add('hidden', 'pointer-events-none');
-    document.body.style.overflow = '';
-  }, 300);
-}
-window.closeNuclearModal = closeNuclearModal;
-
-function initNuclearModal() {
-  const backdrop = document.getElementById('nuclear-modal-backdrop');
-  const closeBtn = document.getElementById('nuclear-modal-close');
-  const auditForm = document.getElementById('nuclear-audit-form');
-
-  if (backdrop) backdrop.addEventListener('click', closeNuclearModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeNuclearModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeNuclearModal();
-  });
-
-  if (auditForm) {
-    auditForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('audit-name')?.value.trim() || 'No especificado';
-      const company = document.getElementById('audit-company')?.value.trim() || 'No especificada';
-      const email = document.getElementById('audit-email')?.value.trim() || 'No especificado';
-      const phone = document.getElementById('audit-phone')?.value.trim() || 'No especificado';
-      const vector = document.getElementById('audit-vector')?.value || 'Diagnóstico Nuclear Completo';
-      const message = document.getElementById('audit-message')?.value.trim() || 'Sin comentarios adicionales';
-
-      const subject = encodeURIComponent(`Solicitud Auditoría Nuclear - ${name} (${company})`);
-      const body = encodeURIComponent(
-        `Hola equipo de Vector Inside 3.0,\n\n` +
-        `Solicito una Auditoría Nuclear con la siguiente información:\n\n` +
-        `• Nombre: ${name}\n` +
-        `• Empresa / Proyecto: ${company}\n` +
-        `• Correo de contacto: ${email}\n` +
-        `• Teléfono / WhatsApp: ${phone}\n` +
-        `• Vector de Enfoque: ${vector}\n` +
-        `• Retos u Objetivos: ${message}\n\n` +
-        `Quedo atento a su respuesta.\n` +
-        `Saludos cordiales,\n${name}`
-      );
-
-      const mailtoUrl = `mailto:contactovectorinside@gmail.com?subject=${subject}&body=${body}`;
-
-      const waText = encodeURIComponent(
-        `⚡ *SOLICITUD AUDITORÍA NUCLEAR // VECTOR INSIDE*\n\n` +
-        `*Nombre:* ${name}\n` +
-        `*Empresa:* ${company}\n` +
-        `*Email:* ${email}\n` +
-        `*Tel:* ${phone}\n` +
-        `*Vector:* ${vector}\n` +
-        `*Detalles:* ${message}`
-      );
-      const waUrl = `https://wa.me/?text=${waText}`;
-
-      const waBtn = document.getElementById('audit-success-whatsapp');
-      if (waBtn) waBtn.href = waUrl;
-
-      // Disparar cliente de correo
-      try {
-        window.location.href = mailtoUrl;
-      } catch (err) {
-        console.warn('Mailto trigger error:', err);
-      }
-
-      // Mostrar pantalla de confirmación dentro del modal
-      auditForm.classList.add('hidden');
-      const successView = document.getElementById('nuclear-modal-success');
-      if (successView) successView.classList.remove('hidden');
-    });
-  }
 }
 
 if (document.readyState === 'loading') {
@@ -3923,13 +4075,11 @@ if (document.readyState === 'loading') {
     initFloatingGallery();
     initVectorIsotipo();
     initDiagnosticoTest();
-    initNuclearModal();
   });
 } else {
   initFloatingGallery();
   initVectorIsotipo();
   initDiagnosticoTest();
-  initNuclearModal();
 }
 
 
