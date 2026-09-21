@@ -125,7 +125,7 @@
     <a href="javascript:void(0)" onclick="scrollToSection3()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // PLATAFORMA</a>
     <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // Ejecución y Evidencia</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // EVIDENCIA</a>
     <a href="javascript:void(0)" onclick="scrollToMetodologia()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Metodología</a>
     <a href="javascript:void(0)" onclick="return scrollToDiagnostico(event)" id="dock-item-diagnostico"
@@ -567,10 +567,9 @@
           <!-- Inner Background Media (Glowing Particles Floating in Space with scale 1.35 -> 1.0) -->
           <div id="scroll-expand-media-wrapper"
             class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
-            <video id="scroll-expand-video"
-              src="Glowing_particles_floating_in_space_20260921040136.mp4"
-              data-lazy-src="Glowing_particles_floating_in_space_20260921040136.mp4" autoplay loop muted
-              playsinline preload="auto"
+            <video id="scroll-expand-video" src="Glowing_particles_floating_in_space_20260921040136.mp4"
+              data-lazy-src="Glowing_particles_floating_in_space_20260921040136.mp4" autoplay loop muted playsinline
+              preload="auto"
               class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
             <!-- Overlay Scrim Gradient for high contrast -->
             <div id="scroll-expand-scrim"
@@ -578,18 +577,18 @@
             </div>
           </div>
 
-          <!-- Internal Scrollable Container for 03 // EJECUCIÓN Y EVIDENCIA -->
+          <!-- Internal Scrollable Container for 03 //  Y EVIDENCIA -->
           <div id="sec-ejecucion-scroll-container"
             class="relative z-20 w-full h-full overflow-y-auto custom-scrollbar flex flex-col justify-between pointer-events-auto">
 
-            <!-- Stage 1: Main Cover Content for 03 // Ejecución y Evidencia -->
+            <!-- Stage 1: Main Cover Content for 03 // Evidencia -->
             <div id="scroll-expand-body"
               class="relative z-20 max-w-6xl w-full mx-auto px-6 sm:px-10 py-12 sm:py-16 flex flex-col justify-center items-start text-left min-h-screen">
 
               <div class="flex items-center gap-3 mb-4">
                 <span
                   class="font-display text-xs font-black text-vector-black bg-vector-lime px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime">
-                  03 // EJECUCIÓN Y EVIDENCIA
+                  03 // EVIDENCIA
                 </span>
                 <span
                   class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
@@ -608,15 +607,19 @@
               </p>
 
               <!-- Prompt to scroll down to evidence photos -->
-              <div class="mt-8 flex items-center gap-3 text-xs font-display uppercase tracking-[0.22em] text-vector-lime/90 select-none cursor-pointer group"
+              <div
+                class="mt-8 flex items-center gap-3 text-xs font-display uppercase tracking-[0.22em] text-vector-lime/90 select-none cursor-pointer group"
                 onclick="scrollToGaleriaFlotante()">
                 <span class="relative flex h-2.5 w-2.5">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-vector-lime"></span>
                 </span>
                 <span class="transition-colors group-hover:text-white">Desplaza para explorar evidencia</span>
-                <svg class="w-4 h-4 animate-bounce text-vector-lime transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                <svg class="w-4 h-4 animate-bounce text-vector-lime transition-transform group-hover:translate-y-1"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                  </path>
                 </svg>
               </div>
             </div>
@@ -628,7 +631,7 @@
               <div id="sec-matriz-25-wrapper"
                 class="sticky top-0 z-10 w-full h-screen flex flex-col justify-between border-t border-white/15 overflow-hidden bg-vector-black">
 
-                <!-- Top Controls Bar: Badge, Title & Filters -->
+                <!-- Top Controls Bar: Badge & Title -->
                 <div
                   class="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 pointer-events-auto">
                   <div class="flex items-center gap-3">
@@ -645,22 +648,6 @@
                         // HAZ CLIC EN CUALQUIER TARJETA PARA CENTRARLA Y EXPANDIR TELEMETRÍA
                       </p>
                     </div>
-                  </div>
-
-                  <!-- Filter Buttons -->
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] overflow-x-auto pb-1">
-                    <button
-                      class="matriz-filter-btn active px-3.5 py-1.5 border border-vector-lime bg-vector-lime text-vector-black font-bold cursor-pointer transition-all"
-                      data-filter="all">TODOS (10)</button>
-                    <button
-                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-vector-lime cursor-pointer transition-all"
-                      data-filter="operativo">OPERATIVO</button>
-                    <button
-                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-cognitive-blue cursor-pointer transition-all"
-                      data-filter="cognitivo">COGNITIVO</button>
-                    <button
-                      class="matriz-filter-btn px-3.5 py-1.5 border border-white/20 bg-surface-dark text-white hover:border-operative-purple cursor-pointer transition-all"
-                      data-filter="expansivo">EXPANSIVO</button>
                   </div>
                 </div>
 
@@ -1095,8 +1082,8 @@
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.282) -->
-  <script src="script.js?v=3.0.282"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.283) -->
+  <script src="script.js?v=3.0.283"></script>
 </body>
 
 </html>
