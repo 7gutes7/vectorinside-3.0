@@ -9,7 +9,7 @@
     content="Firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos. Convertimos el caos en arquitectura." />
 
   <!-- Tailwind static build (compilado con build-tailwind.sh) -->
-  <link rel="stylesheet" href="tailwind-build.css?v=2" />
+  <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
 
   <!-- Google Fonts & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.253" />
+  <link rel="stylesheet" href="style.css?v=3.0.265" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -40,6 +40,16 @@
       history.scrollRestoration = 'manual';
     }
     window.scrollTo(0, 0);
+
+    // Check Intro Video 5-Minute Cooldown (Prevents flash on refresh/return)
+    (function () {
+      try {
+        var last = localStorage.getItem('vectorinside_intro_last_played');
+        if (last && (Date.now() - parseInt(last, 10)) < 300000) {
+          document.documentElement.classList.add('skip-intro-cached');
+        }
+      } catch (e) { }
+    })();
   </script>
 
   <!-- Tailwind Configuration extension: ya no aplica en runtime (CDN retirado).
@@ -75,7 +85,7 @@
 
   <!-- ==================== HEADER & NAVIGATION ==================== -->
   <header id="main-global-header"
-    class="fixed top-0 left-0 w-full z-50 glass-nav glass-nav-dark transition-all duration-500">
+    class="fixed top-0 left-0 w-full z-50 glass-nav glass-nav-hero-transparent transition-all duration-500">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
       <!-- Brand Logo -->
       <a href="index.html" class="flex items-center gap-3 group z-10">
@@ -85,17 +95,18 @@
 
       <!-- Center Headline in Header (Centrado) -->
       <div
-        class="header-center-headline hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2 font-mono text-[11px] lg:text-xs tracking-[0.2em] text-vector-lime/90 font-bold uppercase border-x border-white/10 px-6 py-1 transition-all duration-300">
-        <span>Aceleración Digital // Diseño desde el Núcleo</span>
+        class="header-center-headline hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2.5 text-[11px] lg:text-xs text-vector-lime/90 uppercase border-x border-white/10 px-6 py-1 transition-all duration-300">
+        <span class="font-display font-black tracking-[0.22em]">SOCIAL MEDIA // MARKETING AGENCY</span>
       </div>
 
       <!-- Header Right CTA Button -->
       <div class="flex items-center gap-3 ml-auto z-10">
-        <button type="button" onclick="openNuclearModal(event)" class="btn-pill-nuclear header-cta-btn group cursor-pointer" id="header-pill-nav-btn">
+        <button type="button" onclick="openNuclearModal(event)"
+          class="btn-pill-nuclear header-cta-btn group cursor-pointer" id="header-pill-nav-btn">
           <span class="btn-pill-bg transition-colors duration-300"></span>
           <span class="btn-pill-label transition-colors duration-300">
             <span class="pulse-dot mr-2"></span>
-            <span>AUDITORÍA NUCLEAR</span>
+            <span>CONTACTO</span>
           </span>
         </button>
       </div>
@@ -104,7 +115,7 @@
 
   <!-- ==================== FIXED BOTTOM NAVIGATION DOCK (01 - 06) ==================== -->
   <nav id="bottom-dock-nav"
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-mono text-[11px] sm:text-xs tracking-wider uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-display font-black text-[10.5px] sm:text-xs tracking-[0.18em] uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
     <a href="javascript:void(0)" onclick="scrollToSection2()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // Manifiesto</a>
     <a href="javascript:void(0)" onclick="scrollToSection3()"
@@ -124,11 +135,10 @@
     <!-- Pinned Sticky Viewport Window -->
     <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-20 px-6">
 
-      <!-- ==================== HERO BACKGROUND VIDEO: Silver Silk Cloth Billowing ==================== -->
+      <!-- ==================== HERO BACKGROUND VIDEO: purpleyellow.mp4 ==================== -->
       <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <video id="hero-bg-video"
-          src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152142/Silver_silk_cloth_billowing_1080p_202608301525.mp4"
-          autoplay loop muted playsinline class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
+        <video id="hero-bg-video" src="purpleyellow.mp4" autoplay loop muted playsinline
+          class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
         </video>
         <!-- Dark gradient vignette overlay for depth & typography contrast -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none">
@@ -139,58 +149,95 @@
       <div id="hero-3d-container"
         class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto translate-y-[20px]">
         <canvas id="hero-3d-canvas"
-          class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)]"></canvas>
+          class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)] transition-all duration-150"></canvas>
       </div>
 
       <!-- ==================== LAYER 10: HERO CONTENT & 3D STAGE ==================== -->
       <div id="hero-ui-content"
-        class="relative z-20 max-w-7xl w-full mx-auto flex flex-col justify-center items-start text-left flex-1 h-full pt-2 pb-2 transition-all duration-300 pointer-events-none">
+        class="relative z-20 max-w-[1440px] w-full mx-auto flex flex-col justify-center items-start text-left flex-1 h-full pt-2 pb-2 px-4 sm:px-6 md:px-8 transition-all duration-300 pointer-events-none">
 
-        <!-- Vertically Centered Row: Left (DISEÑAMOS INSTINTO) & Right (LA MARCA // EL DESTINO) -->
-        <div class="w-full flex items-center justify-between my-auto pointer-events-none">
+        <!-- Symmetrical Dual Flank Grid: 50% Left Column & 50% Right Column aligned to Margin Guides -->
+        <div class="w-full grid grid-cols-2 gap-0 my-auto pointer-events-none">
 
-          <!-- Left: DISEÑAMOS INSTINTO. (Centrado verticalmente sobre el margen izquierdo) -->
-          <div class="flex flex-col items-start justify-start text-left pointer-events-auto">
+          <!-- Left Flank: IMPACTO COMERCIAL (Right-aligned to the left margin line) -->
+          <div class="flex flex-col items-end justify-center text-right pointer-events-auto">
             <h1
-              class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-left text-slate-900 flex flex-col items-start">
+              class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-right text-slate-900 flex flex-col items-end">
               <div id="stroke-text-wrapper"
-                class="relative w-[235px] sm:w-[315px] md:w-[390px] lg:w-[420px] max-w-full overflow-visible mb-0 select-none leading-none mr-auto flex justify-start">
-                <svg viewBox="0 0 760 180" class="w-full h-auto block overflow-visible">
+                class="relative w-[220px] sm:w-[270px] md:w-[310px] lg:w-[350px] xl:w-[380px] max-w-full overflow-visible mb-0 select-none leading-none ml-auto flex justify-end">
+                <svg viewBox="0 0 540 180" class="w-full h-auto block overflow-visible">
                   <defs>
                     <clipPath id="stroke-text-clip">
-                      <!-- DISEÑAMOS: Relleno al 70% superior (y: 0 a 56) -->
+                      <!-- IMPACTO: Relleno al 70% superior (y: 0 a 56) -->
                       <rect id="stroke-wipe-rect" class="stroke-wipe-anim" x="0" y="0" width="0%" height="56" />
-                      <!-- INSTINTO.: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
+                      <!-- COMERCIAL: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
                       <rect id="stroke-wipe-rect-2" class="stroke-wipe-anim" x="0" y="114" width="0%" height="66" />
                     </clipPath>
                   </defs>
-                  <!-- Outline stroke layer for both words -->
-                  <text x="0" y="75" text-anchor="start" class="stroke-draw-path font-display font-black" font-size="95"
-                    font-weight="900" letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="3.5"
-                    stroke-dasharray="3500" stroke-dashoffset="3500">
-                    <tspan x="0" y="75">DISEÑAMOS</tspan>
-                    <tspan x="0" y="155">INSTINTO.</tspan>
+                  <!-- Outline stroke layer for both words with enhanced visibility -->
+                  <text class="stroke-draw-path font-display font-black" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-dasharray="3500"
+                    stroke-dashoffset="3500">
+                    <tspan id="hero-word-impacto-stroke" x="0" y="75" text-anchor="start">IMPACTO</tspan>
+                    <tspan x="530" y="155" text-anchor="end">COMERCIAL</tspan>
                   </text>
                   <!-- Fill layer for both words with inverted split clip -->
-                  <text x="0" y="75" text-anchor="start" class="stroke-fill-path font-display font-black" font-size="95"
-                    font-weight="900" letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
-                    <tspan x="0" y="75">DISEÑAMOS</tspan>
-                    <tspan x="0" y="155">INSTINTO.</tspan>
+                  <text class="stroke-fill-path font-display font-black" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
+                    <tspan id="hero-word-impacto-fill" x="0" y="75" text-anchor="start">IMPACTO</tspan>
+                    <tspan x="530" y="155" text-anchor="end">COMERCIAL</tspan>
                   </text>
+                  <!-- Chromatic glitch clones for IMPACTO -->
+                  <text id="hero-impacto-glitch-cyan" x="0" y="75" text-anchor="start"
+                    class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="#00E5FF" opacity="0" pointer-events="none"
+                    aria-hidden="true">IMPACTO</text>
+                  <text id="hero-impacto-glitch-magenta" x="0" y="75" text-anchor="start"
+                    class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="#FF0055" opacity="0" pointer-events="none"
+                    aria-hidden="true">IMPACTO</text>
+                  <text id="hero-impacto-glitch-lime" x="0" y="75" text-anchor="start"
+                    class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="#C3F400" opacity="0" pointer-events="none"
+                    aria-hidden="true">IMPACTO</text>
                 </svg>
               </div>
             </h1>
           </div>
 
-          <!-- Center Right Flank: LA MARCA // EL DESTINO (Al costado derecho del modelo 3D del Hero) -->
-          <div id="hero-curtain-right"
-            class="pointer-events-auto select-none cursor-pointer flex items-center justify-end text-right ml-auto opacity-0 origin-right w-[300px] sm:w-[400px] md:w-[480px] max-w-full">
-            <svg viewBox="0 18 1380 80" class="w-full h-auto block overflow-visible">
-              <text x="100%" y="95" text-anchor="end" class="font-display font-black" font-size="105" font-weight="900"
-                letter-spacing="-3.5" fill="none" stroke="#c3f400" stroke-width="3.5">
-                LA MARCA <tspan stroke="rgba(255,255,255,0.25)">//</tspan> EL DESTINO
-              </text>
-            </svg>
+          <!-- Right Flank: INSTINTO / PARA DOMINAR / EL MERCADO (3 balanced lines) + Micro CTA -->
+          <div class="flex flex-col items-start justify-center text-left pointer-events-auto">
+            <div id="hero-curtain-right"
+              class="pointer-events-auto select-none flex flex-col items-start justify-start text-left mr-auto opacity-0 origin-left max-w-full">
+              <svg viewBox="0 0 680 270" class="w-full h-auto block overflow-visible cursor-pointer">
+                <defs>
+                  <clipPath id="hero-curtain-right-clip">
+                    <rect id="hero-curtain-rect" x="0" y="135" width="100%" height="0" />
+                  </clipPath>
+                </defs>
+                <text x="0" y="75" text-anchor="start" class="font-display font-black" font-size="88" font-weight="900"
+                  letter-spacing="-3.5" fill="#ECEEF2" clip-path="url(#hero-curtain-right-clip)">
+                  <tspan id="hero-word-instinto" x="0" y="75">INSTINTO</tspan>
+                  <tspan x="0" y="155">PARA DOMINAR</tspan>
+                  <tspan x="0" y="235">EL </tspan>
+                  <tspan id="hero-word-mercado" class="hero-word-nucleo-transition">MERCADO</tspan>
+                </text>
+              </svg>
+
+              <!-- Central Action Anchor / Micro Explore CTA below right flank -->
+              <a href="#seccion-portal-revelada" onclick="scrollToSection2(); return false;" id="hero-micro-cta"
+                class="mt-3.5 sm:mt-4.5 inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-vector-black/85 hover:bg-vector-black border border-white/20 hover:border-vector-lime text-white hover:text-vector-lime rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_0_24px_rgba(195,244,0,0.45)] backdrop-blur-md group pointer-events-auto cursor-pointer select-none">
+                <span>EXPLORAR MANIFIESTO</span>
+                <span
+                  class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/10 group-hover:bg-vector-lime group-hover:text-vector-black text-white transition-all duration-300">
+                  <svg class="w-2.5 h-2.5 transform group-hover:translate-y-0.5 transition-transform duration-300"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </a>
+            </div>
           </div>
 
         </div>
@@ -211,24 +258,24 @@
 
       <!-- ==================== LAYER 30: FIXED IN-PLACE SECTION 2 (WHITE BACKGROUND & BRUTALIST CONTRAST) ==================== -->
       <div id="seccion-portal-revelada"
-        class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-6 flex flex-col justify-start bg-white text-vector-black opacity-0 pointer-events-none transition-none shadow-2xl">
+        class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-4 sm:px-6 flex flex-col justify-between bg-white text-vector-black opacity-0 pointer-events-none transition-none shadow-2xl">
 
-        <div class="max-w-7xl w-full mx-auto py-6">
-
-          <!-- Top Meta Badge -->
-          <div class="flex items-center justify-between border-b border-black/15 pb-4 mb-8">
-            <div class="flex items-center gap-3">
-              <span
-                class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-black">
-                01 // MANIFIESTO NUCLEO
-              </span>
-              <span class="text-neutral-600 font-mono text-xs">// DENTRO DE LA VISIÓN VECTOR</span>
-            </div>
+        <!-- Top Meta Badge -->
+        <div class="relative z-10 max-w-7xl w-full mx-auto flex items-center justify-between border-b border-black/15 pb-4">
+          <div class="flex items-center gap-3">
+            <span
+              class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-black">
+              01 // MANIFIESTO NUCLEO
+            </span>
+            <span class="text-neutral-600 font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">// DENTRO DE LA
+              VISIÓN VECTOR</span>
           </div>
+        </div>
 
-          <!-- Main Brutalist Statement Card with Background Video Pinned to Left 50% Fading to White -->
+        <!-- Centered Main Brutalist Statement Card with Background Video -->
+        <div class="relative z-10 max-w-5xl w-full mx-auto my-auto py-4">
           <div
-            class="relative w-full border border-black/15 bg-white mb-10 overflow-hidden shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-0">
+            class="relative w-full border border-black/15 bg-white overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-2 gap-0">
 
             <!-- Left Background Video Layer (Pinned to left, shifted -50px left, fades to white towards right) -->
             <div class="absolute inset-y-0 left-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none z-0">
@@ -242,120 +289,29 @@
             </div>
 
             <!-- Left Clearance Column for Video Visibility on Desktop -->
-            <div class="hidden lg:block relative min-h-[320px] pointer-events-none z-10"></div>
+            <div class="hidden lg:block relative min-h-[340px] sm:min-h-[380px] pointer-events-none z-10"></div>
 
             <!-- Right Half Kinetic Manifesto -->
             <div
-              class="p-6 sm:p-8 lg:p-10 flex flex-col justify-between text-vector-black relative z-10 bg-white/90 lg:bg-transparent">
+              class="p-6 sm:p-10 lg:p-12 flex flex-col justify-center text-vector-black relative z-10 bg-white/90 lg:bg-transparent">
               <div>
-                <span class="font-mono text-[10px] sm:text-xs text-neutral-500 tracking-widest uppercase mb-2 block">//
+                <span
+                  class="font-display font-black text-[10px] sm:text-xs text-neutral-500 tracking-[0.20em] uppercase mb-3 block">//
                   DECLARACIÓN
                   FUNDACIONAL</span>
                 <h2
-                  class="font-display font-black text-sm sm:text-base lg:text-[16px] xl:text-[17px] uppercase leading-snug tracking-tight mb-4 text-vector-black">
-                  Muchas empresas tienen presencia digital, pero no posicionamiento; equipos comerciales, pero no
-                  método; presupuesto publicitario, pero no tracción predecible.
+                  class="font-display font-black text-sm sm:text-base lg:text-[17px] xl:text-[18px] uppercase leading-relaxed tracking-tight text-vector-black">
+                  VECTOR INSIDE SURGE DE LA MISION DE TRANSFORMAR EL CONTENIDO Y LA PUBLICIDAD EN UN SISTEMA DE VENTAS
+                  REAL. DESARROLLANDO ESTRATEGIAS DE MARKETING DIGITAL Y SOCIAL MEDIA, BUSCAMOS QUE MARCAS, EMPRESAS Y
+                  PROYECTOS CREATIVOS LIDEREN SU INDUSTRIA.
                 </h2>
               </div>
-
-              <div class="p-3.5 sm:p-4 bg-vector-black text-white border-l-4 border-vector-lime shadow-md">
-                <p class="font-display font-black text-xs sm:text-sm text-vector-lime uppercase tracking-tight">
-                  Somos una firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos
-                  que buscan dejar de operar desde la improvisación.
-                </p>
-              </div>
             </div>
           </div>
-
-          <!-- ==================== COMMAND DOCK: 6 INDEPENDENT EXPERIENCES ==================== -->
-          <div class="border-t border-black/15 pt-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="font-mono text-xs text-neutral-600 uppercase tracking-widest">// ECOSISTEMA MODULAR VECTOR
-                3.0:</span>
-              <span class="font-mono text-xs text-vector-black font-bold">6 EXPERIENCIAS INTERACTIVAS</span>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-
-              <!-- 01 Manifiesto -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-black transition-all group block shadow-sm cursor-default">
-                <span class="font-mono text-[10px] text-vector-black font-bold block mb-1">01 //</span>
-                <p
-                  class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple-dark transition-colors">
-                  Manifiesto</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Fricción & Núcleo</p>
-              </div>
-
-              <!-- 02 Ecosistema -->
-              <div onclick="scrollToSection3()"
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-black transition-all group block shadow-sm cursor-pointer">
-                <span class="font-mono text-[10px] text-vector-black font-bold block mb-1">02 //</span>
-                <p
-                  class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple-dark transition-colors">
-                  Ecosistema</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">3 Vectores + ROI</p>
-              </div>
-
-              <!-- 03 Ejecución -->
-              <div onclick="scrollToSectionEjecucion()"
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-operative-purple transition-all group block shadow-sm cursor-pointer">
-                <span class="font-mono text-[10px] text-operative-purple-dark font-bold block mb-1">03 //</span>
-                <p
-                  class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple transition-colors">
-                  Ejecución</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Matriz </p>
-              </div>
-
-              <!-- 04 Evidencia -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-cognitive-blue transition-all group block shadow-sm cursor-default">
-                <span class="font-mono text-[10px] text-cognitive-blue font-bold block mb-1">04 //</span>
-                <p
-                  class="font-display font-black text-xs uppercase text-vector-black group-hover:text-cognitive-blue transition-colors">
-                  Evidencia</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Antes vs Después</p>
-              </div>
-
-              <!-- 05 Metodología -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-black transition-all group block shadow-sm cursor-default">
-                <span class="font-mono text-[10px] text-vector-black font-bold block mb-1">05 //</span>
-                <p
-                  class="font-display font-black text-xs uppercase text-vector-black group-hover:text-operative-purple-dark transition-colors">
-                  Metodología</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Pipeline 4 Fases</p>
-              </div>
-
-              <!-- 06 Diagnóstico -->
-              <div
-                class="bg-neutral-100/90 hover:bg-white p-3.5 border border-black/10 hover:border-vector-lime transition-all group block shadow-sm cursor-default">
-                <span class="font-mono text-[10px] text-vector-black font-bold block mb-1">06 //</span>
-                <p class="font-display font-black text-xs uppercase text-vector-black">Diagnóstico</p>
-                <p class="font-mono text-[9px] text-neutral-500 mt-0.5">Test en Tiempo Real</p>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- End-of-Section Highlight Callout (Principio 01) -->
-          <div
-            class="mt-6 p-4 sm:p-5 bg-vector-black text-white border-l-4 border-l-vector-lime shadow-xl flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 rounded-full bg-vector-lime shrink-0 animate-pulse"></span>
-              <p
-                class="font-display font-black text-base sm:text-lg text-neutral-300 uppercase tracking-tight leading-snug">
-                La aceleración real no es aumentar el volumen de ruido, sino <span class="text-vector-lime">eliminar la
-                  fricción estructural</span> que frena la conversión.
-              </p>
-            </div>
-            <span
-              class="font-mono text-[10px] text-vector-lime font-bold uppercase tracking-widest hidden md:inline-block border border-vector-lime/40 px-2.5 py-1 bg-vector-lime/10 whitespace-nowrap">
-              PRINCIPIO // 01
-            </span>
-          </div>
-
         </div>
+
+        <!-- Bottom Spacer for vertical balance -->
+        <div class="relative z-10 max-w-7xl w-full mx-auto opacity-0 pointer-events-none pb-2" aria-hidden="true"></div>
 
       </div>
 
@@ -439,13 +395,16 @@
         <div class="relative z-10 flex items-center justify-between border-b border-white/15 pb-4">
           <div class="flex items-center gap-3">
             <span
-              class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+              class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime/40">
               02 // ECOSISTEMA NUCLEO
             </span>
-            <span class="text-text-muted font-mono text-xs hidden sm:inline">// ARQUITECTURA DE CONVERSIÓN EN TIEMPO
+            <span
+              class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
+              ARQUITECTURA DE CONVERSIÓN EN TIEMPO
               REAL</span>
           </div>
-          <span class="font-mono text-xs text-vector-lime flex items-center gap-1">
+          <span
+            class="font-display text-xs font-black uppercase tracking-[0.20em] text-vector-lime flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-vector-lime animate-pulse"></span>
             <span>MOTOR ACTIVO</span>
           </span>
@@ -467,7 +426,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">01
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-vector-lime">01
                       // NÚCLEO
                       ESTRUCTURAL</span>
                   </div>
@@ -495,7 +454,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">03
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-vector-lime">03
                       // MOTOR
                       DE CONVERSIÓN</span>
                   </div>
@@ -522,7 +481,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-vector-lime"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-vector-lime">05
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-vector-lime">05
                       //
                       ORQUESTACIÓN DE DATOS</span>
                   </div>
@@ -554,7 +513,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">02
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-operative-purple">02
                       //
                       SINCRONIZACIÓN TOTAL</span>
                   </div>
@@ -581,7 +540,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">04
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-operative-purple">04
                       //
                       INTELIGENCIA OPERATIVA</span>
                   </div>
@@ -608,7 +567,7 @@
                   <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-operative-purple"></span>
                     <span
-                      class="font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-operative-purple">06
+                      class="font-display text-[10px] sm:text-[11px] font-black uppercase tracking-[0.20em] text-operative-purple">06
                       //
                       ESCALABILIDAD MODULAR</span>
                   </div>
@@ -666,15 +625,18 @@
               class="sticky top-0 z-30 w-full p-4 sm:p-5 px-6 sm:px-8 flex items-center justify-between border-b border-white/15 backdrop-blur-xl bg-vector-black/80">
               <div class="flex items-center gap-3">
                 <span
-                  class="font-mono text-xs font-bold text-vector-black bg-vector-lime px-3 py-1 uppercase tracking-widest border border-vector-lime">
+                  class="font-display text-xs font-black text-vector-black bg-vector-lime px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime">
                   03 // EJECUCIÓN
                 </span>
-                <span class="text-text-muted font-mono text-xs hidden sm:inline">// ARQUITECTURAS DESPLEGADAS EN
+                <span
+                  class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
+                  ARQUITECTURAS DESPLEGADAS EN
                   PRODUCCIÓN</span>
               </div>
-              <span class="font-mono text-xs text-vector-lime flex items-center gap-2">
+              <span
+                class="font-display text-xs font-black uppercase tracking-[0.20em] text-vector-lime flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-vector-lime animate-ping"></span>
-                <span class="font-bold tracking-wider">SISTEMAS ACTIVOS</span>
+                <span>SISTEMAS ACTIVOS</span>
               </span>
             </div>
 
@@ -683,7 +645,7 @@
               class="relative z-20 max-w-6xl w-full mx-auto px-6 sm:px-10 py-12 sm:py-16 flex flex-col justify-center items-start text-left min-h-[82vh]">
 
               <div
-                class="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-dark/90 border border-vector-lime/30 font-mono text-xs text-vector-lime mb-4">
+                class="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-dark/90 border border-vector-lime/30 font-display font-black text-xs text-vector-lime uppercase tracking-[0.20em] mb-4">
                 <span class="w-1.5 h-1.5 bg-vector-lime"></span>
                 <span>PORTADA DE EJECUCIÓN // SYS_V3.0</span>
               </div>
@@ -695,7 +657,8 @@
               </h2>
 
               <p class="font-body text-xs sm:text-sm md:text-base text-neutral-300 max-w-2xl leading-relaxed mb-6">
-                Infraestructura modular de alta concurrencia: reducción de entropía operativa, optimización de rutas críticas y aceleración determinista con telemetría en tiempo real.
+                Infraestructura modular de alta concurrencia: reducción de entropía operativa, optimización de rutas
+                críticas y aceleración determinista con telemetría en tiempo real.
               </p>
 
               <!-- High-Reality Technical Telemetry KPI Grid (JetBrains Mono) -->
@@ -733,14 +696,15 @@
                   class="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 pointer-events-auto">
                   <div class="flex items-center gap-3">
                     <span
-                      class="font-mono text-xs font-bold text-vector-black bg-vector-lime px-2.5 py-0.5 uppercase tracking-widest">
+                      class="font-display text-xs font-black text-vector-black bg-vector-lime px-2.5 py-0.5 uppercase tracking-[0.20em]">
                       04 EVIDENCIA // GALERÍA FLOTANTE
                     </span>
                     <div>
                       <h3 class="font-display font-black text-lg sm:text-xl uppercase text-white tracking-tight">
                         Sistemas Modulares & Casos Reales
                       </h3>
-                      <p class="font-mono text-[11px] text-text-muted hidden sm:block">
+                      <p
+                        class="font-display text-[11px] font-black text-text-muted tracking-[0.20em] uppercase hidden sm:block">
                         // HAZ CLIC EN CUALQUIER TARJETA PARA CENTRARLA Y EXPANDIR TELEMETRÍA
                       </p>
                     </div>
@@ -799,10 +763,11 @@
                     <div class="max-w-2xl">
                       <div class="flex items-center gap-3 mb-1.5">
                         <span
-                          class="font-mono text-xs font-bold text-vector-lime bg-[#0b0b0d] px-3 py-1 uppercase tracking-widest shadow-sm">
+                          class="font-display text-xs font-black text-vector-lime bg-[#0b0b0d] px-3 py-1 uppercase tracking-[0.20em] shadow-sm">
                           05 // METODOLOGÍA
                         </span>
-                        <span class="text-neutral-700 font-mono text-xs font-bold">// EL PIPELINE VECTOR // 4
+                        <span class="text-neutral-700 font-display text-xs font-black uppercase tracking-[0.20em]">// EL
+                          PIPELINE VECTOR // 4
                           FASES</span>
                       </div>
                       <h2
@@ -830,7 +795,7 @@
                       class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
-                          <span class="font-mono text-xs text-black font-extrabold uppercase tracking-widest">FASE
+                          <span class="font-display text-xs text-black font-black uppercase tracking-[0.20em]">FASE
                             01</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
@@ -856,7 +821,7 @@
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span
-                            class="font-mono text-xs text-operative-purple font-extrabold uppercase tracking-widest">FASE
+                            class="font-display text-xs text-operative-purple font-black uppercase tracking-[0.20em]">FASE
                             02</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
@@ -883,7 +848,7 @@
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span
-                            class="font-mono text-xs text-cognitive-blue font-extrabold uppercase tracking-widest">FASE
+                            class="font-display text-xs text-cognitive-blue font-black uppercase tracking-[0.20em]">FASE
                             03</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
@@ -908,7 +873,7 @@
                       class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
-                          <span class="font-mono text-xs text-black font-extrabold uppercase tracking-widest">FASE
+                          <span class="font-display text-xs text-black font-black uppercase tracking-[0.20em]">FASE
                             04</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">CONTINUO</span>
@@ -956,10 +921,11 @@
                       <div>
                         <div class="flex items-center gap-3 mb-2">
                           <span
-                            class="font-mono text-xs font-bold text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-widest border border-vector-lime/40">
+                            class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime/40">
                             06 // DIAGNÓSTICO
                           </span>
-                          <span class="text-text-muted font-mono text-xs">// EVALUACIÓN DE MADUREZ DIGITAL</span>
+                          <span class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em]">//
+                            EVALUACIÓN DE MADUREZ DIGITAL</span>
                         </div>
                         <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
                           Test de Fricción &amp; Auditoría Nuclear
@@ -979,7 +945,9 @@
                         class="lg:col-span-7 glass-panel p-8 sm:p-10 border border-white/20 bg-surface-dark space-y-8">
 
                         <div class="space-y-3">
-                          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">01 // ¿CÓMO
+                          <label
+                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">01
+                            // ¿CÓMO
                             GESTIONAS TUS DATOS Y PIPELINE COMERCIAL?</label>
                           <div class="space-y-2">
                             <label
@@ -1001,7 +969,9 @@
                         </div>
 
                         <div class="space-y-3">
-                          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">02 // ¿CUÁL
+                          <label
+                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">02
+                            // ¿CUÁL
                             ES TU TIEMPO PROMEDIO DE RESPUESTA A LEADS?</label>
                           <div class="space-y-2">
                             <label
@@ -1023,7 +993,9 @@
                         </div>
 
                         <div class="space-y-3">
-                          <label class="font-mono text-xs text-vector-lime uppercase tracking-wider block">03 // ¿CÓMO
+                          <label
+                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">03
+                            // ¿CÓMO
                             DESCRIBIRÍAS LA AUTORIDAD VISUAL DE TU MARCA?</label>
                           <div class="space-y-2">
                             <label
@@ -1050,7 +1022,8 @@
                       <div
                         class="lg:col-span-5 glass-panel p-8 sm:p-10 border border-vector-lime/40 bg-surface-dark space-y-6 flex flex-col justify-between">
                         <div>
-                          <span class="font-mono text-xs text-vector-lime uppercase tracking-widest block mb-2">//
+                          <span
+                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.20em] block mb-2">//
                             RADIOGRAFÍA EN TIEMPO REAL</span>
                           <h2 class="font-display font-black text-2xl uppercase mb-6">Puntaje de Madurez Vector</h2>
 
@@ -1062,7 +1035,8 @@
                           </div>
 
                           <div class="space-y-3 font-mono text-xs">
-                            <p class="text-white font-bold uppercase">// DIAGNÓSTICO ESTIMADO:</p>
+                            <p class="text-white font-display font-black text-xs uppercase tracking-[0.20em]">//
+                              DIAGNÓSTICO ESTIMADO:</p>
                             <p id="score-explanation" class="text-text-muted leading-relaxed">
                               Tu empresa presenta fugas críticas de capital debido a tareas operativas manuales y falta
                               de una tesis de aceleración digital unificada.
@@ -1084,7 +1058,7 @@
                     <div
                       class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
                       <a href="javascript:void(0)" onclick="scrollToMetodologia()"
-                        class="font-mono text-xs text-text-muted hover:text-white flex items-center gap-2">
+                        class="font-display font-black text-xs text-text-muted hover:text-white uppercase tracking-[0.15em] flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">arrow_back</span> 05 // METODOLOGÍA
                       </a>
                       <button type="button" onclick="openNuclearModal(event)"
@@ -1148,7 +1122,8 @@
       </div>
 
       <!-- Chat Messages Body -->
-      <div id="chatbot-messages" class="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 font-mono text-sm scrollbar-thin"></div>
+      <div id="chatbot-messages" class="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 font-mono text-sm scrollbar-thin">
+      </div>
 
       <!-- Chat Input Bar -->
       <form id="chatbot-form" class="p-3 border-t border-white/10 bg-vector-black/85 flex items-center gap-2.5">
@@ -1183,8 +1158,8 @@
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.253) -->
-  <script src="script.js?v=3.0.253"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.264) -->
+  <script src="script.js?v=3.0.264"></script>
 </body>
 
 </html>

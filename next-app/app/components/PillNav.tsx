@@ -25,7 +25,7 @@ export default function PillNav({
   logo,
   logoAlt = 'Logo',
   items = [
-    { label: 'Auditoría Nuclear', href: '/diagnostico' }
+    { label: 'CONTACTO', href: '/diagnostico' }
   ],
   activeHref = '/',
   className = '',

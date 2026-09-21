@@ -13,8 +13,9 @@ window.addEventListener('beforeunload', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Always reset scroll position to top (Hero section) on page load/refresh
+  // Reset scroll and align Hero SVG text
   window.scrollTo(0, 0);
+  alignHeroDigitalText();
 
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
   initPageVideoIntro();
@@ -49,8 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Fullscreen Video Intro & Asset Preloader Controller
- * Loops intro until all videos in page are buffered and ready
+ * Loops intro until all videos in page are buffered and ready.
+ * Cooldown: Plays only once every 5 minutes across visits/refreshes.
  */
+const INTRO_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos (300,000 ms)
+const INTRO_STORAGE_KEY = 'vectorinside_intro_last_played';
+
 function initPageVideoIntro() {
   const introScreen = document.getElementById('intro-screen');
   const video = document.getElementById('intro-video');
@@ -58,6 +63,21 @@ function initPageVideoIntro() {
   const loaderText = document.querySelector('#intro-loader span:last-child');
 
   if (!introScreen || !video) return;
+
+  const lastPlayed = localStorage.getItem(INTRO_STORAGE_KEY);
+  const now = Date.now();
+
+  // Si han transcurrido menos de 5 minutos, omitir intro inmediatamente
+  if (lastPlayed && (now - parseInt(lastPlayed, 10)) < INTRO_INTERVAL_MS) {
+    introScreen.style.display = 'none';
+    introScreen.style.opacity = '0';
+    video.pause();
+    setTimeout(triggerStrokeTextEffect, 200);
+    return;
+  }
+
+  // Guardar timestamp actual al iniciar la reproducción del intro
+  localStorage.setItem(INTRO_STORAGE_KEY, now.toString());
 
   let isDismissed = false;
   let isMediaReady = false;
@@ -68,6 +88,7 @@ function initPageVideoIntro() {
   function dismissIntro() {
     if (isDismissed) return;
     isDismissed = true;
+    localStorage.setItem(INTRO_STORAGE_KEY, Date.now().toString());
     introScreen.style.opacity = '0';
     setTimeout(() => {
       introScreen.style.display = 'none';
@@ -1192,9 +1213,11 @@ function initHero3DModel() {
   let currentRotX = 0;
 
   let isHoveredOverModel = false;
-  let currentHoverLerp = 0; // 0.0 = Default Blender Blue, 1.0 = Iridescent Green + Eye Glow
+  let currentEyeGlowLerp = 0; // 0.0 = Base Blue, 1.0 = Project Yellow/Lime
+
   const detectedEyeMeshes = [];
   const detectedHeadMeshes = [];
+  const eyePointLights = [];
 
   // Symmetrical Centered Rotation & Max responsive tilt angles
   const BASE_ROT_Y = 0; // Centered forward facing
@@ -1216,7 +1239,7 @@ function initHero3DModel() {
 
     // Precise Nose Tip Pivot Calibration (Centered on screen):
     const noseScreenX = window.innerWidth * 0.50;
-    const noseScreenY = window.innerHeight * 0.55;
+    const noseScreenY = window.innerHeight * 0.52;
 
     const spanX = Math.max(window.innerWidth * 0.48, 300);
     const spanY = Math.max(window.innerHeight * 0.48, 300);
@@ -1225,12 +1248,21 @@ function initHero3DModel() {
     const normY = Math.max(-1.0, Math.min(1.0, (clientY - noseScreenY) / spanY));
 
     targetRotY = normX * MAX_ROT_Y;
-    targetRotX = 0; // Movimiento vertical cancelado (fijo en horizontal)
+    targetRotX = normY * MAX_ROT_X; // Movimiento vertical fluido según cursor (inclinación arriba/abajo)
+
+    // Instant zero-lag hover detection over the 3D wolf head (0 CPU overhead)
+    const hoverSpanX = Math.max(window.innerWidth * 0.18, 140);
+    const hoverSpanY = Math.max(window.innerHeight * 0.22, 170);
+    const dx = (clientX - noseScreenX) / hoverSpanX;
+    const dy = (clientY - noseScreenY) / hoverSpanY;
+    isHoveredOverModel = (dx * dx + dy * dy) <= 1.0;
   }
 
   function resetModelToBasePosition() {
     targetRotY = 0;
     targetRotX = 0;
+    isHoveredOverModel = false;
+    if (typeof resetDisenoHoverGlitch === 'function') resetDisenoHoverGlitch();
   }
 
   // Mouse & Touch listeners for full Hero cursor tracking
@@ -1320,7 +1352,26 @@ function initHero3DModel() {
 
             if (isEye) {
               console.log("--> OJO IDENTIFICADO EXACTAMENTE:", name, matName);
+              const eyePhysMat = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color(0x0055ff),     // Azul eléctrico puro saturado
+                emissive: new THREE.Color(0x0066ff),  // Emisivo azul
+                emissiveIntensity: 0.85,              // Calibrado para resplandor azul visible sin saturar a blanco
+                roughness: 0.25,
+                metalness: 0.10,
+                clearcoat: 0.10,
+                clearcoatRoughness: 0.10,
+                transparent: true,
+                opacity: 1.0,
+                depthWrite: true,
+              });
+              child.material = eyePhysMat;
               detectedEyeMeshes.push(child);
+
+              // Attach real physical point light emitting directly from the eye pupil:
+              const eyeLight = new THREE.PointLight(0x0055ff, 0.35, 3.5, 1.2);
+              eyeLight.position.set(0, 0, 0.35);
+              child.add(eyeLight);
+              eyePointLights.push(eyeLight);
             } else {
               console.log("--> CABEZA IDENTIFICADA EXACTAMENTE:", name, matName);
               detectedHeadMeshes.push(child);
@@ -1343,6 +1394,8 @@ function initHero3DModel() {
         console.log("--> PRECISE RHOMBUS EYE SOCKET TARGET:", targetEyePos);
 
         syncSize();
+        isHero3DModelLoaded = true;
+        triggerHero3DReveal();
       },
       (xhr) => {
         if (xhr.total > 0) {
@@ -1578,6 +1631,25 @@ function initHero3DModel() {
     ro.observe(container);
   }
 
+  // ==================== NON-LINEAR SCROLL SPEED MAPPING ====================
+  // Drastically reduce scroll progression speed exclusively for Hero -> Eye -> Punto -> Línea -> Plano
+  function mapHeroToSection2Scroll(raw) {
+    if (raw <= 0) return 0;
+    if (raw >= 1) return 1;
+
+    // 48% of the physical scroll track is dedicated exclusively to the initial eye journey & Section 2
+    const JUNCTION_RAW = 0.48;
+    const JUNCTION_MAPPED = 0.22; // Physical progression runs ~3.5x slower for extreme slow-motion precision
+
+    if (raw < JUNCTION_RAW) {
+      const t = raw / JUNCTION_RAW;
+      return (t * 0.85 + t * t * 0.15) * JUNCTION_MAPPED;
+    } else {
+      const t = (raw - JUNCTION_RAW) / (1.0 - JUNCTION_RAW);
+      return JUNCTION_MAPPED + t * (1.0 - JUNCTION_MAPPED);
+    }
+  }
+
   // Register ScrollTrigger if available
   let scrollProgress = 0;
   const heroUi = document.getElementById('hero-ui-content');
@@ -1592,7 +1664,7 @@ function initHero3DModel() {
       end: 'bottom bottom',
       scrub: 0.5,
       onUpdate: (self) => {
-        scrollProgress = self.progress; // 0.0 -> 1.0
+        scrollProgress = mapHeroToSection2Scroll(self.progress);
       }
     });
   }
@@ -1605,7 +1677,8 @@ function initHero3DModel() {
     const maxScroll = track.offsetHeight - window.innerHeight;
     if (maxScroll > 0) {
       const current = -rect.top;
-      scrollProgress = Math.max(0, Math.min(1.0, current / maxScroll));
+      const raw = Math.max(0, Math.min(1.0, current / maxScroll));
+      scrollProgress = mapHeroToSection2Scroll(raw);
     }
   }
 
@@ -1894,13 +1967,58 @@ function initHero3DModel() {
         kineticBg.style.filter = 'blur(0px)';
       }
 
+      // Eye Glow Controller, MERCADO Word Glow & INSTINTO Glitch Controller: Base = azul neón saturado (0x0055FF). Hover = azul brillante intenso (0x00D5FF).
+      const targetGlow = (isHoveredOverModel && currentScrollLerp < 0.05) ? 1.0 : 0.0;
+      currentEyeGlowLerp += (targetGlow - currentEyeGlowLerp) * 0.20;
+
+      const mercadoWord = document.getElementById('hero-word-mercado') || document.getElementById('hero-word-nucleo');
+      if (mercadoWord) {
+        if (targetGlow > 0.5) {
+          mercadoWord.classList.add('nucleo-glow-active');
+        } else {
+          mercadoWord.classList.remove('nucleo-glow-active');
+        }
+      }
+
+      if (targetGlow > 0.5) {
+        if (typeof triggerDisenoHoverGlitch === 'function') triggerDisenoHoverGlitch();
+      } else {
+        if (typeof resetDisenoHoverGlitch === 'function') resetDisenoHoverGlitch();
+      }
+
+      const baseNeonBlue = new THREE.Color(0x0055ff);
+      const baseEmissiveBlue = new THREE.Color(0x0066ff);
+      const brightGlowBlue = new THREE.Color(0x0099ff);
+      const brightEmissiveBlue = new THREE.Color(0x00d5ff); // Azul cian hiper-brillante
+
+      const currentColor = new THREE.Color().lerpColors(baseNeonBlue, brightGlowBlue, currentEyeGlowLerp);
+      const currentEmissive = new THREE.Color().lerpColors(baseEmissiveBlue, brightEmissiveBlue, currentEyeGlowLerp);
+      const currentIntensity = THREE.MathUtils.lerp(0.85, 3.2, currentEyeGlowLerp);
+
+      detectedEyeMeshes.forEach(mesh => {
+        if (mesh.material) {
+          mesh.material.color.copy(currentColor);
+          mesh.material.emissive.copy(currentEmissive);
+          mesh.material.emissiveIntensity = currentIntensity;
+          mesh.material.roughness = THREE.MathUtils.lerp(0.25, 0.02, currentEyeGlowLerp);
+        }
+      });
+
+      // Emisión de luz física real en la escena 3D desde las pupilas (azul brillante intenso):
+      const lightInt = THREE.MathUtils.lerp(0.35, 5.0, currentEyeGlowLerp);
+      eyePointLights.forEach(light => {
+        light.color.copy(currentEmissive);
+        light.intensity = lightInt;
+        light.distance = THREE.MathUtils.lerp(3.5, 6.0, currentEyeGlowLerp);
+      });
+
       // 1. Head tilt follows mouse only when at top of hero, dampens to 0 as user scrolls
       const mouseDampen = Math.max(0, 1.0 - currentScrollLerp * 3.0);
-      currentRotY += (targetRotY * mouseDampen - currentRotY) * 0.10;
-      currentRotX += (targetRotX * mouseDampen - currentRotX) * 0.10;
+      currentRotY += (targetRotY * mouseDampen - currentRotY) * 0.20;
+      currentRotX += (targetRotX * mouseDampen - currentRotX) * 0.20;
 
       modelGroup.rotation.y = BASE_ROT_Y + Math.max(-MAX_ROT_Y, Math.min(MAX_ROT_Y, currentRotY));
-      modelGroup.rotation.x = 0;
+      modelGroup.rotation.x = Math.max(-MAX_ROT_X, Math.min(MAX_ROT_X, currentRotX));
       modelGroup.rotation.z = 0;
 
       // 2. Camera Deep Eye Entry (0.0 to 0.10) - Centered in Hero, zooms into eye socket
@@ -1918,15 +2036,23 @@ function initHero3DModel() {
       const currentLookAt = new THREE.Vector3().lerpVectors(baseLookAt, targetLookAt, pHead);
       camera.lookAt(currentLookAt);
 
-      // 4. UI Layer Fade-out & Hero Curtain Right Dynamic Scale & Shift (+25px inicial -> 0px final con scroll)
+      // 4. Symmetrical Flank Inward Motion & Dynamic Scale on Scroll (Towards 3D Wolf Center)
       const curtainRight = document.getElementById('hero-curtain-right');
+      const strokeTextWrapper = document.getElementById('stroke-text-wrapper');
+
+      const pScale = Math.min(1.0, currentScrollLerp / 0.08);
+      const pScaleEased = Math.sin((pScale * Math.PI) / 2);
+      const currentScale = 1.0 + 0.04 * pScaleEased;
+      const shiftDistance = pScaleEased * 45; // Exact same symmetrical inward distance (45px)
+
       if (curtainRight) {
         curtainRight.style.transformOrigin = 'right center';
-        const pScale = Math.min(1.0, currentScrollLerp / 0.08);
-        const pScaleEased = Math.sin((pScale * Math.PI) / 2);
-        const currentScale = 0.85 + 0.15 * pScaleEased;
-        const currentX = (1.0 - pScaleEased) * 25; // +25px a la derecha inicial -> 0px final
-        curtainRight.style.transform = `translateX(${currentX.toFixed(1)}px) scale(${currentScale.toFixed(3)})`;
+        curtainRight.style.transform = `translateX(${-shiftDistance.toFixed(1)}px) scale(${currentScale.toFixed(3)})`;
+      }
+
+      if (strokeTextWrapper) {
+        strokeTextWrapper.style.transformOrigin = 'left center';
+        strokeTextWrapper.style.transform = `translateX(${shiftDistance.toFixed(1)}px) scale(${currentScale.toFixed(3)})`;
       }
 
       if (heroUi) {
@@ -2492,6 +2618,9 @@ function initHero3DModel() {
         }
       }
 
+      // Hero Phase (0.0 <= currentScrollLerp < T_REVEAL_START): Header completely transparent without background
+      const isHeroPhase = currentScrollLerp < T_REVEAL_START;
+
       // White Liquid Glass Header in:
       // - 01 // Manifiesto (0.08 <= currentScrollLerp < 0.34)
       // - 02 // Ecosistema (0.70 <= currentScrollLerp < 0.84)
@@ -2503,21 +2632,26 @@ function initHero3DModel() {
       // Transparent Floating Header during Smartphone Zoom & 360 Spin (0.34 <= currentScrollLerp < 0.70)
       const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.70;
 
-      if (isWhiteHeaderPhase) {
+      if (isHeroPhase) {
+        if (!globalHeader.classList.contains('glass-nav-hero-transparent')) {
+          globalHeader.classList.add('glass-nav-hero-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-transparent');
+        }
+      } else if (isWhiteHeaderPhase) {
         if (!globalHeader.classList.contains('glass-nav-white-liquid')) {
           globalHeader.classList.add('glass-nav-white-liquid');
-          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent', 'glass-nav-hero-transparent');
         }
       } else if (isSmartphoneSpinPhase) {
         if (!globalHeader.classList.contains('glass-nav-transparent')) {
           globalHeader.classList.add('glass-nav-transparent');
-          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-hero-transparent');
         }
       } else {
-        // Dark Cyber Glass in Hero (0.0 - 0.08) and 03 // Ejecución / Galería (0.84 - 1.0)
+        // Dark Cyber Glass in 03 // Ejecución / Galería (0.84 - 1.0)
         if (!globalHeader.classList.contains('glass-nav-dark')) {
           globalHeader.classList.add('glass-nav-dark');
-          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent');
+          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent');
         }
       }
     }
@@ -2548,12 +2682,203 @@ function initHero3DModel() {
  * High-Speed responsive execution:
  * strokeColor="#A78BFA", fillColor="#F8FAFC", drawDuration=0.85s, fillDelay=0.1s, fillMode="wipe", ease="power2.out"
  */
+function alignHeroDigitalText() {
+  const strokePath = document.querySelector('.stroke-draw-path');
+  if (!strokePath) return;
+  const firstTspan = strokePath.querySelector('tspan:first-child');
+  const lastTspan = strokePath.querySelector('tspan:last-child');
+  if (!firstTspan) return;
+
+  try {
+    const w1 = firstTspan.getComputedTextLength();
+    const w2 = lastTspan ? lastTspan.getComputedTextLength() : 0;
+    const maxW = Math.max(w1, w2, 450);
+    const targetX = Math.ceil(maxW).toString();
+    document.querySelectorAll('.stroke-draw-path tspan:last-child, .stroke-fill-path tspan:last-child').forEach(el => {
+      el.setAttribute('x', targetX);
+      el.setAttribute('text-anchor', 'end');
+    });
+    const svg = strokePath.closest('svg');
+    if (svg) {
+      svg.setAttribute('viewBox', `0 0 ${Math.ceil(maxW + 15)} 180`);
+    }
+  } catch (e) {}
+}
+
+/**
+ * Interactive Glitch & Cyber Glyph Scramble Effect for the word "IMPACTO" on 3D Model Hover
+ * Glitch burst duration: strictly 1000 ms (1.0s) per hover event
+ */
+let impactoGlitchInterval = null;
+let impactoGlitchTimeout = null;
+let isImpactoGlitching = false;
+let hasImpactoGlitchRunForCurrentHover = false;
+const ORIGINAL_IMPACTO_TEXT = 'IMPACTO';
+const GLITCH_GLYPHS = ['I', 'M', 'P', '4', 'C', 'T', '0', '1', '§', 'Σ', '#', '!', '?', 'Ø', 'Ξ', 'Ñ', '¥', '3', 'Z', '9', '░', '▒', '▓', '<', '>', '/', '_'];
+
+function triggerDisenoHoverGlitch() {
+  triggerImpactoHoverGlitch();
+}
+
+function resetDisenoHoverGlitch() {
+  resetImpactoHoverGlitch();
+}
+
+function triggerImpactoHoverGlitch() {
+  if (hasImpactoGlitchRunForCurrentHover) return;
+  hasImpactoGlitchRunForCurrentHover = true;
+
+  startImpactoGlitch();
+
+  if (impactoGlitchTimeout) clearTimeout(impactoGlitchTimeout);
+  impactoGlitchTimeout = setTimeout(() => {
+    stopImpactoGlitch();
+  }, 1000);
+}
+
+function resetImpactoHoverGlitch() {
+  hasImpactoGlitchRunForCurrentHover = false;
+  if (impactoGlitchTimeout) {
+    clearTimeout(impactoGlitchTimeout);
+    impactoGlitchTimeout = null;
+  }
+  stopImpactoGlitch();
+}
+
+function startImpactoGlitch() {
+  if (isImpactoGlitching) return;
+  isImpactoGlitching = true;
+
+  const impactoStroke = document.getElementById('hero-word-impacto-stroke');
+  const impactoFill = document.getElementById('hero-word-impacto-fill');
+  const cyanClone = document.getElementById('hero-impacto-glitch-cyan');
+  const magentaClone = document.getElementById('hero-impacto-glitch-magenta');
+  const limeClone = document.getElementById('hero-impacto-glitch-lime');
+
+  if (impactoStroke) impactoStroke.classList.add('impacto-glitch-active');
+  if (impactoFill) impactoFill.classList.add('impacto-glitch-active');
+  if (cyanClone) cyanClone.classList.add('impacto-glitch-active');
+  if (magentaClone) magentaClone.classList.add('impacto-glitch-active');
+  if (limeClone) limeClone.classList.add('impacto-glitch-active');
+
+  let frameCount = 0;
+  if (impactoGlitchInterval) clearInterval(impactoGlitchInterval);
+
+  impactoGlitchInterval = setInterval(() => {
+    frameCount++;
+    const shouldScramble = (frameCount % 6 !== 0);
+    
+    let scrambled = ORIGINAL_IMPACTO_TEXT;
+    if (shouldScramble) {
+      scrambled = ORIGINAL_IMPACTO_TEXT.split('').map((char) => {
+        if (Math.random() < 0.45) {
+          return GLITCH_GLYPHS[Math.floor(Math.random() * GLITCH_GLYPHS.length)];
+        }
+        return char;
+      }).join('');
+    }
+
+    if (impactoStroke) impactoStroke.textContent = scrambled;
+    if (impactoFill) impactoFill.textContent = scrambled;
+    if (cyanClone) cyanClone.textContent = scrambled;
+    if (magentaClone) magentaClone.textContent = scrambled;
+    if (limeClone) limeClone.textContent = scrambled;
+  }, 45);
+}
+
+function stopImpactoGlitch() {
+  isImpactoGlitching = false;
+
+  if (impactoGlitchInterval) {
+    clearInterval(impactoGlitchInterval);
+    impactoGlitchInterval = null;
+  }
+
+  const impactoStroke = document.getElementById('hero-word-impacto-stroke');
+  const impactoFill = document.getElementById('hero-word-impacto-fill');
+  const cyanClone = document.getElementById('hero-impacto-glitch-cyan');
+  const magentaClone = document.getElementById('hero-impacto-glitch-magenta');
+  const limeClone = document.getElementById('hero-impacto-glitch-lime');
+
+  if (impactoStroke) {
+    impactoStroke.classList.remove('impacto-glitch-active');
+    impactoStroke.textContent = ORIGINAL_IMPACTO_TEXT;
+  }
+  if (impactoFill) {
+    impactoFill.classList.remove('impacto-glitch-active');
+    impactoFill.textContent = ORIGINAL_IMPACTO_TEXT;
+  }
+  if (cyanClone) {
+    cyanClone.classList.remove('impacto-glitch-active');
+    cyanClone.textContent = ORIGINAL_IMPACTO_TEXT;
+  }
+  if (magentaClone) {
+    magentaClone.classList.remove('impacto-glitch-active');
+    magentaClone.textContent = ORIGINAL_IMPACTO_TEXT;
+  }
+  if (limeClone) {
+    limeClone.classList.remove('impacto-glitch-active');
+    limeClone.textContent = ORIGINAL_IMPACTO_TEXT;
+  }
+}
+
+function alignHeroRightText() {
+  const rightEl = document.getElementById('hero-curtain-right');
+  if (!rightEl) return;
+  const svg = rightEl.querySelector('svg');
+  const textEl = rightEl.querySelector('text');
+  if (!svg || !textEl) return;
+
+  try {
+    let line1W = 0;
+    let line2W = 0;
+    let line3W = 0;
+    const tspans = textEl.querySelectorAll('tspan');
+    const tspanLine1 = document.getElementById('hero-word-instinto') || tspans[0];
+    const tspanLine2 = tspans[1];
+    const tspanLine3Intro = tspans[2];
+    const tspanLine3Key = document.getElementById('hero-word-mercado') || tspans[3];
+
+    if (tspanLine1) line1W = tspanLine1.getComputedTextLength();
+    if (tspanLine2) line2W = tspanLine2.getComputedTextLength();
+    if (tspanLine3Intro) line3W += tspanLine3Intro.getComputedTextLength();
+    if (tspanLine3Key) line3W += tspanLine3Key.getComputedTextLength();
+
+    const maxW = Math.max(line1W, line2W, line3W, 600);
+    const finalW = Math.ceil(maxW + 25);
+    svg.setAttribute('viewBox', `0 0 ${finalW} 270`);
+    const curtainRect = document.getElementById('hero-curtain-rect');
+    if (curtainRect) {
+      curtainRect.setAttribute('width', `${finalW}`);
+    }
+  } catch (e) {}
+}
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    alignHeroDigitalText();
+    alignHeroRightText();
+  });
+}
+window.addEventListener('resize', () => {
+  alignHeroDigitalText();
+  alignHeroRightText();
+});
+
 function triggerStrokeTextEffect() {
   const wrapper = document.getElementById('stroke-text-wrapper');
   const strokePath = document.querySelector('.stroke-draw-path');
   const wipeRect = document.getElementById('stroke-wipe-rect');
   const wipeRect2 = document.getElementById('stroke-wipe-rect-2');
+
+  // Trigger horizontal curtain reveal on 3D Wolf model
+  triggerHero3DReveal();
+
   if (!strokePath || !wipeRect) return;
+
+  // Auto-align COMERCIAL flush with the right boundary of IMPACTO
+  alignHeroDigitalText();
+  alignHeroRightText();
 
   // Initial states: blur & opacity entrance
   if (wrapper && typeof gsap !== 'undefined') {
@@ -2622,12 +2947,58 @@ function triggerStrokeTextEffect() {
 }
 
 /**
- * Symmetrical Flank Reveal Effect for LA MARCA (Left) & EL DESTINO (Right)
+ * Horizontal Split Curtain Reveal for Hero 3D Model
+ * Opens smoothly from the center vertical line outwards to left and right simultaneously
+ */
+let isHero3DRevealed = false;
+let isHero3DModelLoaded = false;
+
+function triggerHero3DReveal() {
+  if (isHero3DRevealed || !isHero3DModelLoaded) return;
+  const canvas = document.getElementById('hero-3d-canvas');
+  if (!canvas) return;
+
+  const introScreen = document.getElementById('intro-screen');
+  if (introScreen && window.getComputedStyle(introScreen).display !== 'none' && introScreen.style.opacity !== '0') {
+    return;
+  }
+
+  isHero3DRevealed = true;
+
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(canvas,
+      {
+        opacity: 1,
+        clipPath: 'inset(0% 50% 0% 50%)',
+        webkitClipPath: 'inset(0% 50% 0% 50%)'
+      },
+      {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        webkitClipPath: 'inset(0% 0% 0% 0%)',
+        opacity: 1,
+        duration: 1.25,
+        ease: 'power3.inOut'
+      }
+    );
+  } else {
+    canvas.style.transition = 'clip-path 1.25s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease';
+    canvas.style.clipPath = 'inset(0% 0% 0% 0%)';
+    canvas.style.opacity = '1';
+  }
+}
+
+/**
+ * Symmetrical Flank Reveal Effect for INSTINTO / PARA DOMINAR / EL MERCADO
+ * Vertical curtain reveal opening from the center line simultaneously upwards and downwards
  */
 function triggerCurtainRevealEffect() {
   const left = document.getElementById('hero-curtain-left');
   const right = document.getElementById('hero-curtain-right');
-  if (!left && !right) return;
+  const curtainRect = document.getElementById('hero-curtain-rect');
+  const microCta = document.getElementById('hero-micro-cta');
+  if (!right) return;
+
+  alignHeroRightText();
 
   if (typeof gsap !== 'undefined') {
     const tl = gsap.timeline();
@@ -2641,16 +3012,38 @@ function triggerCurtainRevealEffect() {
       }, 0);
     }
     if (right) {
-      gsap.set(right, { opacity: 0 });
-      tl.to(right, {
-        opacity: 1,
-        duration: 0.7,
-        ease: "power3.out"
-      }, 0.12);
+      gsap.set(right, { opacity: 1 });
+      if (curtainRect) {
+        curtainRect.setAttribute('y', '135');
+        curtainRect.setAttribute('height', '0');
+        tl.to(curtainRect, {
+          attr: { y: 0, height: 270 },
+          duration: 0.9,
+          ease: "power3.inOut"
+        }, 0.05);
+      } else {
+        gsap.fromTo(right,
+          { opacity: 1, clipPath: 'inset(50% 0% 50% 0%)', webkitClipPath: 'inset(50% 0% 50% 0%)' },
+          { clipPath: 'inset(0% 0% 0% 0%)', webkitClipPath: 'inset(0% 0% 0% 0%)', opacity: 1, duration: 0.9, ease: "power3.inOut" }
+        );
+      }
+    }
+    if (microCta) {
+      gsap.fromTo(microCta,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.45, ease: "power2.out" }
+      );
     }
   } else {
     if (left) left.style.opacity = '1';
-    if (right) right.style.opacity = '1';
+    if (right) {
+      right.style.opacity = '1';
+      if (curtainRect) {
+        curtainRect.setAttribute('y', '0');
+        curtainRect.setAttribute('height', '270');
+      }
+    }
+    if (microCta) microCta.style.opacity = '1';
   }
 }
 
@@ -3163,11 +3556,11 @@ function scrollToSection2() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  const targetY = trackTop + maxScroll * 0.18;
+  const targetY = trackTop + maxScroll * 0.44; // Land cleanly inside Section 2 Manifesto reading mode
 
   const startY = window.scrollY;
   const distance = targetY - startY;
-  const duration = 1600; // 1.6s smooth cinematic glide
+  const duration = 2600; // 2.6s smooth cinematic glide
   let startTime = null;
 
   function easeInOutCubic(t) {
