@@ -1627,21 +1627,45 @@ function initHero3DModel() {
   }
 
   // ==================== NON-LINEAR SCROLL SPEED MAPPING ====================
-  // Drastically reduce scroll progression speed exclusively for Hero -> Eye -> Punto -> Línea -> Plano
+  // Preserves 100% of Hero & Section 1/2 speed, and reduces speed by 75% (4x physical distance)
+  // exclusively from Smartphone emergence / Ecosistema downwards.
   function mapHeroToSection2Scroll(raw) {
     if (raw <= 0) return 0;
     if (raw >= 1) return 1;
 
-    // 48% of the physical scroll track is dedicated exclusively to the initial eye journey & Section 2
-    const JUNCTION_RAW = 0.48;
-    const JUNCTION_MAPPED = 0.22; // Physical progression runs ~3.5x slower for extreme slow-motion precision
+    // Phase 1: Hero and Manifiesto (PRESERVED 100% UNTOUCHED in physical speed and distance)
+    // Physical distance of 388.5vh out of 1320vh (raw: 0.0 -> 0.2943)
+    if (raw < 0.2254) {
+      // Hero to Manifiesto opening (p: 0 -> 0.22)
+      const u = raw / 0.2254;
+      return (u * 0.85 + u * u * 0.15) * 0.22;
+    } else if (raw < 0.2943) {
+      // Manifiesto reading to line collapse (p: 0.22 -> 0.44)
+      const u = (raw - 0.2254) / (0.2943 - 0.2254);
+      return 0.22 + u * 0.22;
+    }
 
-    if (raw < JUNCTION_RAW) {
-      const t = raw / JUNCTION_RAW;
-      return (t * 0.85 + t * t * 0.15) * JUNCTION_MAPPED;
+    // Phase 2: FROM SMARTPHONE / ECOSISTEMA DOWNWARDS (-75% velocity, 4x physical scroll distance)
+    if (raw < 0.4458) {
+      // Smartphone Zoom Out (p: 0.44 -> 0.60)
+      const u = (raw - 0.2943) / (0.4458 - 0.2943);
+      return 0.44 + u * (0.60 - 0.44);
+    } else if (raw < 0.6125) {
+      // Smartphone 360° Spin (p: 0.60 -> 0.75)
+      const u = (raw - 0.4458) / (0.6125 - 0.4458);
+      return 0.60 + u * (0.75 - 0.60);
+    } else if (raw < 0.6504) {
+      // Smartphone Upward Exit & Transition (p: 0.75 -> 0.77)
+      const u = (raw - 0.6125) / (0.6504 - 0.6125);
+      return 0.75 + u * (0.77 - 0.75);
+    } else if (raw < 0.8171) {
+      // Section 02 // Ecosistema Cards Stream (p: 0.77 -> 0.885)
+      const u = (raw - 0.6504) / (0.8171 - 0.6504);
+      return 0.77 + u * (0.885 - 0.77);
     } else {
-      const t = (raw - JUNCTION_RAW) / (1.0 - JUNCTION_RAW);
-      return JUNCTION_MAPPED + t * (1.0 - JUNCTION_MAPPED);
+      // Section 03 // Ejecución ScrollExpand (p: 0.885 -> 1.00)
+      const u = (raw - 0.8171) / (1.0 - 0.8171);
+      return 0.885 + u * (1.0 - 0.885);
     }
   }
 
@@ -1750,13 +1774,13 @@ function initHero3DModel() {
         const maxInternalScroll = sec3ScrollContainerElem.scrollHeight - sec3ScrollContainerElem.clientHeight;
         if (maxInternalScroll > 0) {
           const ratio = Math.max(0, Math.min(1.0, sec3ScrollContainerElem.scrollTop / maxInternalScroll));
-          const targetProgress = 0.815 + ratio * (0.865 - 0.815);
+          const targetRaw = 0.7156 + ratio * (0.7881 - 0.7156);
           const track = document.getElementById('hero-scroll-track');
           if (track) {
             const trackRect = track.getBoundingClientRect();
             const trackTop = window.scrollY + trackRect.top;
             const maxScroll = track.offsetHeight - window.innerHeight;
-            window.scrollTo(0, trackTop + targetProgress * maxScroll);
+            window.scrollTo(0, trackTop + targetRaw * maxScroll);
           }
         }
       }
@@ -1959,7 +1983,7 @@ function initHero3DModel() {
       const hero3dContainer = document.getElementById('hero-3d-container');
       if (hero3dContainer) {
         hero3dContainer.style.zIndex = '10';
-        hero3dContainer.style.transform = (currentScrollLerp < 0.11) ? 'translateY(24px)' : 'none';
+        hero3dContainer.style.transform = 'none';
       }
 
       // Asegurar que el canvas esté visible únicamente en Hero y totalmente oculto en Sección 2 (Manifiesto)
@@ -3634,7 +3658,7 @@ function scrollToSection2() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  const targetY = trackTop + maxScroll * 0.44; // Land cleanly inside Section 2 Manifesto reading mode
+  const targetY = trackTop + maxScroll * 0.24; // Land cleanly inside Section 2 Manifesto reading mode
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3669,8 +3693,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 60% (0.60): Smartphone 3D centrado frontalmente con video
-  const targetY = trackTop + maxScroll * 0.60;
+  // Posición al raw 45%: Smartphone 3D centrado frontalmente con video (p = 0.60)
+  const targetY = trackTop + maxScroll * 0.45;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3705,8 +3729,8 @@ function scrollToSectionEjecucion() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 97%: ScrollExpand completamente abierto a pantalla completa
-  const targetY = trackTop + maxScroll * 0.97;
+  // Posición al raw 96%: ScrollExpand completamente abierto a pantalla completa
+  const targetY = trackTop + maxScroll * 0.96;
 
   const startY = window.scrollY;
   const distance = targetY - startY;

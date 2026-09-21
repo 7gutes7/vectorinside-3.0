@@ -153,7 +153,7 @@ body {
 }
 
 .glass-nav-hero-transparent .header-center-headline {
-  color: rgba(195, 244, 0, 0.95) !important;
+  color: #FFFFFF !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   opacity: 1 !important;
 }
@@ -1002,6 +1002,16 @@ body {
     clip-path: polygon(0 0%, 100% 0%, 100% 24%, 0 24%);
   }
 }
+
+/* ==================== SCROLL TRACK DIMENSIONS ==================== */
+#hero-scroll-track {
+  height: 1420vh !important;
+}
+
+#sec-matriz-25-track {
+  min-height: 700vh !important;
+}
+
 
 
 
