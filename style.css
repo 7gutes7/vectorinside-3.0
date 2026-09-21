@@ -162,6 +162,26 @@ body {
   filter: none !important;
 }
 
+/* Transparent Header in Section 05 Diagnóstico (No background, pure white texts & original yellow V logo) */
+.glass-nav-transparent-section05 {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.glass-nav-transparent-section05 .header-center-headline {
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  opacity: 1 !important;
+  transform: translate(-50%, 0) !important;
+}
+
+.glass-nav-transparent-section05 .brand-logo-img {
+  filter: none !important; /* Original SVG with yellow #e7f900 V and white text */
+}
+
 /* Transparent Floating Header Theme (During Smartphone Spin/Stage) */
 .glass-nav-transparent {
   background: transparent !important;
@@ -721,6 +741,21 @@ body {
   box-shadow: 0 0 25px #c3f400, 0 0 50px #c3f400, 0 0 80px rgba(195, 244, 0, 0.6);
 }
 
+/* ==================== 07 // CIERRE & FOOTER FINAL STAGE ==================== */
+#sec-07-cierre-footer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  pointer-events: none;
+  background-color: #08080a;
+  z-index: 35;
+  opacity: 0;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+
 /* ==================== CHATBOT LEVITATION ANIMATION ==================== */
 @keyframes chatbotLevitate {
   0%, 100% {
@@ -1024,7 +1059,7 @@ body {
 }
 
 #sec-matriz-25-track {
-  min-height: 700vh !important;
+  min-height: 480vh !important;
 }
 
 

@@ -1890,7 +1890,7 @@ function initHero3DModel() {
 
   let _vidTargetTime = 0;  // Target time calculated from scroll position
 
-  // Video scrubbing state & queue for Section 03 Evidencia (Glowing_particles_floating_in_space_20260921040136.mp4)
+  // Video scrubbing state & queue for Section 03 Evidencia (Glowing_particles_floating_in_space_720.mp4)
   const sec3Vid = document.getElementById('scroll-expand-video');
   let _sec3VidSeeking = false;
   let _sec3VidPendingTime = null;
@@ -1955,16 +1955,21 @@ function initHero3DModel() {
   const bottomDock = document.getElementById('bottom-dock-nav');
   const dockLinks = bottomDock ? bottomDock.querySelectorAll('a') : [];
 
+  // Use the global updateActiveDockItem so there's only one source of truth
   function updateActiveDockItem(index) {
-    dockLinks.forEach((link, i) => {
-      if (index !== null && i === index) {
-        link.classList.add('bg-vector-lime', 'text-vector-black', 'font-bold');
-        link.classList.remove('text-white');
-      } else {
-        link.classList.remove('bg-vector-lime', 'text-vector-black', 'font-bold');
-        link.classList.add('text-white');
-      }
-    });
+    if (typeof window._updateActiveDockItem === 'function') {
+      window._updateActiveDockItem(index);
+    } else {
+      dockLinks.forEach((link, i) => {
+        if (index !== null && i === index) {
+          link.classList.add('bg-vector-lime', 'text-vector-black', 'font-bold');
+          link.classList.remove('text-white');
+        } else {
+          link.classList.remove('bg-vector-lime', 'text-vector-black', 'font-bold');
+          link.classList.add('text-white');
+        }
+      });
+    }
   }
 
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
@@ -2008,18 +2013,18 @@ function initHero3DModel() {
     const T_HEAD_ZOOM_END = 0.10;       // 0% -> 10%: 3D Head zooms into eye
     const T_REVEAL_START = 0.08;        // 8% -> Laser dot appears
     const T_REVEAL_END = 0.16;          // 16% -> Section 2 curtains 100% open & flat
-    const T_CONTENT_SCROLL_END = 0.28;  // 16% -> 28%: Section 2 content active
-    const T_EXIT_START = 0.29;          // 29% -> Curtains start closing (Plano -> Línea)
-    const T_PHONE_ZOOM_START = 0.44;    // 44% -> Vertical line formed & Smartphone starts Zoom Out!
-    const T_EXIT_END = 0.59;            // 59% -> Line collapses to center PUNTO  [3× más lento]
-    const T_PHONE_ZOOM_END = 0.60;      // 60% -> Smartphone fully centered
-    const T_SPIN_START = 0.60;          // 60% -> 360° rotation begins with scroll
-    const T_SPIN_END = 0.75;            // 75% -> 360° spin completes
-    // 75% -> 79%: Smartphone shifts upwards & Kinetic Text Background fades out
-    // 77% -> 87%: Section 3 Ecosistema cards stream active
-    // 87% -> 89%: ScrollExpand appears with blur effect
-    // 89% -> 97%: ScrollExpand expands to full screen & flanks retreat
-    // 97% -> 100%: 03 // Ejecución full stage active
+    const T_CONTENT_SCROLL_END = 0.36;  // 16% -> 36%: Section 2 content active & full video scrub
+    const T_EXIT_START = 0.36;          // 36% -> Curtains start closing only AFTER video finishes
+    const T_PHONE_ZOOM_START = 0.48;    // 48% -> Vertical line formed & Smartphone starts Zoom Out!
+    const T_EXIT_END = 0.58;            // 58% -> Line collapses to center PUNTO
+    const T_PHONE_ZOOM_END = 0.62;      // 62% -> Smartphone fully centered
+    const T_SPIN_START = 0.62;          // 62% -> 360° rotation begins with scroll
+    const T_SPIN_END = 0.76;            // 76% -> 360° spin completes
+    // 76% -> 80%: Smartphone shifts upwards & Kinetic Text Background fades out
+    // 77% -> 86.5%: Section 3 Ecosistema cards stream active
+    // 86.5% -> 88.5%: ScrollExpand appears with blur effect
+    // 88.5% -> 94%: ScrollExpand expands to full screen & flanks retreat
+    // 94% -> 100%: 03 // Ejecución full stage active
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
       // 2. Camera Deep Eye Entry (0.0 to 0.10) - Centered in Hero, zooms into eye socket
@@ -2199,14 +2204,23 @@ function initHero3DModel() {
       }
 
       // ==================== STRICT HERO UI VISIBILITY ====================
-      // "los textos del hero en cuanto desaparecen no vuelven a aparecer (ni haciendo refresh en otra seccion) solo visibles durante el hero"
+      // "LOS TEXTOS EN EL HERO DEBEN ESTAR VISIBLES EN TODO MOMENTO DURANTE EL HERO"
+      // Se mantienen al 100% de opacidad y visibilidad durante todo el Hero (0.0 -> T_REVEAL_START)
       if (heroUi) {
-        if (currentScrollLerp <= 0.06) {
-          const uiOpacity = Math.max(0, 1.0 - currentScrollLerp * 16.6);
+        if (currentScrollLerp < T_REVEAL_START) {
+          heroUi.style.display = 'flex';
+          heroUi.style.opacity = '1.0';
+          heroUi.style.visibility = 'visible';
+          heroUi.style.transform = `translateY(${-currentScrollLerp * 30}px)`;
+          heroUi.style.pointerEvents = 'auto';
+        } else if (currentScrollLerp < T_REVEAL_START + 0.02) {
+          // Desvanecimiento suave justo cuando el punto láser emerge hacia Sección 01 (0.08 -> 0.10)
+          const pFade = (currentScrollLerp - T_REVEAL_START) / 0.02;
+          const uiOpacity = Math.max(0, 1.0 - pFade);
           heroUi.style.display = uiOpacity > 0.01 ? 'flex' : 'none';
           heroUi.style.opacity = uiOpacity.toFixed(3);
           heroUi.style.visibility = uiOpacity > 0.01 ? 'visible' : 'hidden';
-          heroUi.style.transform = `translateY(${-currentScrollLerp * 80}px) scale(${1.0 + currentScrollLerp * 0.08})`;
+          heroUi.style.transform = `translateY(${-currentScrollLerp * 30}px)`;
           heroUi.style.pointerEvents = uiOpacity < 0.1 ? 'none' : 'auto';
         } else {
           heroUi.style.display = 'none';
@@ -2217,9 +2231,12 @@ function initHero3DModel() {
       }
 
       if (heroScrollHint) {
-        if (currentScrollLerp <= 0.06) {
+        if (currentScrollLerp < T_REVEAL_START) {
           heroScrollHint.style.display = 'block';
-          heroScrollHint.style.opacity = Math.max(0, 1.0 - currentScrollLerp * 16.6).toFixed(3);
+          heroScrollHint.style.opacity = '1.0';
+        } else if (currentScrollLerp < T_REVEAL_START + 0.02) {
+          const pFade = (currentScrollLerp - T_REVEAL_START) / 0.02;
+          heroScrollHint.style.opacity = Math.max(0, 1.0 - pFade).toFixed(3);
         } else {
           heroScrollHint.style.display = 'none';
           heroScrollHint.style.opacity = '0';
@@ -2364,15 +2381,16 @@ function initHero3DModel() {
 
         // =========================================================================
         // CONTROL DE VIDEO DE FONDO SECCIÓN 01 IDENTIDAD: SCRUBBING FLUIDO CON SCROLL
-        // Sincroniza frame a frame con el scroll desde la apertura de la sección
+        // Inicia solo cuando la sección se ha desplegado totalmente (T_REVEAL_END = 0.16)
+        // y se reproduce en su totalidad a lo largo de la lectura hasta T_VID_END = 0.36
         // =========================================================================
         if (sec2Vid) {
           if (!sec2Vid.paused) sec2Vid.pause();
           const vidDur = (sec2Vid.duration && !isNaN(sec2Vid.duration) && sec2Vid.duration > 0)
             ? sec2Vid.duration : 10.0;
 
-          const T_VID_START = T_REVEAL_START; // 0.08 (desde que la sección empieza a revelarse)
-          const T_VID_END = 0.32;             // 0.32 (a través de toda la lectura)
+          const T_VID_START = T_REVEAL_END;   // 0.16 (inicia hasta que la sección se despliega totalmente)
+          const T_VID_END = T_EXIT_START;     // 0.36 (se reproduce totalmente antes de comenzar la salida)
 
           if (currentScrollLerp < T_VID_START) {
             _vidTargetTime = 0;
@@ -2919,12 +2937,20 @@ function initHero3DModel() {
         const matrixTrack = document.getElementById('sec-matriz-25-track');
         if (internalScroll && matrixTrack) {
           const trackTop = matrixTrack.offsetTop;
-          if (internalScroll.scrollTop >= trackTop - 150) {
-            // Reaparece al entrar a Sección 04 (Galería Flotante) y secciones posteriores
+          const scrollableDistance = matrixTrack.offsetHeight - internalScroll.clientHeight;
+          const pInternalTrack = scrollableDistance > 0 ? (internalScroll.scrollTop - trackTop) / scrollableDistance : 0;
+
+          if (pInternalTrack >= 0.86) {
+            // Durante la última sección (Cierre y Footer), el índice fijo se oculta por completo
+            const pFadeOut = Math.min(1.0, (pInternalTrack - 0.86) / 0.04);
+            dockOpacity = Math.max(0, 1.0 - pFadeOut);
+            updateActiveDockItem(null);
+          } else if (internalScroll.scrollTop >= trackTop - 150) {
+            // Reaparece al entrar a Sección 04 (Galería Flotante), Metodología y Diagnóstico
             const pReappear = Math.min(1.0, Math.max(0, (internalScroll.scrollTop - (trackTop - 150)) / 150));
             dockOpacity = pReappear;
           } else {
-            // Durante toda la Sección 03 está desvanecido
+            // Durante toda la portada de Sección 03 está desvanecido
             dockOpacity = 0;
             updateActiveDockItem(null);
           }
@@ -2967,26 +2993,31 @@ function initHero3DModel() {
       // Transparent Floating Header during Smartphone Zoom & 360 Spin
       const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.785;
 
-      if (isHeroPhase) {
+      if (window._isDiagnosticoActive) {
+        if (!globalHeader.classList.contains('glass-nav-transparent-section05')) {
+          globalHeader.classList.add('glass-nav-transparent-section05');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent');
+        }
+      } else if (isHeroPhase) {
         if (!globalHeader.classList.contains('glass-nav-hero-transparent')) {
           globalHeader.classList.add('glass-nav-hero-transparent');
-          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-transparent-section05');
         }
       } else if (isWhiteHeaderPhase) {
         if (!globalHeader.classList.contains('glass-nav-white-liquid')) {
           globalHeader.classList.add('glass-nav-white-liquid');
-          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent', 'glass-nav-hero-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent', 'glass-nav-hero-transparent', 'glass-nav-transparent-section05');
         }
       } else if (isSmartphoneSpinPhase) {
         if (!globalHeader.classList.contains('glass-nav-transparent')) {
           globalHeader.classList.add('glass-nav-transparent');
-          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-hero-transparent');
+          globalHeader.classList.remove('glass-nav-dark', 'glass-nav-white-liquid', 'glass-nav-hero-transparent', 'glass-nav-transparent-section05');
         }
       } else {
         // Dark Cyber Glass in 03 // Ejecución / Galería (0.84 - 1.0)
         if (!globalHeader.classList.contains('glass-nav-dark')) {
           globalHeader.classList.add('glass-nav-dark');
-          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent');
+          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent', 'glass-nav-transparent-section05');
         }
       }
     }
@@ -3901,7 +3932,7 @@ function scrollToSection2() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  const targetY = trackTop + maxScroll * 0.24; // Land cleanly inside Section 2 Manifesto reading mode
+  const targetY = trackTop + maxScroll * 0.26; // Land cleanly inside Section 2 Manifesto reading & video scrub mode (0.16 -> 0.36)
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3936,8 +3967,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al raw 45%: Smartphone 3D centrado frontalmente con video (p = 0.60)
-  const targetY = trackTop + maxScroll * 0.45;
+  // Posición al raw 55%: Smartphone 3D centrado frontalmente (p = 0.62)
+  const targetY = trackTop + maxScroll * 0.55;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -4059,124 +4090,113 @@ window.initSec3Topography = initSec3Topography;
 
 // ==================== MATRIZ MODAL (25 BLOQUES) LOGIC CON FOTOS Y DEGRADADO ARMÓNICO ====================
 const matrizData = [
-  // ==================== BLOQUE 1: PROYECTOS OPERATIVOS (5 Módulos // Verde & Lima Neón) ====================
+  // ==================== 01 SYBORX ====================
   {
     id: 1,
     code: 'BLK-01',
     category: 'operativo',
-    file: 'Vector Inside Isologo.png',
-    title: 'Vector Inside',
-    desc: 'Firma de arquitectura de crecimiento, diseño cinemático y aceleración digital para marcas de alto impacto.',
-    kpi1: '72h → 14.5h',
-    kpi2: 'Desv: 0.8%',
-    kpi3: 'Estabiliz: 28d',
-    color: '#c3f400',
-    tint: 'rgba(195, 244, 0, 0.45)'
-  },
-  {
-    id: 2,
-    code: 'BLK-02',
-    category: 'operativo',
     file: 'SyborX Logo White.svg',
     title: 'SyborX',
     desc: 'Desarrollo de software a medida, ciberseguridad e integración de automatización inteligente.',
+    link: 'www.syborx.com',
     kpi1: '14.2% Capital',
     kpi2: 'Anomalías: <0.4%',
     kpi3: 'Adopción: 96h',
     color: '#a3e635',
     tint: 'rgba(163, 230, 53, 0.45)'
   },
+
+  // ==================== 02 VALOR MÁXIMO ====================
   {
-    id: 3,
-    code: 'BLK-03',
-    category: 'operativo',
-    file: 'Imagotipo2.ai.png',
-    title: 'Lealtix',
-    desc: 'Plataforma de lealtad digital y retención de clientes para la industria HORECA mediante pases en Apple & Google Wallet sin necesidad de apps.',
-    kpi1: '+38.5% Recurrencia',
-    kpi2: 'Retención: +28.4%',
-    kpi3: 'Adopción: 72h',
-    color: '#006a61',
-    tint: 'rgba(0, 106, 97, 0.45)'
-  },
-  {
-    id: 4,
-    code: 'BLK-04',
+    id: 2,
+    code: 'BLK-02',
     category: 'operativo',
     file: 'imagotipo valor Green.png',
     title: 'Valor Máximo',
     desc: 'Plataforma de match inmobiliario y conexión estratégica de espacios comerciales con empresarios y emprendedores.',
+    link: 'www.valor-maximo.com',
     kpi1: '24.1% Margen',
     kpi2: 'Error Residual: 0.4%',
     kpi3: 'Estabiliz: 28d',
     color: '#10b981',
     tint: 'rgba(16, 185, 129, 0.45)'
   },
-  {
-    id: 5,
-    code: 'BLK-05',
-    category: 'operativo',
-    file: 'Logo aida.png',
-    title: 'AIDA',
-    desc: 'Framework estratégico de adquisición y conversión comercial estructurado en 4 etapas: Atención, Interés, Deseo y Acción.',
-    kpi1: '96h → 18.5h',
-    kpi2: 'Desv: 0.7%',
-    kpi3: 'Estabiliz: 35d',
-    color: '#34d399',
-    tint: 'rgba(52, 211, 153, 0.45)'
-  },
 
-  // ==================== BLOQUE 2: PROYECTOS COGNITIVOS Y EXPANSIVOS ====================
+  // ==================== 03 SIMBIOTIK ====================
   {
-    id: 6,
-    code: 'BLK-06',
+    id: 3,
+    code: 'BLK-03',
     category: 'cognitivo',
     file: 'SmbtK1.svg',
     title: 'SimbiotiK',
     desc: 'Banda de rock alternativo conceptual con experiencia interactiva 3D y WebGL inmersivo.',
+    link: 'www.simbiotikrockband.com',
     color: '#06b6d4',
     tint: 'rgba(6, 182, 212, 0.45)'
   },
+
+  // ==================== 04 LEALTIX ====================
   {
-    id: 7,
-    code: 'BLK-07',
+    id: 4,
+    code: 'BLK-04',
+    category: 'operativo',
+    file: 'Imagotipo2.ai.png',
+    title: 'Lealtix',
+    desc: 'Plataforma de lealtad digital y retención de clientes para la industria HORECA mediante pases en Apple & Google Wallet sin necesidad de apps.',
+    link: 'www.lealtix.com.mx',
+    kpi1: '+38.5% Recurrencia',
+    kpi2: 'Retención: +28.4%',
+    kpi3: 'Adopción: 72h',
+    color: '#006a61',
+    tint: 'rgba(0, 106, 97, 0.45)'
+  },
+
+  // ==================== 05 INTEGRITUS ====================
+  {
+    id: 5,
+    code: 'BLK-05',
     category: 'cognitivo',
-    file: 'integritus2.svg',
+    file: 'IntegritUS imagotipo COLOR.png',
     title: 'IntegritUS',
-    desc: 'Consultoría en cumplimiento normativo, gobierno corporativo y auditoría de integridad empresarial.',
+    desc: 'Plataforma inteligente de cumplimiento normativo y blindaje fiscal que detecta alertas SAT, monitorea actividades vulnerables PLD y dictamina actas con IA.',
+    link: 'www.integritusmx.com',
     color: '#0ea5e9',
     tint: 'rgba(14, 165, 233, 0.45)'
   },
-  {
-    id: 8,
-    code: 'BLK-08',
-    category: 'expansivo',
-    file: 'LOGO 4GUARD.jpeg',
-    title: '4Guard',
-    desc: 'Firma de seguridad privada integral, blindaje perimetral y custodia de activos corporativos.',
-    color: '#8b5cf6',
-    tint: 'rgba(139, 92, 246, 0.45)'
-  },
-  {
-    id: 9,
-    code: 'BLK-09',
-    category: 'expansivo',
-    file: 'karloz vazquez logo.svg',
-    title: 'Karloz Vázquez',
-    desc: 'Estudio de dirección de arte brutalista, diseño conceptual y consultoría de identidad visual.',
-    color: '#9d4edd',
-    tint: 'rgba(157, 78, 221, 0.45)'
-  },
-  {
-    id: 10,
-    code: 'BLK-10',
-    category: 'expansivo',
-    file: 'Brevemente02.png',
-    title: 'BreveMente',
-    desc: 'Software de documentación clínica y asistente inteligente (Brifi) para Terapia Breve Estratégica.',
-    color: '#a855f7',
-    tint: 'rgba(168, 85, 247, 0.45)'
-  }
+
+  // ==================== OCULTAS TEMPORALMENTE ====================
+  // {
+  //   id: 6, code: 'BLK-06', category: 'operativo',
+  //   file: 'Vector Inside Isologo.png', title: 'Vector Inside',
+  //   desc: 'Firma de arquitectura de crecimiento, diseño cinemático y aceleración digital para marcas de alto impacto.',
+  //   kpi1: '72h → 14.5h', kpi2: 'Desv: 0.8%', kpi3: 'Estabiliz: 28d',
+  //   color: '#c3f400', tint: 'rgba(195, 244, 0, 0.45)'
+  // },
+  // {
+  //   id: 7, code: 'BLK-07', category: 'operativo',
+  //   file: 'Logo aida.png', title: 'AIDA',
+  //   desc: 'Framework estratégico de adquisición y conversión comercial estructurado en 4 etapas: Atención, Interés, Deseo y Acción.',
+  //   kpi1: '96h → 18.5h', kpi2: 'Desv: 0.7%', kpi3: 'Estabiliz: 35d',
+  //   color: '#34d399', tint: 'rgba(52, 211, 153, 0.45)'
+  // },
+  // {
+  //   id: 8, code: 'BLK-08', category: 'expansivo',
+  //   file: 'LOGO 4GUARD.jpeg', title: '4Guard',
+  //   desc: 'Firma de seguridad privada integral, blindaje perimetral y custodia de activos corporativos.',
+  //   color: '#8b5cf6', tint: 'rgba(139, 92, 246, 0.45)'
+  // },
+  // {
+  //   id: 9, code: 'BLK-09', category: 'expansivo',
+  //   file: 'karloz vazquez logo.svg', title: 'Karloz Vázquez',
+  //   desc: 'Estudio de dirección de arte brutalista, diseño conceptual y consultoría de identidad visual.',
+  //   color: '#9d4edd', tint: 'rgba(157, 78, 221, 0.45)'
+  // },
+  // {
+  //   id: 10, code: 'BLK-10', category: 'expansivo',
+  //   file: 'Brevemente02.png', title: 'BreveMente',
+  //   desc: 'Software de documentación clínica y asistente inteligente (Brifi) para Terapia Breve Estratégica.',
+  //   color: '#a855f7', tint: 'rgba(168, 85, 247, 0.45)'
+  // },
 ];
 const matriz25Data = matrizData;
 // ==================== 04 EVIDENCIA // 3D DEPTH CAROUSEL ====================
@@ -4199,6 +4219,7 @@ function updateActiveDockItem(index) {
     }
   });
 }
+window._updateActiveDockItem = updateActiveDockItem;
 
 // ==================== CINEMATIC SMOOTH SCROLL TO 04 // EVIDENCIA (GALERÍA FLOTANTE) ====================
 function scrollToGaleriaFlotante() {
@@ -4210,6 +4231,13 @@ function scrollToGaleriaFlotante() {
   if (metodologiaWrapper) {
     metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
     metodologiaWrapper.style.pointerEvents = 'none';
+  }
+
+  const sec3Wrapper = document.getElementById('sec-matriz-25-wrapper');
+  if (sec3Wrapper) {
+    sec3Wrapper.style.opacity = '1';
+    sec3Wrapper.style.transform = 'none';
+    sec3Wrapper.style.pointerEvents = 'auto';
   }
 
   const doInternalScroll = () => {
@@ -4248,7 +4276,8 @@ window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 //     detaching the curtain -> banner shows, everything below is black.
 // Fix: jump the window instantly, freeze the timeline, force the 03 portal to its
 // final full-screen size, and pin the internal scroll INSIDE the sticky range.
-function scrollToMetodologia() {
+function scrollToMetodologia(e) {
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
@@ -4286,23 +4315,39 @@ function scrollToMetodologia() {
   };
 
   const revealCurtain = () => {
+    window._isDiagnosticoActive = false;
     if (metodologiaWrapper) {
       metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+      metodologiaWrapper.style.backgroundColor = '#ffffff';
       metodologiaWrapper.style.pointerEvents = 'auto';
     }
+    const stage = document.getElementById('sec-metodologia-stage');
+    if (stage) {
+      stage.style.opacity = '1';
+      stage.style.transform = 'none';
+      stage.style.pointerEvents = 'auto';
+    }
+    const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+    if (videoBg && videoBg.parentElement) videoBg.parentElement.style.opacity = '1';
+    const diagSec = document.getElementById('sec-06-diagnostico');
+    if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+    const diagDot = document.getElementById('diag-reveal-dot');
+    if (diagDot) diagDot.style.opacity = '0';
+    const diagLine = document.getElementById('diag-reveal-line');
+    if (diagLine) diagLine.style.opacity = '0';
     if (globalHeader) {
       globalHeader.classList.add('glass-nav-white-liquid');
-      globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
+      globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent', 'glass-nav-transparent-section05');
     }
     updateActiveDockItem(3); // 04 // Metodología
   };
 
-  if (!container) { revealCurtain(); return; }
+  if (!container) { revealCurtain(); return false; }
 
   const internalTarget = () => {
     if (!matrixTrack) return 3000;
     const scrollable = matrixTrack.offsetHeight - container.clientHeight;
-    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.58);
+    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.22);
   };
 
   if (mainTrack) {
@@ -4333,6 +4378,7 @@ function scrollToMetodologia() {
     container.scrollTop = internalTarget();
     revealCurtain();
   }
+  return false;
 }
 window.scrollToMetodologia = scrollToMetodologia;
 window.triggerLaserMetodologiaTransition = scrollToMetodologia;
@@ -4340,16 +4386,24 @@ window.triggerLaserMetodologiaTransition = scrollToMetodologia;
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología)
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología) + Isotipo 3D Zoom
 function initExecutionInternalScrollListener() {
+  if (window.__sec04ScrollListenerInit) return;
+  window.__sec04ScrollListenerInit = true;
+
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const track = document.getElementById('sec-matriz-25-track');
+  const sec3Wrapper = document.getElementById('sec-matriz-25-wrapper');
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
   const stage = document.getElementById('sec-metodologia-stage');
   const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+  if (videoBg) {
+    videoBg.play().catch(() => {});
+  }
   const videoWrapper = videoBg ? videoBg.parentElement : null;
   const diagSec = document.getElementById('sec-06-diagnostico');
   const diagDot = document.getElementById('diag-reveal-dot');
   const diagLine = document.getElementById('diag-reveal-line');
   const diagStage = document.getElementById('diag-content-stage');
+  const cierreSec = document.getElementById('sec-07-cierre-footer');
   const globalHeader = document.getElementById('main-global-header');
 
   if (container && track && metodologiaWrapper) {
@@ -4363,70 +4417,116 @@ function initExecutionInternalScrollListener() {
       }
     } catch (e) {}
 
+    let _saveScrollTimeout = null;
+    const saveInnerScroll = (pos) => {
+      clearTimeout(_saveScrollTimeout);
+      _saveScrollTimeout = setTimeout(() => {
+        try {
+          sessionStorage.setItem('vectorinside_inner_scroll_pos', String(pos));
+        } catch (e) {}
+      }, 250);
+    };
+
     const updateCurtain = () => {
-      try {
-        sessionStorage.setItem('vectorinside_inner_scroll_pos', String(container.scrollTop));
-      } catch (e) {}
       const scrollY = container.scrollTop;
+      saveInnerScroll(scrollY);
       const trackTop = track.offsetTop;
       const scrollableDistance = track.offsetHeight - container.clientHeight;
 
       if (scrollY < trackTop - 100) {
         // En Sección 03 Cover (el índice inferior se mantiene desvanecido durante toda la Sección 03)
+        window._isDiagnosticoActive = false;
+        if (sec3Wrapper) {
+          sec3Wrapper.style.opacity = '1';
+          sec3Wrapper.style.transform = 'none';
+          sec3Wrapper.style.pointerEvents = 'auto';
+        }
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
         window.__vectorIsotipoVisible = false;
         window.__vectorIsotipoProgress = 0;
         if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+        if (diagDot) diagDot.style.opacity = '0';
+        if (diagLine) diagLine.style.opacity = '0';
+        if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
         if (globalHeader) {
-          globalHeader.classList.remove('glass-nav-white-liquid');
+          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent-section05');
           globalHeader.classList.add('glass-nav-dark');
         }
         updateActiveDockItem(null);
       } else if (scrollableDistance > 0 && scrollY >= trackTop - 100 && scrollY < trackTop) {
-        // Transición a Sección 04 // Galería Flotante (reaparece el dock)
+        // Transición a Sección 03 // Evidencia (Galería)
+        window._isDiagnosticoActive = false;
+        if (sec3Wrapper) {
+          sec3Wrapper.style.opacity = '1';
+          sec3Wrapper.style.transform = 'none';
+          sec3Wrapper.style.pointerEvents = 'auto';
+        }
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
         window.__vectorIsotipoVisible = false;
         window.__vectorIsotipoProgress = 0;
         if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+        if (diagDot) diagDot.style.opacity = '0';
+        if (diagLine) diagLine.style.opacity = '0';
+        if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
         if (globalHeader) {
-          globalHeader.classList.remove('glass-nav-white-liquid');
+          globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent-section05');
           globalHeader.classList.add('glass-nav-dark');
         }
         updateActiveDockItem(2); // 03 // Evidencia (Galería)
       } else if (scrollableDistance > 0 && scrollY >= trackTop) {
         const pTrack = Math.min(1.0, Math.max(0, (scrollY - trackTop) / scrollableDistance));
 
-        if (pTrack < 0.18) {
-          // Sección Evidencia // Galería visible
+        if (pTrack < 0.03) {
+          // Fase 1: Sección 03 // Evidencia (Galería visible al 100%)
+          window._isDiagnosticoActive = false;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '1';
+            sec3Wrapper.style.transform = 'none';
+            sec3Wrapper.style.pointerEvents = 'auto';
+          }
           metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
           metodologiaWrapper.style.pointerEvents = 'none';
-          window.__vectorIsotipoVisible = false;
-          window.__vectorIsotipoProgress = 0;
           if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
-            globalHeader.classList.remove('glass-nav-white-liquid');
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent-section05');
             globalHeader.classList.add('glass-nav-dark');
           }
-          updateActiveDockItem(2); // 03 // Evidencia (Galería)
-        } else if (pTrack < 0.45) {
-          // Cortina Sección 04 Metodología sube de 100% a 0%
-          const pCurtain = (pTrack - 0.18) / (0.45 - 0.18);
+          updateActiveDockItem(2); // 03 // Evidencia
+        } else if (pTrack < 0.12) {
+          // Fase 2: Cortina Blanca Sección 04 Metodología entra deslizándose
+          // Y todo el contenido y fichas de Sección 03 se desvanecen fluidamente hacia arriba
+          window._isDiagnosticoActive = false;
+          const pCurtain = (pTrack - 0.03) / (0.12 - 0.03);
           const yPct = (1.0 - pCurtain) * 100;
           metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
           metodologiaWrapper.style.pointerEvents = pCurtain > 0.6 ? 'auto' : 'none';
           metodologiaWrapper.style.backgroundColor = '#ffffff';
+
+          // Desvanecimiento suave y desplazamiento cinemático de Sección 03
+          const sec3Fade = Math.max(0, 1.0 - pCurtain);
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = sec3Fade.toFixed(3);
+            sec3Wrapper.style.transform = `scale(${(0.96 + 0.04 * sec3Fade).toFixed(4)}) translateY(${(-25 * (1.0 - sec3Fade)).toFixed(1)}px)`;
+            sec3Wrapper.style.pointerEvents = sec3Fade > 0.4 ? 'auto' : 'none';
+          }
+
           if (stage) {
             stage.style.opacity = '1';
             stage.style.transform = 'none';
             stage.style.pointerEvents = 'auto';
           }
           if (videoWrapper) videoWrapper.style.opacity = '1';
-          window.__vectorIsotipoVisible = false;
-          window.__vectorIsotipoProgress = 0;
           if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-transparent-section05');
             if (pCurtain > 0.5) {
               globalHeader.classList.add('glass-nav-white-liquid');
               globalHeader.classList.remove('glass-nav-dark');
@@ -4435,9 +4535,14 @@ function initExecutionInternalScrollListener() {
               globalHeader.classList.add('glass-nav-dark');
             }
           }
-          updateActiveDockItem(pCurtain > 0.5 ? 3 : 2);
-        } else if (pTrack < 0.60) {
-          // Sección 04 Metodología fija/activa
+          updateActiveDockItem(pCurtain > 0.4 ? 3 : 2);
+        } else if (pTrack < 0.36) {
+          // Fase 3: Sección 04 Metodología Activa, Blanca, Nítida y Confortable
+          window._isDiagnosticoActive = false;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
           metodologiaWrapper.style.backgroundColor = '#ffffff';
@@ -4447,39 +4552,55 @@ function initExecutionInternalScrollListener() {
             stage.style.pointerEvents = 'auto';
           }
           if (videoWrapper) videoWrapper.style.opacity = '1';
-          window.__vectorIsotipoVisible = true;
-          window.__vectorIsotipoProgress = 0;
           if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-transparent-section05', 'glass-nav-dark');
             globalHeader.classList.add('glass-nav-white-liquid');
-            globalHeader.classList.remove('glass-nav-dark');
           }
           updateActiveDockItem(3); // 04 // Metodología
-        } else if (pTrack < 0.72) {
-          // Sección 04 Metodología se desvanece a negro, isotipo viaja al centro
-          const pTransit = (pTrack - 0.60) / (0.72 - 0.60);
+        } else if (pTrack < 0.44) {
+          // Fase 4: Desvanecimiento suave de Metodología hacia Negro (sin cortes bruscos)
+          window._isDiagnosticoActive = false;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          const pFade = (pTrack - 0.36) / (0.44 - 0.36);
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
-
-          const fadeStage = Math.max(0, 1.0 - pTransit);
+          const bgVal = Math.round(255 - pFade * (255 - 8));
+          metodologiaWrapper.style.backgroundColor = `rgb(${bgVal}, ${bgVal}, ${bgVal})`;
           if (stage) {
-            stage.style.opacity = fadeStage.toFixed(3);
-            stage.style.transform = `translateY(${(-40 * (1 - fadeStage)).toFixed(1)}px) scale(${(0.96 + 0.04 * fadeStage).toFixed(4)})`;
-            stage.style.pointerEvents = fadeStage < 0.1 ? 'none' : 'auto';
+            stage.style.opacity = (1.0 - pFade).toFixed(3);
+            stage.style.transform = `translateY(${(-20 * pFade).toFixed(1)}px)`;
+            stage.style.pointerEvents = pFade > 0.5 ? 'none' : 'auto';
           }
-          if (videoWrapper) videoWrapper.style.opacity = fadeStage.toFixed(3);
-          metodologiaWrapper.style.backgroundColor = '#080808';
-
-          window.__vectorIsotipoVisible = true;
-          window.__vectorIsotipoProgress = pTransit;
+          if (videoWrapper) videoWrapper.style.opacity = (1.0 - pFade).toFixed(3);
           if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
-            globalHeader.classList.remove('glass-nav-white-liquid');
-            globalHeader.classList.add('glass-nav-dark');
+            if (pFade > 0.5) {
+              globalHeader.classList.remove('glass-nav-white-liquid');
+              globalHeader.classList.add('glass-nav-transparent-section05');
+            } else {
+              globalHeader.classList.add('glass-nav-white-liquid');
+              globalHeader.classList.remove('glass-nav-transparent-section05');
+            }
           }
-          updateActiveDockItem(3);
-        } else {
-          // ==================== SECCIÓN 06 // DIAGNÓSTICO: PUNTO -> LÍNEA -> PLANO ====================
+          updateActiveDockItem(pFade > 0.6 ? 4 : 3);
+        } else if (pTrack < 0.54) {
+          // ==================== CINEMATIC LASER: 1. EL PUNTO ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          const pDot = (pTrack - 0.44) / (0.54 - 0.44);
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
           metodologiaWrapper.style.backgroundColor = '#080808';
@@ -4488,266 +4609,268 @@ function initExecutionInternalScrollListener() {
             stage.style.pointerEvents = 'none';
           }
           if (videoWrapper) videoWrapper.style.opacity = '0';
-          window.__vectorIsotipoVisible = false;
-          window.__vectorIsotipoProgress = 1.0;
           if (globalHeader) {
-            globalHeader.classList.remove('glass-nav-white-liquid');
-            globalHeader.classList.add('glass-nav-dark');
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
           }
-
           if (diagSec) {
             diagSec.style.opacity = '1';
-
-            if (pTrack < 0.78) {
-              // 1. EL PUNTO (aparece y brilla en el centro exacto)
-              const pDot = (pTrack - 0.72) / (0.78 - 0.72);
-              diagSec.style.clipPath = 'inset(50% 0 50% 0)';
-              if (diagDot) {
-                diagDot.style.opacity = (pDot * 1.0).toFixed(2);
-                diagDot.style.transform = `scale(${(0.4 + 1.6 * pDot).toFixed(2)})`;
-              }
-              if (diagLine) {
-                diagLine.style.opacity = '0';
-                diagLine.style.transform = 'scaleX(0)';
-              }
-              if (diagStage) {
-                diagStage.style.clipPath = 'none';
-                diagStage.style.opacity = '0';
-                diagStage.style.transform = 'scale(0.96)';
-              }
-              diagSec.style.pointerEvents = 'none';
-            } else if (pTrack < 0.88) {
-              // 2. LA LÍNEA HORIZONTAL (se abre del centro hacia los extremos izquierdo y derecho)
-              const pLine = (pTrack - 0.78) / (0.88 - 0.78);
-              diagSec.style.clipPath = 'inset(50% 0 50% 0)';
-              if (diagDot) {
-                diagDot.style.opacity = Math.max(0, 1.0 - pLine * 1.8).toFixed(2);
-                diagDot.style.transform = `scale(${Math.max(0, 2.0 - pLine).toFixed(2)})`;
-              }
-              if (diagLine) {
-                diagLine.style.opacity = '1';
-                diagLine.style.transform = `scaleX(${pLine.toFixed(3)})`;
-              }
-              if (diagStage) {
-                diagStage.style.clipPath = 'none';
-                diagStage.style.opacity = (pLine * 0.35).toFixed(2);
-                diagStage.style.transform = `scale(${(0.96 + 0.02 * pLine).toFixed(3)})`;
-              }
-              diagSec.style.pointerEvents = 'none';
-            } else {
-              // 3. EL PLANO VERTICAL (se abre desde la línea central en 50% hacia ARRIBA y hacia ABAJO simultáneamente)
-              const pPlane = Math.min(1.0, (pTrack - 0.88) / (1.0 - 0.88));
-              const insetY = Math.max(0, (1.0 - pPlane) * 50).toFixed(1);
-              diagSec.style.clipPath = `inset(${insetY}% 0 ${insetY}% 0)`;
-
-              if (diagDot) {
-                diagDot.style.opacity = '0';
-              }
-              if (diagLine) {
-                diagLine.style.opacity = Math.max(0, 1.0 - pPlane * 1.5).toFixed(2);
-                diagLine.style.transform = 'scaleX(1)';
-              }
-              if (diagStage) {
-                diagStage.style.clipPath = 'none';
-                diagStage.style.opacity = (0.35 + 0.65 * pPlane).toFixed(2);
-                diagStage.style.transform = `scale(${(0.98 + 0.02 * pPlane).toFixed(3)})`;
-              }
-              diagSec.style.pointerEvents = pPlane > 0.7 ? 'auto' : 'none';
-            }
+            diagSec.style.clipPath = 'inset(50% 0 50% 0)';
+            diagSec.style.transform = 'none';
+            diagSec.style.pointerEvents = 'none';
+          }
+          if (diagDot) {
+            diagDot.style.opacity = Math.min(1.0, pDot * 1.6).toFixed(3);
+            diagDot.style.transform = `scale(${(0.4 + 1.6 * pDot).toFixed(2)})`;
+          }
+          if (diagLine) {
+            diagLine.style.opacity = '0';
+            diagLine.style.transform = 'scaleX(0)';
+          }
+          if (diagStage) {
+            diagStage.style.opacity = '0';
+            diagStage.style.transform = 'scale(0.96)';
+          }
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+          updateActiveDockItem(4); // 05 // Diagnóstico
+        } else if (pTrack < 0.66) {
+          // ==================== CINEMATIC LASER: 2. LA LÍNEA HORIZONTAL ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          const pLine = (pTrack - 0.54) / (0.66 - 0.54);
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
+          }
+          if (diagSec) {
+            diagSec.style.opacity = '1';
+            diagSec.style.clipPath = 'inset(50% 0 50% 0)';
+            diagSec.style.transform = 'none';
+            diagSec.style.pointerEvents = 'none';
+          }
+          if (diagDot) {
+            diagDot.style.opacity = Math.max(0, 1.0 - pLine * 2.0).toFixed(3);
+            diagDot.style.transform = `scale(${Math.max(0, 2.0 - pLine).toFixed(2)})`;
+          }
+          if (diagLine) {
+            diagLine.style.opacity = '1';
+            diagLine.style.transform = `scaleX(${pLine.toFixed(3)})`;
+          }
+          if (diagStage) {
+            diagStage.style.opacity = (pLine * 0.25).toFixed(3);
+            diagStage.style.transform = `scale(${(0.96 + 0.02 * pLine).toFixed(3)})`;
+          }
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+          updateActiveDockItem(4);
+        } else if (pTrack < 0.76) {
+          // ==================== CINEMATIC LASER: 3. EL PLANO VERTICAL ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          const pPlane = Math.min(1.0, (pTrack - 0.66) / (0.76 - 0.66));
+          const insetY = Math.max(0, (1.0 - pPlane) * 50).toFixed(1);
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
+          }
+          if (diagSec) {
+            diagSec.style.opacity = '1';
+            diagSec.style.clipPath = `inset(${insetY}% 0 ${insetY}% 0)`;
+            diagSec.style.transform = 'none';
+            diagSec.style.pointerEvents = pPlane > 0.7 ? 'auto' : 'none';
+          }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) {
+            diagLine.style.opacity = Math.max(0, 1.0 - pPlane * 1.5).toFixed(3);
+            diagLine.style.transform = 'scaleX(1)';
+          }
+          if (diagStage) {
+            diagStage.style.opacity = (0.25 + 0.75 * pPlane).toFixed(3);
+            diagStage.style.transform = `scale(${(0.98 + 0.02 * pPlane).toFixed(3)})`;
+          }
+          if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+          updateActiveDockItem(4);
+        } else if (pTrack < 0.86) {
+          // ==================== SECCIÓN 05 // DIAGNÓSTICO ACTIVA ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
+          }
+          if (diagSec) {
+            diagSec.style.opacity = '1';
+            diagSec.style.clipPath = 'none';
+            diagSec.style.transform = 'none';
+            diagSec.style.overflowY = 'hidden';
+            diagSec.style.pointerEvents = 'auto';
+          }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (diagStage) {
+            diagStage.style.clipPath = 'none';
+            diagStage.style.opacity = '1';
+            diagStage.style.transform = 'none';
+          }
+          if (cierreSec) {
+            cierreSec.style.opacity = '0';
+            cierreSec.style.transform = 'translateY(25px)';
+            cierreSec.style.pointerEvents = 'none';
           }
           updateActiveDockItem(4); // 05 // Diagnóstico
+        } else if (pTrack < 0.94) {
+          // ==================== TRANSICIÓN: SECCIÓN 05 SE DESVANECE -> SECCIÓN FINAL & FOOTER ENTRA ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          const pCierre = (pTrack - 0.86) / (0.94 - 0.86);
+          const pCierreEased = 0.5 * (1.0 - Math.cos(pCierre * Math.PI));
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
+          }
+          if (diagSec) {
+            diagSec.style.opacity = Math.max(0, 1.0 - pCierre * 1.3).toFixed(3);
+            diagSec.style.transform = `translateY(${(-30 * pCierreEased).toFixed(1)}px) scale(${(1.0 - 0.03 * pCierreEased).toFixed(3)})`;
+            diagSec.style.pointerEvents = pCierre > 0.4 ? 'none' : 'auto';
+          }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) {
+            cierreSec.style.opacity = pCierreEased.toFixed(3);
+            cierreSec.style.transform = `translateY(${((1.0 - pCierreEased) * 30).toFixed(1)}px)`;
+            cierreSec.style.pointerEvents = pCierre > 0.6 ? 'auto' : 'none';
+          }
+          const bottomDock = document.getElementById('bottom-dock-nav');
+          if (bottomDock) {
+            const dockFade = Math.max(0, 1.0 - pCierre * 2.0);
+            bottomDock.style.opacity = dockFade.toFixed(3);
+            bottomDock.style.pointerEvents = dockFade > 0.4 ? 'auto' : 'none';
+          }
+          updateActiveDockItem(pCierre > 0.5 ? null : 4);
+        } else {
+          // ==================== SECCIÓN 07 // CIERRE & FOOTER 100% ACTIVA ====================
+          window._isDiagnosticoActive = true;
+          if (sec3Wrapper) {
+            sec3Wrapper.style.opacity = '0';
+            sec3Wrapper.style.pointerEvents = 'none';
+          }
+          metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+          metodologiaWrapper.style.pointerEvents = 'auto';
+          metodologiaWrapper.style.backgroundColor = '#080808';
+          if (stage) {
+            stage.style.opacity = '0';
+            stage.style.pointerEvents = 'none';
+          }
+          if (videoWrapper) videoWrapper.style.opacity = '0';
+          if (globalHeader) {
+            globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+            globalHeader.classList.add('glass-nav-transparent-section05');
+          }
+          if (diagSec) {
+            diagSec.style.opacity = '0';
+            diagSec.style.pointerEvents = 'none';
+          }
+          if (diagDot) diagDot.style.opacity = '0';
+          if (diagLine) diagLine.style.opacity = '0';
+          if (cierreSec) {
+            cierreSec.style.opacity = '1';
+            cierreSec.style.transform = 'none';
+            cierreSec.style.pointerEvents = 'auto';
+          }
+          const bottomDock = document.getElementById('bottom-dock-nav');
+          if (bottomDock) {
+            bottomDock.style.opacity = '0';
+            bottomDock.style.pointerEvents = 'none';
+          }
+          updateActiveDockItem(null); // Keep index clean and unobstructed over footer
         }
       } else {
+        window._isDiagnosticoActive = false;
+        if (sec3Wrapper) {
+          sec3Wrapper.style.opacity = '1';
+          sec3Wrapper.style.transform = 'none';
+          sec3Wrapper.style.pointerEvents = 'auto';
+        }
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
-        window.__vectorIsotipoVisible = false;
-        window.__vectorIsotipoProgress = 0;
         if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+        if (diagDot) diagDot.style.opacity = '0';
+        if (diagLine) diagLine.style.opacity = '0';
+        if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+        if (globalHeader) globalHeader.classList.remove('glass-nav-transparent-section05');
       }
     };
 
-    container.addEventListener('scroll', updateCurtain, { passive: true });
+    let isTicking = false;
+    const onScroll = () => {
+      if (!isTicking) {
+        isTicking = true;
+        requestAnimationFrame(() => {
+          updateCurtain();
+          isTicking = false;
+        });
+      }
+    };
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    window._updateCurtain = updateCurtain;
     updateCurtain();
   }
 }
 
 // ==================== 3D VECTOR ISOTIPO (SECTION 05 // METODOLOGÍA) ====================
 function initVectorIsotipo() {
-  const canvas = document.getElementById('vector-isotipo-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-
-  const slot = document.getElementById('vector-isotipo-slot');
-  const scene = new THREE.Scene();
-
-  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 0, 5.0);
-
-  const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    alpha: true,
-    antialias: true,
-    powerPreference: 'high-performance'
-  });
-  renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-  function syncSize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h, false);
-  }
-  syncSize();
-  window.addEventListener('resize', syncSize);
-
-  // Iluminación para destacar el volumen 3D y brillo del isotipo
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
-  scene.add(ambientLight);
-
-  const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
-  dirLight1.position.set(5, 7, 6);
-  scene.add(dirLight1);
-
-  const dirLight2 = new THREE.DirectionalLight(0xc3f400, 2.0);
-  dirLight2.position.set(-5, -4, 4);
-  scene.add(dirLight2);
-
-  const pivotGroup = new THREE.Group();
-  scene.add(pivotGroup);
-
-  // Material amarillo/lima del proyecto (#c3f400)
-  const limeMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xc3f400,          // Color amarillo / lima del proyecto (#c3f400)
-    emissive: 0xc3f400,
-    emissiveIntensity: 0.18,  // Brillo sutil distintivo de marca
-    metalness: 0.35,
-    roughness: 0.25,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.15,
-    side: THREE.DoubleSide
-  });
-
-  if (typeof THREE.GLTFLoader !== 'undefined') {
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      './Vector isotipo.glb',
-      (gltf) => {
-        const model = gltf.scene;
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.material = limeMaterial;
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-
-        // Centrar exactamente en el pivote de rotación y normalizar
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        const normScale = 1.0 / maxDim;
-
-        model.scale.set(normScale, normScale, normScale);
-        model.position.sub(center.clone().multiplyScalar(normScale));
-
-        pivotGroup.add(model);
-      },
-      undefined,
-      (err) => {
-        console.error('Error cargando Vector isotipo.glb:', err);
-      }
-    );
-  }
-
-  const ease = (t) => {
-    t = Math.max(0, Math.min(1, t));
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  };
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  let currentRotY = 0;
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const isVisible = window.__vectorIsotipoVisible;
-    if (!isVisible) {
-      canvas.style.opacity = '0';
-      return;
-    }
-
-    const pTransit = window.__vectorIsotipoProgress || 0.0;
-
-    // Giro dinámico:
-    // Gira únicamente mientras viaja al centro y crece (pTransit: 0 -> 0.72).
-    // Al alcanzar el 72% del recorrido (pantalla completa), el giro se detiene
-    // completamente con la cara frontal alineada recta hacia la pantalla.
-    const pRot = Math.min(1.0, pTransit / 0.72);
-    const easedRot = ease(pRot);
-    const targetRotY = easedRot * Math.PI * 4; // 2 giros completos de 360° concluyendo en orientación frontal exacta (0°)
-
-    currentRotY += (targetRotY - currentRotY) * 0.20;
-
-    if (pivotGroup) {
-      pivotGroup.rotation.y = currentRotY;
-    }
-
-    // Calcular proyección de la ranura del header en pantalla
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    const vHeight = 2 * Math.tan((45 / 2) * Math.PI / 180) * 5.0; // ~4.142
-    const vWidth = vHeight * (W / H);
-
-    const s = slot ? slot.getBoundingClientRect() : null;
-    const slotW = (s && s.width > 10) ? s.width : 140;
-    const slotH = (s && s.height > 10) ? s.height : 140;
-    const slotCenterX = s ? (s.left + slotW / 2) : (W * 0.25);
-    const slotCenterY = s ? (s.top + slotH / 2) : 100;
-
-    // Convertir pixeles a coordenadas de mundo 3D
-    const slotWorldX = (slotCenterX / W - 0.5) * vWidth;
-    const slotWorldY = -(slotCenterY / H - 0.5) * vHeight;
-
-    const baseWorldScale = (slotW / H) * vHeight * 0.95;
-    const maxWorldScale = Math.max(vWidth, vHeight) * 2.8;
-
-    let curWorldX, curWorldY, curScale, isoOpacity;
-
-    if (pTransit <= 0.78) {
-      // Fase 1: Viaje al centro y crecimiento a pantalla completa
-      const pCentering = Math.min(1.0, pTransit / 0.78);
-      const easedCentering = ease(pCentering);
-      curWorldX = lerp(slotWorldX, 0, easedCentering);
-      curWorldY = lerp(slotWorldY, 0, easedCentering);
-      curScale = lerp(baseWorldScale, maxWorldScale, easedCentering);
-      isoOpacity = 1.0;
-    } else {
-      // Fase 2: Después de dejar de girar, SE ACERCA MÁS, SALE DEL CUADRO
-      // Y SE DESVANECE TRAS BAMBALINAS mientras aparece la Sección 6
-      const pExit = (pTransit - 0.78) / (1.0 - 0.78);
-      const easedExit = ease(pExit);
-      curWorldX = 0;
-      curWorldY = 0;
-      // Ultra zoom que hace que el isotipo traspase y desborde el viewport
-      curScale = lerp(maxWorldScale, maxWorldScale * 8.5, easedExit);
-      // Desvanecimiento suave tras bambalinas
-      isoOpacity = Math.max(0, 1.0 - easedExit * 1.45);
-    }
-
-    canvas.style.opacity = isoOpacity.toFixed(3);
-
-    pivotGroup.position.set(curWorldX, curWorldY, 0);
-    pivotGroup.scale.set(curScale, curScale, curScale);
-
-    renderer.render(scene, camera);
-  }
-  requestAnimationFrame(animate);
+  // Modelo 3D eliminado según requerimiento
 }
 
-/** Live maturity score and scroll displacement for 06 // Diagnóstico test. */
+/** Live maturity score and radio handler for 06 // Diagnóstico test. */
 function initDiagnosticoTest() {
+  if (window.__diagnosticoTestInit) return;
+  window.__diagnosticoTestInit = true;
+
   const sec = document.getElementById('sec-06-diagnostico');
   if (!sec) return;
   const radios = sec.querySelectorAll('.diag-radio');
@@ -4756,75 +4879,37 @@ function initDiagnosticoTest() {
   const scoreExp = document.getElementById('score-explanation');
   const whatsappLink = document.getElementById('whatsapp-cta-link');
 
-  // Control de apertura cinemática: Punto -> Línea horizontal -> Expansión vertical del plano
-  let diagRevealed = false;
-
-  function triggerDiagCinematicReveal() {
-    if (diagRevealed) return;
-    diagRevealed = true;
-    sec.classList.remove('diag-step-2', 'diag-step-3', 'diag-active');
-    sec.classList.add('diag-step-1');
-    setTimeout(() => {
-      sec.classList.add('diag-step-2');
-    }, 280);
-    setTimeout(() => {
-      sec.classList.add('diag-step-3', 'diag-active');
-    }, 680);
-  }
-
-  function resetDiagCinematicReveal() {
-    if (!diagRevealed) return;
-    diagRevealed = false;
-    sec.classList.remove('diag-step-1', 'diag-step-2', 'diag-step-3', 'diag-active');
-  }
-
-  function checkDiagScroll() {
-    const rect = sec.getBoundingClientRect();
-    const triggerThreshold = window.innerHeight * 0.88;
-
-    if (rect.top <= triggerThreshold && rect.bottom >= 100) {
-      triggerDiagCinematicReveal();
-      updateActiveDockItem(4); // 05 // Diagnóstico
-    } else if (rect.top > window.innerHeight * 1.2) {
-      resetDiagCinematicReveal();
-    }
-  }
-
-  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
-  const ejecucionContainer = document.getElementById('sec-ejecucion-scroll-container');
-
-  if (metodologiaWrapper) {
-    metodologiaWrapper.addEventListener('scroll', checkDiagScroll, { passive: true });
-  }
-  if (ejecucionContainer) {
-    ejecucionContainer.addEventListener('scroll', checkDiagScroll, { passive: true });
-  }
-  window.addEventListener('scroll', checkDiagScroll, { passive: true });
-  checkDiagScroll();
-
-  if (!scoreNum || !scoreStatus || !scoreExp) return;
-
   function calculateScore() {
     let total = 0;
     radios.forEach((rr) => { if (rr.checked) total += parseInt(rr.value, 10) || 0; });
-    scoreNum.textContent = total + ' / 120';
+    if (scoreNum) scoreNum.textContent = total + ' / 120';
 
+    let statusText = 'NIVEL: FRICCIÓN OPERATIVA MODERADA';
     if (total <= 45) {
-      scoreStatus.textContent = 'NIVEL: IMPROVISACIÓN CRÍTICA';
-      scoreStatus.className = 'font-mono text-xs uppercase text-red-400 font-bold';
-      scoreExp.textContent = 'Tu operación presenta alta fricción y pérdida de capital por procesos manuales desconectados. Se requiere una intervención inmediata en arquitectura operativa.';
+      statusText = 'NIVEL: IMPROVISACIÓN CRÍTICA';
+      if (scoreStatus) {
+        scoreStatus.textContent = statusText;
+        scoreStatus.className = 'font-mono text-[11px] uppercase text-red-400 font-bold';
+      }
+      if (scoreExp) scoreExp.textContent = 'Tu operación presenta alta fricción y pérdida de capital por procesos manuales desconectados.';
     } else if (total <= 85) {
-      scoreStatus.textContent = 'NIVEL: FRICCIÓN OPERATIVA MODERADA';
-      scoreStatus.className = 'font-mono text-xs uppercase text-yellow-400 font-bold';
-      scoreExp.textContent = 'Cuentas con herramientas básicas, pero careces de integración y automatización con IA, limitando tu capacidad de escalar sin aumentar costos.';
+      statusText = 'NIVEL: FRICCIÓN OPERATIVA MODERADA';
+      if (scoreStatus) {
+        scoreStatus.textContent = statusText;
+        scoreStatus.className = 'font-mono text-[11px] uppercase text-yellow-400 font-bold';
+      }
+      if (scoreExp) scoreExp.textContent = 'Cuentas con herramientas básicas, pero careces de integración y automatización con IA.';
     } else {
-      scoreStatus.textContent = 'NIVEL: LISTO PARA ACELERACIÓN VECTORIAL';
-      scoreStatus.className = 'font-mono text-xs uppercase text-vector-lime font-bold';
-      scoreExp.textContent = 'Tu negocio cuenta con bases sólidas y está en la posición ideal para implementar interfaces vanguardistas y modelos predictivos avanzados.';
+      statusText = 'NIVEL: LISTO PARA ACELERACIÓN';
+      if (scoreStatus) {
+        scoreStatus.textContent = statusText;
+        scoreStatus.className = 'font-mono text-[11px] uppercase text-vector-lime font-bold';
+      }
+      if (scoreExp) scoreExp.textContent = 'Tu negocio cuenta con bases sólidas y está en la posición ideal para escalar.';
     }
 
     if (whatsappLink) {
-      const msg = encodeURIComponent('Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ' + total + '/120 - ' + scoreStatus.textContent + ') y me gustaría agendar la sesión estratégica.');
+      const msg = encodeURIComponent('Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ' + total + '/120 - ' + statusText + ') y me gustaría agendar la sesión estratégica.');
       whatsappLink.href = 'https://wa.me/527203323957?text=' + msg;
     }
   }
@@ -4870,10 +4955,53 @@ function scrollToDiagnostico(e) {
     }
   };
 
+  const revealDiag = () => {
+    window._isDiagnosticoActive = true;
+    const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+    if (metodologiaWrapper) {
+      metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
+      metodologiaWrapper.style.backgroundColor = '#080808';
+      metodologiaWrapper.style.pointerEvents = 'auto';
+    }
+    const stage = document.getElementById('sec-metodologia-stage');
+    if (stage) {
+      stage.style.opacity = '0';
+      stage.style.pointerEvents = 'none';
+    }
+    const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+    if (videoBg && videoBg.parentElement) videoBg.parentElement.style.opacity = '0';
+    const diagSec = document.getElementById('sec-06-diagnostico');
+    if (diagSec) {
+      diagSec.style.opacity = '1';
+      diagSec.style.clipPath = 'none';
+      diagSec.style.pointerEvents = 'auto';
+    }
+    const diagDot = document.getElementById('diag-reveal-dot');
+    const diagLine = document.getElementById('diag-reveal-line');
+    const diagStage = document.getElementById('diag-content-stage');
+    const cierreSec = document.getElementById('sec-07-cierre-footer');
+    if (diagDot) diagDot.style.opacity = '0';
+    if (diagLine) diagLine.style.opacity = '0';
+    if (diagStage) {
+      diagStage.style.opacity = '1';
+      diagStage.style.transform = 'none';
+    }
+    if (cierreSec) {
+      cierreSec.style.opacity = '0';
+      cierreSec.style.pointerEvents = 'none';
+    }
+    const globalHeader = document.getElementById('main-global-header');
+    if (globalHeader) {
+      globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
+      globalHeader.classList.add('glass-nav-transparent-section05');
+    }
+    updateActiveDockItem(4);
+  };
+
   const internalTarget = () => {
     if (!matrixTrack || !container) return 5000;
     const scrollable = matrixTrack.offsetHeight - container.clientHeight;
-    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.99);
+    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.80);
   };
 
   if (mainTrack) {
@@ -4890,7 +5018,7 @@ function scrollToDiagnostico(e) {
       window.scrollTo(0, targetY);
       forceFullScreenFrame();
       if (container) container.scrollTop = internalTarget();
-      updateActiveDockItem(4);
+      revealDiag();
     };
     const deadline = performance.now() + 1500;
     const pin = () => {
@@ -4902,7 +5030,7 @@ function scrollToDiagnostico(e) {
   } else {
     forceFullScreenFrame();
     if (container) container.scrollTop = internalTarget();
-    updateActiveDockItem(4);
+    revealDiag();
   }
   return false;
 }
@@ -4926,7 +5054,7 @@ function initFloatingGallery() {
     kpi1: item.kpi1,
     kpi2: item.kpi2,
     kpi3: item.kpi3,
-    link: '#'
+    link: item.link || '#'
   }));
 
   window.accordionGalleryInstance = new AccordionGallery('floating-gallery-root', {

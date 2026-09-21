@@ -148,10 +148,7 @@
       const endIdx = this.currentPage * this.pageSize + currentItems.length;
       const totalCount = this.filteredItems.length;
 
-      this.counterEl.innerHTML = `
-        <span class="text-vector-lime font-bold">BLOQUES ${startIdx} – ${endIdx}</span>
-        <span class="text-neutral-500">// TOTAL: ${totalCount} MÓDULOS (PÁG. ${this.currentPage + 1}/${totalPages})</span>
-      `;
+      this.counterEl.innerHTML = '';
     }
 
     updateDots() {
@@ -228,6 +225,9 @@
               <div class="ag-panel__details">
                 ${category ? `<span class="font-mono text-[9px] uppercase tracking-widest font-bold block mb-1" style="color: ${color}">// ${category}</span>` : ''}
                 ${item.desc ? `<p class="font-body text-[12px] text-neutral-200 leading-relaxed">${item.desc}</p>` : ''}
+                ${item.link && item.link !== '#' ? `
+                  <a href="${item.link.startsWith('http') ? item.link : 'https://' + item.link}" target="_blank" rel="noopener noreferrer" class="ag-panel__link" style="color: ${color};" onclick="event.stopPropagation();">${item.link.replace(/^https?:\/\//, '')}</a>
+                ` : ''}
               </div>
             </span>
           ` : ''}

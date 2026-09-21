@@ -126,10 +126,10 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // PLATAFORMA</a>
     <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // EVIDENCIA</a>
-    <a href="javascript:void(0)" onclick="scrollToMetodologia()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Metodología</a>
+    <a href="javascript:void(0)" onclick="return scrollToMetodologia(event)" id="dock-item-metodologia"
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // METODOLOGÍA</a>
     <a href="javascript:void(0)" onclick="return scrollToDiagnostico(event)" id="dock-item-diagnostico"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Diagnóstico</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // DIAGNÓSTICO</a>
   </nav>
 
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
@@ -304,7 +304,7 @@
                   FUNDACIONAL</span>
                 <h2
                   class="font-display font-black text-sm sm:text-base lg:text-[17px] xl:text-[18px] uppercase leading-relaxed tracking-tight text-vector-black">
-                  VECTOR INSIDE SURGE DE LA MISION DE TRANSFORMAR EL CONTENIDO Y LA PUBLICIDAD EN UN SISTEMA DE VENTAS
+                  VECTOR INSIDE SURGE DE LA MISIÓN DE TRANSFORMAR EL CONTENIDO Y LA PUBLICIDAD EN UN SISTEMA DE VENTAS
                   REAL. DESARROLLANDO ESTRATEGIAS DE MARKETING DIGITAL Y SOCIAL MEDIA, BUSCAMOS QUE MARCAS, EMPRESAS Y
                   PROYECTOS CREATIVOS LIDEREN SU INDUSTRIA.
                 </h2>
@@ -567,8 +567,7 @@
           <!-- Inner Background Media (Glowing Particles Floating in Space with scale 1.35 -> 1.0) -->
           <div id="scroll-expand-media-wrapper"
             class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
-            <video id="scroll-expand-video" src="Glowing_particles_floating_in_space_20260921040136.mp4"
-              data-lazy-src="Glowing_particles_floating_in_space_20260921040136.mp4" muted playsinline
+            <video id="scroll-expand-video" src="Glowing_particles_floating_in_space_720.mp4" muted playsinline
               preload="auto"
               class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
             <!-- Overlay Scrim Gradient for high contrast -->
@@ -609,8 +608,7 @@
               <!-- Prompt to scroll down to evidence photos -->
               <div id="scroll-explore-prompt"
                 class="flex items-center gap-3 text-xs font-display uppercase tracking-[0.22em] text-vector-lime/90 select-none cursor-pointer group"
-                style="margin-top: clamp(3.25rem, 6vh, 4.25rem);"
-                onclick="scrollToGaleriaFlotante()">
+                style="margin-top: clamp(3.25rem, 6vh, 4.25rem);" onclick="scrollToGaleriaFlotante()">
                 <span class="relative flex h-2.5 w-2.5">
                   <span
                     class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
@@ -626,7 +624,7 @@
             </div>
 
             <!-- Stage 2: Floating Gallery & Metodología Scrollytelling Pinned Curtain Track -->
-            <div id="sec-matriz-25-track" class="relative w-full min-h-[700vh]">
+            <div id="sec-matriz-25-track" class="relative w-full min-h-[520vh]">
 
               <!-- Layer 1 (Back / Pinned): Floating Gallery (Sticky Fullscreen Viewport) -->
               <div id="sec-matriz-25-wrapper"
@@ -638,15 +636,15 @@
                   <div class="flex items-center gap-3">
                     <span
                       class="font-display text-xs font-black text-vector-black bg-vector-lime px-2.5 py-0.5 uppercase tracking-[0.20em]">
-                      EVIDENCIA // GALERÍA FLOTANTE
+                      EVIDENCIA // GALERÍA
                     </span>
                     <div>
                       <h3 class="font-display font-black text-lg sm:text-xl uppercase text-white tracking-tight">
-                        Sistemas Modulares & Casos Reales
+                        Casos Reales
                       </h3>
                       <p
                         class="font-display text-[11px] font-black text-text-muted tracking-[0.20em] uppercase hidden sm:block">
-                        // HAZ CLIC EN CUALQUIER TARJETA PARA CENTRARLA Y EXPANDIR TELEMETRÍA
+
                       </p>
                     </div>
                   </div>
@@ -661,22 +659,19 @@
 
               </div>
 
-              <!-- Layer 2 (Front / Revealing Curtain): 05 // METODOLOGÍA (White Liquid Glass Curtain) -->
+              <!-- Layer 2 (Front / Revealing Curtain): 04 // METODOLOGÍA (White Liquid Glass Curtain) -->
               <div id="sec-metodologia-wrapper"
-                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-y-auto custom-scrollbar pointer-events-none will-change-transform flex flex-col justify-center transition-colors duration-300"
-                style="transform: translate3d(0, 100%, 0);">
+                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-hidden pointer-events-none will-change-transform flex flex-col justify-center"
+                style="transform: translate3d(0, 100%, 0); will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;">
 
                 <!-- Background Abstract Liquid Flow Motion Video -->
-                <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden transition-opacity duration-300">
-                  <video id="ejecucion-liquid-flow-video" loop muted playsinline preload="none"
-                    class="w-full h-full object-cover opacity-90">
-                    <source
-                      data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152141/Abstract_liquid_flow_motion_1080p_202608301513.mp4"
-                      type="video/mp4">
+                <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden" style="transform: translateZ(0);">
+                  <video id="ejecucion-liquid-flow-video" src="Abstract_liquid_flow_motion_480.mp4" autoplay loop muted
+                    playsinline preload="auto" class="w-full h-full object-cover opacity-90 will-change-transform transform-gpu pointer-events-none">
                   </video>
-                  <!-- White Liquid Frosted Glass Overlay (Half Opacity for Higher Video Visibility) -->
+                  <!-- White Liquid Frosted Glass Overlay (Optimized without compositor thrashing) -->
                   <div
-                    class="absolute inset-0 bg-gradient-to-b from-white/45 via-white/35 to-white/50 backdrop-blur-[1px]">
+                    class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/45 to-white/65 pointer-events-none">
                   </div>
                 </div>
 
@@ -689,7 +684,7 @@
                       <div class="flex items-center gap-3 mb-1.5">
                         <span
                           class="font-display text-xs font-black text-vector-lime bg-[#0b0b0d] px-3 py-1 uppercase tracking-[0.20em] shadow-sm">
-                          05 // METODOLOGÍA
+                          04 // METODOLOGÍA
                         </span>
                         <span class="text-neutral-700 font-display text-xs font-black uppercase tracking-[0.20em]">// EL
                           PIPELINE VECTOR // 4
@@ -697,18 +692,11 @@
                       </div>
                       <h2
                         class="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-[#0b0b0d] mb-2">
-                        Ingeniería de Aceleración en 4 Fases
+                        RUTA DE IMPLEMENTACIÓN
                       </h2>
                       <p class="font-mono text-xs text-neutral-700 max-w-xl font-medium">
-                        Un proceso sistemático, medible y sin sorpresas diseñado para ejecutar en ciclos rápidos de alto
-                        impacto y tracción predecible.
-                      </p>
-                    </div>
 
-                    <!-- 3D Vector Isotipo Header Slot Placeholder (Aligned directly above 4th card) -->
-                    <div class="flex justify-end items-center self-end shrink-0">
-                      <div id="vector-isotipo-slot" class="w-[90px] h-[90px] sm:w-[115px] sm:h-[115px] relative"
-                        aria-hidden="true"></div>
+                      </p>
                     </div>
                   </div>
 
@@ -717,21 +705,21 @@
 
                     <!-- Phase 1 -->
                     <div
-                      class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      class="phase-card bg-white/85 backdrop-blur-sm p-5 sm:p-6 border border-black/15 hover:border-black transition-colors duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span class="font-display text-xs text-black font-black uppercase tracking-[0.20em]">FASE
-                            01</span>
+                            00</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
                             1</span>
                         </div>
                         <h3
                           class="font-display font-black text-base sm:text-lg uppercase mb-2 text-[#0b0b0d] group-hover:text-black transition-colors">
-                          Diagnóstico Nuclear</h3>
+                          Diagnóstico</h3>
                         <p class="text-[11px] sm:text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
-                          Auditoría profunda de cuellos de botella, latencias operativas y fugas de conversión en tus
-                          flujos actuales.
+                          Análisis de marca y flujos comerciales: revisamos la cohesión de tu propuesta visual y fijamos
+                          alcances.
                         </p>
                       </div>
                       <div
@@ -742,12 +730,12 @@
 
                     <!-- Phase 2 -->
                     <div
-                      class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-operative-purple transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      class="phase-card bg-white/85 backdrop-blur-sm p-5 sm:p-6 border border-black/15 hover:border-operative-purple transition-colors duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span
                             class="font-display text-xs text-operative-purple font-black uppercase tracking-[0.20em]">FASE
-                            02</span>
+                            01</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
                             2-3</span>
@@ -769,12 +757,12 @@
 
                     <!-- Phase 3 -->
                     <div
-                      class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-cognitive-blue transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      class="phase-card bg-white/85 backdrop-blur-sm p-5 sm:p-6 border border-black/15 hover:border-cognitive-blue transition-colors duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span
                             class="font-display text-xs text-cognitive-blue font-black uppercase tracking-[0.20em]">FASE
-                            03</span>
+                            02</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">SEMANA
                             4-6</span>
@@ -795,17 +783,17 @@
 
                     <!-- Phase 4 -->
                     <div
-                      class="phase-card bg-white/85 backdrop-blur-xl p-5 sm:p-6 border border-black/15 hover:border-black transition-all duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
+                      class="phase-card bg-white/85 backdrop-blur-sm p-5 sm:p-6 border border-black/15 hover:border-black transition-colors duration-300 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex flex-col justify-between group">
                       <div>
                         <div class="flex justify-between items-center mb-3">
                           <span class="font-display text-xs text-black font-black uppercase tracking-[0.20em]">FASE
-                            04</span>
+                            03</span>
                           <span
                             class="font-mono text-[10px] text-neutral-800 bg-neutral-100 font-bold px-2 py-0.5 rounded border border-black/10">CONTINUO</span>
                         </div>
                         <h3
                           class="font-display font-black text-base sm:text-lg uppercase mb-2 text-[#0b0b0d] group-hover:text-black transition-colors">
-                          Aceleración</h3>
+                          Seguimiento</h3>
                         <p class="text-[11px] sm:text-xs text-neutral-700 leading-relaxed mb-4 font-normal">
                           Monitoreo en tiempo real, optimización de algoritmos de conversión y escalamiento exponencial
                           continuo.
@@ -836,162 +824,204 @@
 
                 <!-- ==================== 06 // DIAGNÓSTICO — INTERACTIVE ASSESSMENT (INSIDE METODOLOGÍA WRAPPER) ==================== -->
                 <section id="sec-06-diagnostico"
-                  class="diag-reveal absolute inset-0 z-30 w-full h-full bg-vector-black text-white pt-28 sm:pt-36 pb-32 px-4 sm:px-8 overflow-y-auto custom-scrollbar pointer-events-none opacity-0 flex flex-col justify-start">
+                  class="diag-reveal absolute inset-0 z-30 w-full h-full bg-vector-black text-white pt-20 sm:pt-24 pb-20 sm:pb-24 px-4 sm:px-8 pointer-events-none opacity-0 flex flex-col justify-center overflow-hidden">
+
+                  <!-- Background Image (Vector Monolith in Desert) -->
+                  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                    <img src="Translating_prompt_into_English_2K_20260921035114.jpeg"
+                      alt="Vector Monolith Desert Background" class="w-full h-full object-cover object-center" />
+                    <!-- Subtle bottom gradient at 30% only -->
+                    <div
+                      class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none">
+                    </div>
+                  </div>
 
                   <!-- 3. Expanding Content Plane -->
-                  <div id="diag-content-stage" class="max-w-7xl mx-auto w-full relative z-10 pt-2 sm:pt-4">
+                  <div id="diag-content-stage"
+                    class="max-w-7xl mx-auto w-full relative z-10 flex flex-col justify-center">
 
                     <!-- Top Title -->
-                    <div class="flex flex-wrap items-end justify-between gap-6 border-b border-white/15 pb-6 mb-12">
-                      <div>
-                        <div class="flex items-center gap-3 mb-2">
-                          <span
-                            class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime/40">
-                            06 // DIAGNÓSTICO
-                          </span>
-                          <span class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em]">//
-                            EVALUACIÓN DE MADUREZ DIGITAL</span>
-                        </div>
-                        <h1 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight">
-                          Test de Fricción &amp; Auditoría Nuclear
-                        </h1>
+                    <div class="mb-4 sm:mb-6">
+                      <div class="flex items-center gap-3 mb-1">
+                        <span
+                          class="font-display text-[10px] sm:text-xs font-black text-vector-lime bg-vector-black px-2.5 py-0.5 uppercase tracking-[0.20em] border border-vector-lime/40">
+                          05 // DIAGNÓSTICO
+                        </span>
+                        <span
+                          class="text-text-muted font-display text-[10px] sm:text-xs font-black uppercase tracking-[0.20em]">//
+                          EVALUACIÓN DIGITAL</span>
                       </div>
-                      <p class="font-mono text-xs text-text-muted max-w-md">
-                        Responde 5 preguntas clave en 60 segundos y obtén un diagnóstico en tiempo real del estado de tu
-                        arquitectura empresarial.
-                      </p>
+                      <h1 class="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight">
+                        Test de Fricción
+                      </h1>
                     </div>
 
                     <!-- Assessment Widget & Radar Result -->
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-                      <!-- Left: Interactive Form -->
+                      <!-- Left: Interactive Form (Compact, fits completely on viewport) -->
                       <div
-                        class="lg:col-span-7 glass-panel p-8 sm:p-10 border border-white/20 bg-surface-dark space-y-8">
+                        class="lg:col-span-7 glass-panel p-5 sm:p-6 border border-white/20 bg-[#101012]/90 backdrop-blur-xl space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl">
 
-                        <div class="space-y-3">
+                        <!-- Question 01 -->
+                        <div class="space-y-1.5">
                           <label
-                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">01
-                            // ¿CÓMO
-                            GESTIONAS TUS DATOS Y PIPELINE COMERCIAL?</label>
-                          <div class="space-y-2">
+                            class="font-display font-black text-[11px] sm:text-xs text-vector-lime uppercase tracking-[0.16em] block">
+                            01 // ¿CÓMO GESTIONAS TUS DATOS Y PIPELINE COMERCIAL?
+                          </label>
+                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q1" value="10" checked class="accent-[#c3f400] diag-radio">
-                              <span>Hojas de cálculo / Procesos manuales sin CRM centralizado.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q1" value="10" checked
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong
+                                  class="block text-white font-sans text-xs">Manual</strong>Sin CRM centralizado</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q1" value="25" class="accent-[#c3f400] diag-radio">
-                              <span>CRM básico, pero sin automatizaciones ni sincronización con marketing.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q1" value="25"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">CRM
+                                  Básico</strong>Sin automatizaciones</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q1" value="40" class="accent-[#c3f400] diag-radio">
-                              <span>Ecosistema integrado con IA y atribución multicanal en tiempo real.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q1" value="40"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">Ecosistema
+                                  IA</strong>Atribución en tiempo real</span>
                             </label>
                           </div>
                         </div>
 
-                        <div class="space-y-3">
+                        <!-- Question 02 -->
+                        <div class="space-y-1.5">
                           <label
-                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">02
-                            // ¿CUÁL
-                            ES TU TIEMPO PROMEDIO DE RESPUESTA A LEADS?</label>
-                          <div class="space-y-2">
+                            class="font-display font-black text-[11px] sm:text-xs text-vector-lime uppercase tracking-[0.16em] block">
+                            02 // ¿CUÁL ES TU TIEMPO PROMEDIO DE RESPUESTA A LEADS?
+                          </label>
+                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q2" value="10" checked class="accent-[#c3f400] diag-radio">
-                              <span>Más de 4 horas o al día siguiente.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q2" value="10" checked
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">&gt; 4
+                                  Horas</strong>O al día siguiente</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q2" value="25" class="accent-[#c3f400] diag-radio">
-                              <span>Entre 15 minutos y 1 hora.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q2" value="25"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">15 - 60
+                                  Min</strong>Respuesta manual</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q2" value="40" class="accent-[#c3f400] diag-radio">
-                              <span>Menos de 90 segundos mediante agentes IA autónomos.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q2" value="40"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">&lt; 90
+                                  Seg</strong>Agentes autónomos IA</span>
                             </label>
                           </div>
                         </div>
 
-                        <div class="space-y-3">
+                        <!-- Question 03 -->
+                        <div class="space-y-1.5">
                           <label
-                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.16em] block">03
-                            // ¿CÓMO
-                            DESCRIBIRÍAS LA AUTORIDAD VISUAL DE TU MARCA?</label>
-                          <div class="space-y-2">
+                            class="font-display font-black text-[11px] sm:text-xs text-vector-lime uppercase tracking-[0.16em] block">
+                            03 // ¿CÓMO DESCRIBIRÍAS LA AUTORIDAD VISUAL DE TU MARCA?
+                          </label>
+                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q3" value="10" checked class="accent-[#c3f400] diag-radio">
-                              <span>Genérica; competimos principalmente por precio frente a la competencia.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q3" value="10" checked
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong
+                                  class="block text-white font-sans text-xs">Genérica</strong>Compite por precio</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q3" value="25" class="accent-[#c3f400] diag-radio">
-                              <span>Correcta pero tradicional; no proyecta vanguardia tecnológica.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q3" value="25"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong
+                                  class="block text-white font-sans text-xs">Tradicional</strong>Sin vanguardia
+                                tech</span>
                             </label>
                             <label
-                              class="flex items-center gap-3 p-3.5 bg-black/40 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-xs">
-                              <input type="radio" name="q3" value="40" class="accent-[#c3f400] diag-radio">
-                              <span>Posicionamiento brutalista y experiencia 3D de alta conversión.</span>
+                              class="flex items-start gap-2 p-2.5 bg-black/50 border border-white/10 hover:border-vector-lime cursor-pointer font-mono text-[11px] rounded transition-colors">
+                              <input type="radio" name="q3" value="40"
+                                class="accent-[#c3f400] diag-radio mt-0.5 shrink-0">
+                              <span class="leading-tight"><strong class="block text-white font-sans text-xs">Brutalista
+                                  3D</strong>Alta conversión</span>
                             </label>
                           </div>
                         </div>
 
-                      </div>
-
-                      <!-- Right: Real-time Live Result -->
-                      <div
-                        class="lg:col-span-5 glass-panel p-8 sm:p-10 border border-vector-lime/40 bg-surface-dark space-y-6 flex flex-col justify-between">
-                        <div>
-                          <span
-                            class="font-display font-black text-xs text-vector-lime uppercase tracking-[0.20em] block mb-2">//
-                            RADIOGRAFÍA EN TIEMPO REAL</span>
-                          <h2 class="font-display font-black text-2xl uppercase mb-6">Puntaje de Madurez Vector</h2>
-
-                          <div class="p-6 bg-black/70 border border-white/10 text-center mb-6">
-                            <p id="score-number" class="font-display font-black text-6xl text-vector-lime mb-2">30 / 120
-                            </p>
-                            <p id="score-status" class="font-mono text-xs uppercase text-red-400 font-bold">NIVEL:
-                              IMPROVISACIÓN CRÍTICA</p>
-                          </div>
-
-                          <div class="space-y-3 font-mono text-xs">
-                            <p class="text-white font-display font-black text-xs uppercase tracking-[0.20em]">//
-                              DIAGNÓSTICO ESTIMADO:</p>
-                            <p id="score-explanation" class="text-text-muted leading-relaxed">
-                              Tu empresa presenta fugas críticas de capital debido a tareas operativas manuales y falta
-                              de una tesis de aceleración digital unificada.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div class="pt-6 border-t border-white/10">
+                        <!-- Bottom Action Bar: CTA Button (Matching header Contacto style, aligned left) -->
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-start">
                           <button type="button" onclick="openNuclearModal(event)"
-                            class="w-full btn-vector-primary py-4 text-xs font-mono tracking-widest text-center block uppercase shadow-[0_0_25px_rgba(195,244,0,0.3)] hover:shadow-[0_0_35px_rgba(195,244,0,0.6)] cursor-pointer transition-all">
-                            AGENDAR AUDITORÍA NUCLEAR
+                            class="btn-pill-nuclear group cursor-pointer py-2.5 px-6">
+                            <span class="btn-pill-bg transition-colors duration-300"></span>
+                            <span class="btn-pill-label transition-colors duration-300">
+                              <span class="pulse-dot mr-2"></span>
+                              <span>SOLICITAR AUDITORÍA COMPLETA</span>
+                              <span class="material-symbols-outlined text-sm ml-1.5 font-normal">bolt</span>
+                            </span>
                           </button>
                         </div>
+
                       </div>
 
                     </div>
 
-                    <!-- Navigation Footer -->
-                    <div
-                      class="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/15 pt-8">
-                      <a href="javascript:void(0)" onclick="scrollToMetodologia()"
-                        class="font-display font-black text-xs text-text-muted hover:text-white uppercase tracking-[0.15em] flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">arrow_back</span> 05 // METODOLOGÍA
-                      </a>
-                      <button type="button" onclick="openNuclearModal(event)"
-                        class="btn-vector-outline px-8 py-3 text-xs font-mono tracking-wider flex items-center gap-2 cursor-pointer hover:border-vector-lime hover:text-vector-lime transition-all">
-                        <span>SOLICITAR AUDITORÍA COMPLETA</span>
-                        <span class="material-symbols-outlined text-sm">bolt</span>
-                      </button>
+                  </div>
+                </section>
+ 
+                <!-- ==================== 07 // CIERRE & FOOTER — ARQUITECTURA FINAL (FADES OUT SECTION 05) ==================== -->
+                <section id="sec-07-cierre-footer"
+                  class="absolute inset-0 z-35 w-full h-screen max-h-screen bg-[#08080a] text-white pointer-events-none opacity-0 flex flex-col justify-between overflow-hidden pt-16 sm:pt-20 pb-4 sm:pb-6 px-4 sm:px-8 transition-all duration-300">
+                  
+                  <!-- Ambient Glow Accents -->
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-vector-lime/10 blur-[140px] pointer-events-none rounded-full"></div>
+                  <div class="absolute bottom-1/3 right-0 w-[450px] h-[350px] bg-purple-600/10 blur-[160px] pointer-events-none rounded-full"></div>
+
+                  <!-- Container Stage (Fits 100% viewport without scroll) -->
+                  <div class="relative z-10 w-full max-w-7xl mx-auto flex flex-col justify-between items-center flex-1 min-h-0 gap-3 sm:gap-4">
+                    
+                    <!-- Hero Visual Showcase: Gemini_Generated_Image_56o9dz56o9dz56o9.jpeg_2K_20260921084044.jpeg (100% uncropped 2K) -->
+                    <div class="relative w-full max-w-4xl lg:max-w-5xl flex-1 min-h-0 max-h-[52vh] sm:max-h-[56vh] aspect-[2752/1536] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 bg-black/80 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex items-center justify-center">
+                      <img src="Gemini_Generated_Image_56o9dz56o9dz56o9.jpeg_2K_20260921084044.jpeg"
+                        alt="Vector Inside Final Architecture Showcase"
+                        class="w-full h-full object-contain object-center" />
                     </div>
+
+                    <!-- Compact & Minimalist Site Footer with Yellow V Logo -->
+                    <footer class="w-full shrink-0 pt-4 pb-2">
+                      <div class="relative flex flex-col md:flex-row items-center justify-center gap-4 mb-3 sm:mb-4">
+                        
+                        <!-- Brand Logo with Yellow V -->
+                        <div class="flex items-center gap-2.5 md:absolute md:left-0">
+                          <img src="Vector%20Inside%20imagotipo.svg" alt="Vector Inside Logo" class="h-6 sm:h-7 w-auto object-contain" />
+                          <span class="w-1.5 h-1.5 rounded-full bg-vector-lime animate-pulse hidden sm:inline-block"></span>
+                        </div>
+
+                        <!-- Minimalist Navigation Links (Centered) -->
+                        <nav class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 font-mono text-[10.5px] sm:text-[11px] uppercase tracking-wider text-neutral-400">
+                          <a href="javascript:void(0)" onclick="scrollToSection2()" class="hover:text-vector-lime transition-colors">01 // Identidad</a>
+                          <a href="javascript:void(0)" onclick="scrollToSection3()" class="hover:text-vector-lime transition-colors">02 // Plataforma</a>
+                          <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()" class="hover:text-vector-lime transition-colors">03 // Evidencia</a>
+                          <a href="javascript:void(0)" onclick="scrollToMetodologia(event)" class="hover:text-vector-lime transition-colors">04 // Metodología</a>
+                          <a href="javascript:void(0)" onclick="scrollToDiagnostico(event)" class="hover:text-vector-lime transition-colors">05 // Diagnóstico</a>
+                        </nav>
+                      </div>
+
+                      <!-- Sub-footer Compact Bar -->
+                      <div class="pt-2.5 border-t border-white/5 flex items-center justify-center font-mono text-[10px] sm:text-[10.5px] text-neutral-400">
+                        <div>
+                          &copy; 2026 VECTOR INSIDE. TODOS LOS DERECHOS RESERVADOS.
+                        </div>
+                      </div>
+                    </footer>
 
                   </div>
                 </section>
@@ -1008,11 +1038,6 @@
 
     </div>
   </div>
-
-  <!-- ==================== 3D VECTOR ISOTIPO — FIXED FULLSCREEN 3D OVERLAY LAYER ==================== -->
-  <canvas id="vector-isotipo-canvas"
-    class="fixed inset-0 w-full h-full pointer-events-none z-[45] opacity-0 transition-opacity duration-300"
-    style="display:block;background:transparent;"></canvas>
 
   <!-- ==================== FLOATING CHATBOT WIDGET (BOTTOM RIGHT) ==================== -->
   <div id="floating-chatbot-container"

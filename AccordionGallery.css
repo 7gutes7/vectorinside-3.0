@@ -49,7 +49,7 @@
   outline: none;
   transform-style: preserve-3d;
   transform-origin: center center;
-  background: #0a0713;
+  background: #ffffff;
   box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.12);
   will-change: flex-grow, transform;
@@ -73,7 +73,7 @@
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  background-color: #06050b;
+  background-color: #ffffff;
 }
 
 .ag-panel__media {
@@ -86,7 +86,7 @@
   height: 100%;
   filter: grayscale(var(--ag-gray));
   will-change: transform, filter;
-  background-color: #08070d;
+  background-color: #ffffff;
 }
 
 .accordion-gallery--vertical .ag-panel__media {
@@ -103,6 +103,7 @@
   user-select: none;
   -webkit-user-drag: none;
   image-rendering: -webkit-optimize-contrast;
+  background-color: #ffffff;
 }
 
 /* Specific scaling and crisp white background for all transparent logos and vector assets */
@@ -113,12 +114,14 @@
 .ag-panel__media img[src*="syborx"],
 .ag-panel__media img[src*="SmbtK"],
 .ag-panel__media img[src*="integritus"],
+.ag-panel__media img[src*="IntegritUS"],
 .ag-panel__media img[src*="karloz"],
 .ag-panel__media img[src*="imagotipo"],
 .ag-panel__media img[src*="Isologo"],
 .ag-panel__media img[src*="VectorInside"],
 .ag-panel__media img[src*="lobo02"],
 .ag-panel__media img[src*="ValorMaximo"],
+.ag-panel__media img[src*="valor"],
 .ag-panel__media img[src*="Lealtix"],
 .ag-panel__media img[src*="Brevemente"],
 .ag-panel__media img[src*="SynexIA"],
@@ -126,7 +129,7 @@
   object-fit: contain;
   padding: 28px 18px;
   box-sizing: border-box;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
 }
 
 /* Specific 30% reduction and solid white background for BLK-01 and BLK-02 */
@@ -145,7 +148,7 @@
 .ag-panel__media img[src*="Imagotipo2"],
 .ag-panel__media img[src*="imagotipo2"],
 .ag-panel__media img[src*="integritus"],
-.ag-panel__media img[src*="Integritus"],
+.ag-panel__media img[src*="IntegritUS"],
 .ag-panel__media img[src*="karloz"],
 .ag-panel__media img[src*="Karloz"] {
   background-color: #ffffff !important;
@@ -166,7 +169,8 @@
 /* Specific padding for wide horizontal logos so they never touch borders */
 .ag-panel__media img[src*="SynexIA"],
 .ag-panel__media img[src*="Lealtix"],
-.ag-panel__media img[src*="ValorMaximo"] {
+.ag-panel__media img[src*="ValorMaximo"],
+.ag-panel__media img[src*="valor"] {
   padding: 42px 24px !important;
 }
 
@@ -175,8 +179,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, transparent 40%, rgba(6, 0, 16, 0.94) 100%),
-    rgba(6, 0, 16, calc(var(--ag-dim, 0.08)));
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, 0.7) 74%, rgba(6, 0, 16, 0.95) 100%);
   transition: opacity 0.3s ease;
 }
 
@@ -240,6 +243,29 @@
 .ag-panel--active .ag-panel__details {
   opacity: 1;
   transform: translateY(0);
+}
+
+.ag-panel__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  pointer-events: auto !important;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+  z-index: 10;
+}
+
+.ag-panel__link:hover {
+  opacity: 0.9;
+  filter: brightness(1.25);
+  transform: translateX(3px);
 }
 
 /* Pagination & Controls Bar */
