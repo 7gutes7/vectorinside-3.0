@@ -67,8 +67,8 @@
   <!-- ==================== PAGE VIDEO INTRO & PRELOADER OVERLAY ==================== -->
   <div id="intro-screen"
     class="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700">
-    <video id="intro-video" src="logo vector inside 01_1.mp4" autoplay muted playsinline
-      class="w-[50vw] h-[50vh] max-w-[50vw] max-h-[50vh] object-contain object-center mx-auto rounded-xl intro-video-cinematic-enter"></video>
+    <video id="intro-video" src="logo vector inside 01_2.mp4" autoplay muted playsinline
+      class="w-full h-full max-w-[90vw] max-h-[85vh] object-contain object-center mx-auto rounded-xl intro-video-cinematic-enter"></video>
 
     <!-- Top Loading Indicator Overlay -->
     <div id="intro-loader"
@@ -92,7 +92,8 @@
     class="fixed top-0 left-0 w-full z-50 glass-nav glass-nav-hero-transparent transition-all duration-500">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
       <!-- Brand Logo -->
-      <a href="index.html" class="flex items-center gap-3 group z-10">
+      <a href="index.html" class="flex items-center gap-3 group z-10" id="header-logo-link"
+        onclick="handleLogoClick(event)">
         <img id="header-brand-logo" src="Vector%20Inside%20imagotipo.svg" alt="Vector Inside Logo"
           class="brand-logo-img h-8 sm:h-9 w-auto object-contain transition-all duration-300 group-hover:scale-105" />
       </a>
@@ -124,7 +125,7 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // IDENTIDAD</a>
     <a href="javascript:void(0)" onclick="scrollToSection3()"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // PLATAFORMA</a>
-    <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()"
+    <a href="javascript:void(0)" onclick="return scrollToSectionEjecucion(event)" id="dock-item-evidencia"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // EVIDENCIA</a>
     <a href="javascript:void(0)" onclick="return scrollToMetodologia(event)" id="dock-item-metodologia"
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // METODOLOGÍA</a>
@@ -149,7 +150,7 @@
 
       <!-- Background 3D Canvas Layer -->
       <div id="hero-3d-container"
-        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto">
+        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-none">
         <canvas id="hero-3d-canvas"
           class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)] transition-none"></canvas>
       </div>
@@ -211,7 +212,7 @@
           <div class="flex flex-col items-start justify-center text-left pointer-events-auto">
             <div id="hero-curtain-right"
               class="pointer-events-auto select-none flex flex-col items-start justify-start text-left mr-auto opacity-0 origin-left max-w-full">
-              <svg viewBox="0 0 680 270" class="w-full h-auto block overflow-visible cursor-pointer">
+              <svg viewBox="0 0 680 270" class="w-full h-auto block overflow-visible pointer-events-none">
                 <defs>
                   <clipPath id="hero-curtain-right-clip">
                     <rect id="hero-curtain-rect" x="0" y="135" width="100%" height="0" />
@@ -227,12 +228,12 @@
               </svg>
 
               <!-- Central Action Anchor / Micro Explore CTA below right flank -->
-              <a href="#seccion-portal-revelada" onclick="scrollToSection2(); return false;" id="hero-micro-cta"
-                class="mt-3.5 sm:mt-4.5 inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-vector-black/50 hover:bg-vector-black border border-white/20 hover:border-vector-lime text-white hover:text-vector-lime rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_0_24px_rgba(195,244,0,0.45)] backdrop-blur-md group pointer-events-auto cursor-pointer select-none">
-                <span>EXPERIENCIA VI</span>
+              <a href="javascript:void(0)" onclick="scrollToSection2(); return false;" id="hero-micro-cta"
+                class="relative z-30 mt-3.5 sm:mt-4.5 inline-flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-[10.5px] sm:text-xs font-mono font-bold uppercase tracking-widest shadow-[0_4px_24px_rgba(0,0,0,0.6)] backdrop-blur-md group pointer-events-auto cursor-pointer select-none">
+                <span class="hero-cta-text">EXPERIENCIA VI</span>
                 <span
-                  class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/10 group-hover:bg-vector-lime group-hover:text-vector-black text-white transition-all duration-300">
-                  <svg class="w-2.5 h-2.5 transform group-hover:translate-y-0.5 transition-transform duration-300"
+                  class="hero-cta-icon-wrap inline-flex items-center justify-center w-4 h-4 rounded-full">
+                  <svg class="w-2.5 h-2.5"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                     stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
@@ -1009,7 +1010,7 @@
                         <nav class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 font-mono text-[10.5px] sm:text-[11px] uppercase tracking-wider text-neutral-400">
                           <a href="javascript:void(0)" onclick="scrollToSection2()" class="hover:text-vector-lime transition-colors">01 // Identidad</a>
                           <a href="javascript:void(0)" onclick="scrollToSection3()" class="hover:text-vector-lime transition-colors">02 // Plataforma</a>
-                          <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()" class="hover:text-vector-lime transition-colors">03 // Evidencia</a>
+                          <a href="javascript:void(0)" onclick="return scrollToSectionEjecucion(event)" class="hover:text-vector-lime transition-colors">03 // Evidencia</a>
                           <a href="javascript:void(0)" onclick="scrollToMetodologia(event)" class="hover:text-vector-lime transition-colors">04 // Metodología</a>
                           <a href="javascript:void(0)" onclick="scrollToDiagnostico(event)" class="hover:text-vector-lime transition-colors">05 // Diagnóstico</a>
                         </nav>

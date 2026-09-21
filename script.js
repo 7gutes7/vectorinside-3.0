@@ -28,6 +28,88 @@ function restoreCurrentScrollPosition() {
 // Restore immediately on script execution
 restoreCurrentScrollPosition();
 
+let _isHeroUiEnsured = false;
+function ensureHeroUiVisible(force = false) {
+  const heroUi = document.getElementById('hero-ui-content');
+  if (heroUi) {
+    heroUi.style.display = 'flex';
+    heroUi.style.opacity = '1';
+    heroUi.style.visibility = 'visible';
+    heroUi.style.pointerEvents = 'auto';
+  }
+
+  // Left Flank: DISEÑO DE MARCA
+  const strokeTextWrapper = document.getElementById('stroke-text-wrapper');
+  if (strokeTextWrapper) {
+    strokeTextWrapper.style.filter = 'none';
+    strokeTextWrapper.style.opacity = '1';
+    strokeTextWrapper.style.visibility = 'visible';
+  }
+  const strokePath = document.querySelector('.stroke-draw-path');
+  if (strokePath) {
+    strokePath.style.strokeDashoffset = '0';
+    strokePath.style.stroke = '#FFFFFF';
+    strokePath.style.opacity = '1';
+  }
+  const wipeRect = document.getElementById('stroke-wipe-rect');
+  if (wipeRect) {
+    wipeRect.setAttribute('width', '100%');
+    wipeRect.setAttribute('height', '56');
+    wipeRect.style.width = '100%';
+  }
+  const wipeRect2 = document.getElementById('stroke-wipe-rect-2');
+  if (wipeRect2) {
+    wipeRect2.setAttribute('width', '100%');
+    wipeRect2.setAttribute('height', '66');
+    wipeRect2.style.width = '100%';
+  }
+
+  // Right Flank: INSTINTO PARA DOMINAR EL MERCADO
+  const curtainRight = document.getElementById('hero-curtain-right');
+  if (curtainRight) {
+    curtainRight.classList.remove('opacity-0');
+    curtainRight.style.opacity = '1';
+    curtainRight.style.visibility = 'visible';
+    curtainRight.style.filter = 'none';
+  }
+  const curtainRect = document.getElementById('hero-curtain-rect');
+  if (curtainRect) {
+    curtainRect.setAttribute('y', '0');
+    curtainRect.setAttribute('height', '270');
+  }
+  const microCta = document.getElementById('hero-micro-cta');
+  if (microCta) {
+    microCta.style.opacity = '1';
+    microCta.style.visibility = 'visible';
+    microCta.style.clipPath = 'none';
+    microCta.style.webkitClipPath = 'none';
+    microCta.style.pointerEvents = 'auto';
+  }
+
+  // 3D Wolf Model Canvas
+  const canvas = document.getElementById('hero-3d-canvas');
+  if (canvas) {
+    canvas.style.opacity = '1';
+    canvas.style.clipPath = 'none';
+    canvas.style.webkitClipPath = 'none';
+    canvas.style.visibility = 'visible';
+  }
+  if (typeof isHero3DRevealed !== 'undefined') isHero3DRevealed = true;
+
+  // Background Video
+  const heroBgVideo = document.getElementById('hero-bg-video');
+  if (heroBgVideo && heroBgVideo.paused) {
+    heroBgVideo.play().catch(() => {});
+  }
+
+  if (force || !_isHeroUiEnsured) {
+    _isHeroUiEnsured = true;
+    if (typeof alignHeroDigitalText === 'function') alignHeroDigitalText();
+    if (typeof alignHeroRightText === 'function') alignHeroRightText();
+  }
+}
+window.ensureHeroUiVisible = ensureHeroUiVisible;
+
 // Si al cargar o refrescar no estamos en el Hero, ocultar inmediatamente los textos del Hero
 if ((window.scrollY || window.pageYOffset || 0) > 80) {
   const earlyHeroUi = document.getElementById('hero-ui-content');
@@ -37,6 +119,7 @@ if ((window.scrollY || window.pageYOffset || 0) > 80) {
     earlyHeroUi.style.visibility = 'hidden';
     earlyHeroUi.style.pointerEvents = 'none';
   }
+  ensureHeroUiVisible();
 }
 
 // Persist scroll position continuously and on pagehide/unload
@@ -91,20 +174,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Fullscreen Video Intro & Asset Preloader Controller
- * (Hidden for realtime development; immediately triggers Hero text effect)
  */
 function initPageVideoIntro() {
   const introScreen = document.getElementById('intro-screen');
   const video = document.getElementById('intro-video');
-  if (introScreen) {
+  const skipBtn = document.getElementById('skip-intro-btn');
+
+  if (!introScreen || !video) {
+    setTimeout(triggerStrokeTextEffect, 300);
+    return;
+  }
+
+  // Si el usuario refresca la página estando ya en una sección inferior, omitir intro
+  const currentY = window.scrollY || window.pageYOffset || 0;
+  if (currentY > 120) {
     introScreen.style.display = 'none';
     introScreen.style.opacity = '0';
     introScreen.style.pointerEvents = 'none';
-  }
-  if (video) {
     try { video.pause(); } catch (e) {}
+    return;
   }
-  triggerStrokeTextEffect();
+
+  let isDismissed = false;
+
+  function dismissIntro() {
+    if (isDismissed) return;
+    isDismissed = true;
+    introScreen.style.opacity = '0';
+    introScreen.style.pointerEvents = 'none';
+    setTimeout(() => {
+      introScreen.style.display = 'none';
+      try { video.pause(); } catch (e) {}
+      triggerStrokeTextEffect();
+    }, 700);
+  }
+
+  // Reproducir video intro de inmediato (silenciado y con soporte autoplay)
+  video.currentTime = 0;
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch((err) => {
+      console.warn('Autoplay intro video blocked or delayed:', err);
+    });
+  }
+
+  // Transición al finalizar el video
+  video.addEventListener('ended', dismissIntro);
+  video.addEventListener('timeupdate', () => {
+    if (video.duration && (video.duration - video.currentTime < 0.15)) {
+      dismissIntro();
+    }
+  });
+
+  // Temporizador de seguridad (video dura ~5 seg)
+  setTimeout(() => {
+    if (!isDismissed) dismissIntro();
+  }, 6500);
+
+  // Clic en video o pantalla para omitir
+  video.style.cursor = 'pointer';
+  video.addEventListener('click', dismissIntro);
+  introScreen.addEventListener('click', (e) => {
+    if (e.target !== skipBtn) dismissIntro();
+  });
+
+  // Botón Saltar Intro
+  if (skipBtn) {
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissIntro();
+    });
+  }
+
+  // Tecla ESC para omitir
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !isDismissed) {
+      dismissIntro();
+    }
+  });
 }
 
 /**
@@ -1325,12 +1472,6 @@ function initHero3DModel() {
 
         syncSize();
         isHero3DModelLoaded = true;
-        const heroCanvas = document.getElementById('hero-3d-canvas');
-        if (heroCanvas) {
-          heroCanvas.style.clipPath = 'none';
-          heroCanvas.style.webkitClipPath = 'none';
-          heroCanvas.style.opacity = '1';
-        }
         triggerHero3DReveal();
       },
       (xhr) => {
@@ -2213,7 +2354,9 @@ function initHero3DModel() {
           heroUi.style.visibility = 'visible';
           heroUi.style.transform = `translateY(${-currentScrollLerp * 30}px)`;
           heroUi.style.pointerEvents = 'auto';
+          ensureHeroUiVisible();
         } else if (currentScrollLerp < T_REVEAL_START + 0.02) {
+          _isHeroUiEnsured = false;
           // Desvanecimiento suave justo cuando el punto láser emerge hacia Sección 01 (0.08 -> 0.10)
           const pFade = (currentScrollLerp - T_REVEAL_START) / 0.02;
           const uiOpacity = Math.max(0, 1.0 - pFade);
@@ -2223,6 +2366,7 @@ function initHero3DModel() {
           heroUi.style.transform = `translateY(${-currentScrollLerp * 30}px)`;
           heroUi.style.pointerEvents = uiOpacity < 0.1 ? 'none' : 'auto';
         } else {
+          _isHeroUiEnsured = false;
           heroUi.style.display = 'none';
           heroUi.style.opacity = '0';
           heroUi.style.visibility = 'hidden';
@@ -3248,6 +3392,12 @@ function triggerStrokeTextEffect() {
       heroUi.style.visibility = 'hidden';
       heroUi.style.pointerEvents = 'none';
     }
+    const canvas = document.getElementById('hero-3d-canvas');
+    if (canvas) {
+      canvas.style.clipPath = 'none';
+      canvas.style.webkitClipPath = 'none';
+    }
+    isHero3DRevealed = true;
     return;
   }
 
@@ -3349,17 +3499,31 @@ function triggerHero3DReveal() {
   }
 
   isHero3DRevealed = true;
-
-  canvas.style.clipPath = 'none';
-  canvas.style.webkitClipPath = 'none';
   canvas.style.opacity = '1';
 
   if (typeof gsap !== 'undefined') {
-    gsap.to(canvas, {
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power2.out'
-    });
+    const clipProgress = { val: 50 };
+    gsap.fromTo(clipProgress,
+      { val: 50 },
+      {
+        val: 0,
+        duration: 1.5,
+        ease: 'power3.inOut',
+        onUpdate: () => {
+          const p = clipProgress.val.toFixed(2);
+          const clip = `inset(0% ${p}% 0% ${p}%)`;
+          canvas.style.clipPath = clip;
+          canvas.style.webkitClipPath = clip;
+        },
+        onComplete: () => {
+          canvas.style.clipPath = 'none';
+          canvas.style.webkitClipPath = 'none';
+        }
+      }
+    );
+  } else {
+    canvas.style.clipPath = 'none';
+    canvas.style.webkitClipPath = 'none';
   }
 }
 
@@ -3405,10 +3569,34 @@ function triggerCurtainRevealEffect() {
       }
     }
     if (microCta) {
-      gsap.fromTo(microCta,
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.45, ease: "power2.out" }
-      );
+      const ctaProgress = { bottom: 100, y: -8, opacity: 0 };
+      gsap.set(microCta, {
+        opacity: 0,
+        y: -8,
+        clipPath: 'inset(0% 0% 100% 0%)',
+        webkitClipPath: 'inset(0% 0% 100% 0%)'
+      });
+      tl.to(ctaProgress, {
+        bottom: 0,
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power3.out",
+        onUpdate: () => {
+          const b = ctaProgress.bottom.toFixed(2);
+          const clip = `inset(0% 0% ${b}% 0%)`;
+          microCta.style.clipPath = clip;
+          microCta.style.webkitClipPath = clip;
+          microCta.style.opacity = ctaProgress.opacity;
+          microCta.style.transform = `translateY(${ctaProgress.y}px)`;
+        },
+        onComplete: () => {
+          microCta.style.clipPath = 'none';
+          microCta.style.webkitClipPath = 'none';
+          microCta.style.opacity = '1';
+          microCta.style.transform = '';
+        }
+      }, 0.95);
     }
   } else {
     if (left) left.style.opacity = '1';
@@ -3419,12 +3607,25 @@ function triggerCurtainRevealEffect() {
         curtainRect.setAttribute('height', '270');
       }
     }
-    if (microCta) microCta.style.opacity = '1';
+    if (microCta) {
+      microCta.style.opacity = '1';
+      microCta.style.clipPath = 'none';
+      microCta.style.webkitClipPath = 'none';
+    }
   }
 }
 
-// ==================== REACT BITS PILLNAV MAGNETIC HOVER EFFECT ====================
+// ==================== REACT BITS PILLNAV MAGNETIC HOVER EFFECT & HERO CTA ====================
 document.addEventListener('DOMContentLoaded', () => {
+  const heroCta = document.getElementById('hero-micro-cta');
+  if (heroCta) {
+    heroCta.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      scrollToSection2();
+    });
+  }
+
   const pillBtn = document.getElementById('header-pill-nav-btn');
   if (!pillBtn) return;
 
@@ -3925,6 +4126,120 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ==================== LOGO CLICK: SCROLL TO HERO (NO INTRO VIDEO) ====================
+/**
+ * Al hacer clic en el logo del header, siempre ir al Hero sin reproducir el video intro.
+ * - Si estamos en index.html: previene recarga, registra cooldown en localStorage para
+ *   saltarse el intro, y hace smooth scroll al top.
+ * - Si estamos en otra página: navega a index.html con el flag de skip en localStorage.
+ */
+function handleLogoClick(event) {
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
+
+  // 1. Registrar cooldown del intro para omitirlo siempre al volver al Hero
+  try {
+    localStorage.setItem('vectorinside_intro_last_played', String(Date.now()));
+    sessionStorage.setItem('vectorinside_scroll_pos', '0');
+    sessionStorage.setItem('vectorinside_inner_scroll_pos', '0');
+  } catch (e) {}
+
+  // 2. Si no estamos en index.html: navegar a index con cooldown registrado
+  const isOnIndex = window.location.pathname.endsWith('index.html') ||
+                    window.location.pathname.endsWith('/') ||
+                    window.location.pathname === '';
+  if (!isOnIndex) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const jumpId = (window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1);
+
+  // 3. Ocultar intro inmediatamente si existiera
+  const introScreen = document.getElementById('intro-screen');
+  if (introScreen) {
+    introScreen.style.display = 'none';
+    introScreen.style.opacity = '0';
+    introScreen.style.pointerEvents = 'none';
+  }
+
+  // 4. Resetear capas inferiores (Portales, Curtains, Scroll Containers)
+  window._isDiagnosticoActive = false;
+  window.__forceTimelineProgress = 0;
+  window.__forceTimelineUntil = performance.now() + 1200;
+  setTimeout(() => {
+    if (window.__activeNavJumpId === jumpId) window.__forceTimelineProgress = null;
+  }, 1400);
+
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  if (container) container.scrollTop = 0;
+
+  const secPortal = document.getElementById('seccion-portal-revelada');
+  if (secPortal) {
+    secPortal.scrollTop = 0;
+    secPortal.style.opacity = '0';
+    secPortal.style.filter = 'blur(20px)';
+    secPortal.style.clipPath = 'inset(50% 50% 50% 50%)';
+    secPortal.style.pointerEvents = 'none';
+  }
+
+  const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+  if (expandWrapper) {
+    expandWrapper.style.opacity = '0';
+    expandWrapper.style.filter = 'blur(20px)';
+    expandWrapper.style.pointerEvents = 'none';
+  }
+
+  const expandBody = document.getElementById('scroll-expand-body');
+  if (expandBody) {
+    expandBody.style.opacity = '0';
+    expandBody.style.visibility = 'hidden';
+    expandBody.style.pointerEvents = 'none';
+  }
+  if (typeof isSec3BodyRevealed !== 'undefined') isSec3BodyRevealed = false;
+
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  if (metodologiaWrapper) {
+    metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+    metodologiaWrapper.style.pointerEvents = 'none';
+  }
+
+  const diagSec = document.getElementById('sec-06-diagnostico');
+  if (diagSec) {
+    diagSec.style.opacity = '0';
+    diagSec.style.pointerEvents = 'none';
+  }
+
+  const globalHeader = document.getElementById('main-global-header');
+  if (globalHeader) {
+    globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark', 'glass-nav-transparent-section05');
+    globalHeader.classList.add('glass-nav-hero-transparent');
+  }
+
+  if (typeof updateActiveDockItem === 'function') updateActiveDockItem(null);
+
+  // 5. Garantizar textos y elementos del Hero visibles
+  ensureHeroUiVisible(true);
+
+  // 6. Posicionar la ventana en 0 y fijar por frames
+  window.scrollTo(0, 0);
+
+  const apply = () => {
+    if (window.__activeNavJumpId !== jumpId) return;
+    window.scrollTo(0, 0);
+    ensureHeroUiVisible(true);
+  };
+
+  const deadline = performance.now() + 1200;
+  const pin = () => {
+    if (window.__activeNavJumpId !== jumpId) return;
+    apply();
+    if (performance.now() < deadline) requestAnimationFrame(pin);
+  };
+  requestAnimationFrame(pin);
+  [0, 50, 100, 200, 350, 600, 900, 1200].forEach((t) => setTimeout(apply, t));
+}
+window.handleLogoClick = handleLogoClick;
+
 // ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 (MANIFIESTO) ====================
 function scrollToSection2() {
   const track = document.getElementById('hero-scroll-track');
@@ -3932,7 +4247,7 @@ function scrollToSection2() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  const targetY = trackTop + maxScroll * 0.26; // Land cleanly inside Section 2 Manifesto reading & video scrub mode (0.16 -> 0.36)
+  const targetY = trackTop + maxScroll * 0.17; // T_REVEAL_END = 0.16 → sección 100% abierta, inicio del video scrub
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3967,8 +4282,9 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al raw 55%: Smartphone 3D centrado frontalmente (p = 0.62)
-  const targetY = trackTop + maxScroll * 0.55;
+  // Posición al 62%: T_PHONE_ZOOM_END — Smartphone 3D completamente centrado y frontal
+  // con el kinetic text "Vector Inside /" visible de fondo (imagen de referencia)
+  const targetY = trackTop + maxScroll * 0.62;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3996,39 +4312,132 @@ function scrollToSection3() {
 }
 window.scrollToSection3 = scrollToSection3;
 
-// ==================== CINEMATIC SMOOTH SCROLL TO SECTION 03 (EJECUCIÓN) ====================
-function scrollToSectionEjecucion() {
-  const track = document.getElementById('hero-scroll-track');
-  if (!track) return;
-  const trackRect = track.getBoundingClientRect();
-  const trackTop = window.scrollY + trackRect.top;
-  const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al raw 96%: ScrollExpand completamente abierto a pantalla completa
-  const targetY = trackTop + maxScroll * 0.96;
+// ==================== CINEMATIC JUMP TO 03 // EVIDENCIA (PORTADA / EXPAND COVER) ====================
+function scrollToSectionEjecucion(e) {
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-  const startY = window.scrollY;
-  const distance = targetY - startY;
-  const duration = 1800; // 1.8s smooth cinematic glide
-  let startTime = null;
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
+  const mainTrack = document.getElementById('hero-scroll-track');
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  const stage = document.getElementById('sec-metodologia-stage');
+  const diagSec = document.getElementById('sec-06-diagnostico');
+  const diagDot = document.getElementById('diag-reveal-dot');
+  const diagLine = document.getElementById('diag-reveal-line');
+  const cierreSec = document.getElementById('sec-07-cierre-footer');
+  const globalHeader = document.getElementById('main-global-header');
+  const sec3Wrapper = document.getElementById('sec-matriz-25-wrapper');
+  const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+  const expandFrame = document.getElementById('scroll-expand-frame');
+  const expandVideo = document.getElementById('scroll-expand-video');
+  const expandBody = document.getElementById('scroll-expand-body');
 
-  function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
-
-  function step(currentTime) {
-    if (!startTime) startTime = currentTime;
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1.0);
-    const easeProgress = easeInOutCubic(progress);
-
-    window.scrollTo(0, startY + distance * easeProgress);
-
-    if (progress < 1.0) {
-      requestAnimationFrame(step);
+  window._isDiagnosticoActive = false;
+  window.__forceTimelineProgress = 0.96;
+  window.__forceTimelineUntil = performance.now() + 1400;
+  setTimeout(() => {
+    if (window.__activeNavJumpId === jumpId) {
+      window.__forceTimelineProgress = null;
     }
+  }, 1600);
+
+  const resetToEvidenciaCover = () => {
+    // 1. Reset inner scroll of execution container to top (Stage 1 cover)
+    if (container) {
+      container.scrollTop = 0;
+    }
+    try {
+      sessionStorage.setItem('vectorinside_inner_scroll_pos', '0');
+    } catch (err) {}
+
+    // 2. Hide Section 04 Metodología curtain completely
+    if (metodologiaWrapper) {
+      metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+      metodologiaWrapper.style.pointerEvents = 'none';
+    }
+    if (stage) {
+      stage.style.opacity = '0';
+      stage.style.pointerEvents = 'none';
+    }
+
+    // 3. Hide Diagnóstico & Cierre
+    if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+    if (diagDot) diagDot.style.opacity = '0';
+    if (diagLine) diagLine.style.opacity = '0';
+    if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+
+    // 4. Section 03 Matrix wrapper
+    if (sec3Wrapper) {
+      sec3Wrapper.style.opacity = '1';
+      sec3Wrapper.style.transform = 'none';
+      sec3Wrapper.style.pointerEvents = 'auto';
+    }
+
+    // 5. Expand portal full screen & reveal cover
+    if (expandWrapper) {
+      expandWrapper.style.opacity = '1';
+      expandWrapper.style.filter = 'none';
+      expandWrapper.style.pointerEvents = 'auto';
+    }
+    if (expandFrame) {
+      expandFrame.style.width = '100vw';
+      expandFrame.style.height = '100vh';
+      expandFrame.style.borderRadius = '0px';
+    }
+    if (expandVideo) {
+      expandVideo.style.transform = 'scale(1)';
+      if (expandVideo.paused) {
+        expandVideo.play().catch(() => {});
+      }
+    }
+    if (expandBody) {
+      expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.webkitClipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.opacity = '1';
+      expandBody.style.visibility = 'visible';
+      expandBody.style.pointerEvents = 'auto';
+      expandBody.style.transform = 'translateY(0)';
+      isSec3BodyRevealed = true;
+    }
+
+    // 6. Set header to dark cyberpunk glass
+    if (globalHeader) {
+      globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent-section05', 'glass-nav-hero-transparent');
+      globalHeader.classList.add('glass-nav-dark');
+    }
+
+    // 7. Update dock active item (03 // EVIDENCIA)
+    if (typeof updateActiveDockItem === 'function') {
+      updateActiveDockItem(2);
+    }
+  };
+
+  if (!mainTrack) {
+    resetToEvidenciaCover();
+    return false;
   }
 
-  requestAnimationFrame(step);
+  const maxScroll = mainTrack.offsetHeight - window.innerHeight;
+  const targetY = Math.round(maxScroll * 0.96);
+
+  window.scrollTo(0, targetY);
+
+  const apply = () => {
+    if (window.__activeNavJumpId !== jumpId) return;
+    window.scrollTo(0, targetY);
+    resetToEvidenciaCover();
+  };
+
+  const deadline = performance.now() + 1500;
+  const pin = () => {
+    if (window.__activeNavJumpId !== jumpId) return;
+    apply();
+    if (performance.now() < deadline) requestAnimationFrame(pin);
+  };
+  requestAnimationFrame(pin);
+  [0, 50, 100, 200, 350, 600, 1000, 1400].forEach((t) => setTimeout(apply, t));
+  return false;
 }
 window.scrollToSectionEjecucion = scrollToSectionEjecucion;
 
@@ -4278,6 +4687,8 @@ window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 // final full-screen size, and pin the internal scroll INSIDE the sticky range.
 function scrollToMetodologia(e) {
   if (e && typeof e.preventDefault === 'function') e.preventDefault();
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
@@ -4345,9 +4756,23 @@ function scrollToMetodologia(e) {
   if (!container) { revealCurtain(); return false; }
 
   const internalTarget = () => {
-    if (!matrixTrack) return 3000;
-    const scrollable = matrixTrack.offsetHeight - container.clientHeight;
-    return Math.round(matrixTrack.offsetTop + Math.max(0, scrollable) * 0.22);
+    // La curtain de Metodología es sticky top-0 z-20 dentro de sec-ejecucion-scroll-container.
+    // Para verla limpiamente desde arriba, el scrollTop del container debe ser igual
+    // al offsetTop del sec-metodologia-wrapper relativo al container de ejecución.
+    const metodWrapper = document.getElementById('sec-metodologia-wrapper');
+    if (metodWrapper && container) {
+      // Calcula el offsetTop relativo al container de ejecución
+      let el = metodWrapper;
+      let offsetTop = 0;
+      while (el && el !== container) {
+        offsetTop += el.offsetTop;
+        el = el.offsetParent;
+      }
+      if (offsetTop > 0) return offsetTop;
+    }
+    // Fallback: el track tiene ~520vh; metodología empieza después de la galería (1 pantalla)
+    if (!matrixTrack) return window.innerHeight * 2;
+    return Math.max(0, matrixTrack.offsetTop + window.innerHeight);
   };
 
   if (mainTrack) {
@@ -4356,11 +4781,14 @@ function scrollToMetodologia(e) {
 
     window.__forceTimelineProgress = 0.995;
     window.__forceTimelineUntil = performance.now() + 1400;
-    setTimeout(() => { window.__forceTimelineProgress = null; }, 1600);
+    setTimeout(() => {
+      if (window.__activeNavJumpId === jumpId) window.__forceTimelineProgress = null;
+    }, 1600);
 
     window.scrollTo(0, targetY); // instant — smooth loses the race here
 
     const apply = () => {
+      if (window.__activeNavJumpId !== jumpId) return;
       window.scrollTo(0, targetY);
       forceFullScreenFrame();
       container.scrollTop = internalTarget();
@@ -4368,11 +4796,14 @@ function scrollToMetodologia(e) {
     };
     const deadline = performance.now() + 1500;
     const pin = () => {
+      if (window.__activeNavJumpId !== jumpId) return;
       apply();
       if (performance.now() < deadline) requestAnimationFrame(pin);
     };
     requestAnimationFrame(pin);
-    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(apply, t));
+    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(() => {
+      if (window.__activeNavJumpId === jumpId) apply();
+    }, t));
   } else {
     forceFullScreenFrame();
     container.scrollTop = internalTarget();
@@ -4921,6 +5352,8 @@ function initDiagnosticoTest() {
 /** Dock link handler: jump straight to the 06 // Diagnóstico test (no page nav). */
 function scrollToDiagnostico(e) {
   if (e && e.preventDefault) e.preventDefault();
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
@@ -5010,11 +5443,14 @@ function scrollToDiagnostico(e) {
 
     window.__forceTimelineProgress = 0.995;
     window.__forceTimelineUntil = performance.now() + 1400;
-    setTimeout(() => { window.__forceTimelineProgress = null; }, 1600);
+    setTimeout(() => {
+      if (window.__activeNavJumpId === jumpId) window.__forceTimelineProgress = null;
+    }, 1600);
 
     window.scrollTo(0, targetY);
 
     const apply = () => {
+      if (window.__activeNavJumpId !== jumpId) return;
       window.scrollTo(0, targetY);
       forceFullScreenFrame();
       if (container) container.scrollTop = internalTarget();
@@ -5022,11 +5458,14 @@ function scrollToDiagnostico(e) {
     };
     const deadline = performance.now() + 1500;
     const pin = () => {
+      if (window.__activeNavJumpId !== jumpId) return;
       apply();
       if (performance.now() < deadline) requestAnimationFrame(pin);
     };
     requestAnimationFrame(pin);
-    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(apply, t));
+    [0, 60, 150, 300, 550, 900, 1400].forEach((t) => setTimeout(() => {
+      if (window.__activeNavJumpId === jumpId) apply();
+    }, t));
   } else {
     forceFullScreenFrame();
     if (container) container.scrollTop = internalTarget();
