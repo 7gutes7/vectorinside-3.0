@@ -28,6 +28,17 @@ function restoreCurrentScrollPosition() {
 // Restore immediately on script execution
 restoreCurrentScrollPosition();
 
+// Si al cargar o refrescar no estamos en el Hero, ocultar inmediatamente los textos del Hero
+if ((window.scrollY || window.pageYOffset || 0) > 80) {
+  const earlyHeroUi = document.getElementById('hero-ui-content');
+  if (earlyHeroUi) {
+    earlyHeroUi.style.display = 'none';
+    earlyHeroUi.style.opacity = '0';
+    earlyHeroUi.style.visibility = 'hidden';
+    earlyHeroUi.style.pointerEvents = 'none';
+  }
+}
+
 // Persist scroll position continuously and on pagehide/unload
 window.addEventListener('scroll', saveCurrentScrollPosition, { passive: true });
 window.addEventListener('beforeunload', saveCurrentScrollPosition);
@@ -36,6 +47,15 @@ window.addEventListener('pagehide', saveCurrentScrollPosition);
 document.addEventListener('DOMContentLoaded', () => {
   // Restore scroll without resetting to Hero and align Hero SVG text
   restoreCurrentScrollPosition();
+  if ((window.scrollY || window.pageYOffset || 0) > 80) {
+    const earlyHeroUi = document.getElementById('hero-ui-content');
+    if (earlyHeroUi) {
+      earlyHeroUi.style.display = 'none';
+      earlyHeroUi.style.opacity = '0';
+      earlyHeroUi.style.visibility = 'hidden';
+      earlyHeroUi.style.pointerEvents = 'none';
+    }
+  }
   alignHeroDigitalText();
 
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
@@ -2178,15 +2198,32 @@ function initHero3DModel() {
         strokeTextWrapper.style.transform = `translateX(${shiftDistance.toFixed(1)}px) scale(${currentScale.toFixed(3)})`;
       }
 
+      // ==================== STRICT HERO UI VISIBILITY ====================
+      // "los textos del hero en cuanto desaparecen no vuelven a aparecer (ni haciendo refresh en otra seccion) solo visibles durante el hero"
       if (heroUi) {
-        const uiOpacity = Math.max(0, 1.0 - currentScrollLerp * 8.0);
-        heroUi.style.opacity = uiOpacity.toFixed(3);
-        heroUi.style.transform = `translateY(${-currentScrollLerp * 80}px) scale(${1.0 + currentScrollLerp * 0.08})`;
-        heroUi.style.pointerEvents = uiOpacity < 0.1 ? 'none' : 'auto';
+        if (currentScrollLerp <= 0.06) {
+          const uiOpacity = Math.max(0, 1.0 - currentScrollLerp * 16.6);
+          heroUi.style.display = uiOpacity > 0.01 ? 'flex' : 'none';
+          heroUi.style.opacity = uiOpacity.toFixed(3);
+          heroUi.style.visibility = uiOpacity > 0.01 ? 'visible' : 'hidden';
+          heroUi.style.transform = `translateY(${-currentScrollLerp * 80}px) scale(${1.0 + currentScrollLerp * 0.08})`;
+          heroUi.style.pointerEvents = uiOpacity < 0.1 ? 'none' : 'auto';
+        } else {
+          heroUi.style.display = 'none';
+          heroUi.style.opacity = '0';
+          heroUi.style.visibility = 'hidden';
+          heroUi.style.pointerEvents = 'none';
+        }
       }
 
       if (heroScrollHint) {
-        heroScrollHint.style.opacity = Math.max(0, 1.0 - currentScrollLerp * 10.0).toFixed(3);
+        if (currentScrollLerp <= 0.06) {
+          heroScrollHint.style.display = 'block';
+          heroScrollHint.style.opacity = Math.max(0, 1.0 - currentScrollLerp * 16.6).toFixed(3);
+        } else {
+          heroScrollHint.style.display = 'none';
+          heroScrollHint.style.opacity = '0';
+        }
       }
 
       // 5. Kinetic Section 2 Reveal & Exit Controller (Strict Sequence: Punto -> Línea -> Plano)
@@ -2353,7 +2390,14 @@ function initHero3DModel() {
         }
       }
     } else {
-      // --- Phase B: Section 3 Smartphone 3D Mode ---
+      // --- Phase B: Section 3 Smartphone 3D Mode & Posteriores ---
+      // Los textos del Hero nunca deben aparecer fuera del Hero
+      if (heroUi) {
+        heroUi.style.display = 'none';
+        heroUi.style.opacity = '0';
+        heroUi.style.visibility = 'hidden';
+        heroUi.style.pointerEvents = 'none';
+      }
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
 
@@ -3163,6 +3207,19 @@ window.addEventListener('resize', () => {
 });
 
 function triggerStrokeTextEffect() {
+  // Si no estamos en el Hero (ej. refresh en otra sección), NUNCA ejecutar ni mostrar textos del Hero
+  const currentY = window.scrollY || window.pageYOffset || 0;
+  if (currentY > 80 || (typeof currentScrollLerp !== 'undefined' && currentScrollLerp > 0.06)) {
+    const heroUi = document.getElementById('hero-ui-content');
+    if (heroUi) {
+      heroUi.style.display = 'none';
+      heroUi.style.opacity = '0';
+      heroUi.style.visibility = 'hidden';
+      heroUi.style.pointerEvents = 'none';
+    }
+    return;
+  }
+
   const wrapper = document.getElementById('stroke-text-wrapper');
   const strokePath = document.querySelector('.stroke-draw-path');
   const wipeRect = document.getElementById('stroke-wipe-rect');
