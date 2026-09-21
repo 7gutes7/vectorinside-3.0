@@ -184,7 +184,7 @@ function initPageVideoIntro() {
   const skipBtn = document.getElementById('skip-intro-btn');
 
   if (!introScreen || !video) {
-    setTimeout(triggerStrokeTextEffect, 300);
+    setTimeout(triggerStrokeTextEffect, 200);
     return;
   }
 
@@ -199,17 +199,24 @@ function initPageVideoIntro() {
   }
 
   let isDismissed = false;
+  let rafId = null;
 
   function dismissIntro() {
     if (isDismissed) return;
     isDismissed = true;
+    if (rafId) cancelAnimationFrame(rafId);
+
+    introScreen.style.transition = 'opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
     introScreen.style.opacity = '0';
     introScreen.style.pointerEvents = 'none';
+
+    // Iniciar de inmediato la animación del hero
+    triggerStrokeTextEffect();
+
     setTimeout(() => {
       introScreen.style.display = 'none';
       try { video.pause(); } catch (e) {}
-      triggerStrokeTextEffect();
-    }, 700);
+    }, 350);
   }
 
   // Reproducir video intro de inmediato (silenciado y con soporte autoplay)
@@ -221,18 +228,31 @@ function initPageVideoIntro() {
     });
   }
 
+  // Monitoreo de alta precisión con requestAnimationFrame para ocultar justo antes del frame estático final
+  function checkProgress() {
+    if (isDismissed) return;
+    if (video.duration && video.duration > 0) {
+      if (video.duration - video.currentTime <= 0.2) {
+        dismissIntro();
+        return;
+      }
+    }
+    rafId = requestAnimationFrame(checkProgress);
+  }
+  rafId = requestAnimationFrame(checkProgress);
+
   // Transición al finalizar el video
   video.addEventListener('ended', dismissIntro);
   video.addEventListener('timeupdate', () => {
-    if (video.duration && (video.duration - video.currentTime < 0.15)) {
+    if (video.duration && (video.duration - video.currentTime < 0.25)) {
       dismissIntro();
     }
   });
 
-  // Temporizador de seguridad (video dura ~5 seg)
+  // Temporizador de seguridad (video dura 5s)
   setTimeout(() => {
     if (!isDismissed) dismissIntro();
-  }, 6500);
+  }, 5200);
 
   // Clic en video o pantalla para omitir
   video.style.cursor = 'pointer';
