@@ -1869,6 +1869,66 @@ function initHero3DModel() {
   }
 
   let _vidTargetTime = 0;  // Target time calculated from scroll position
+
+  // Video scrubbing state & queue for Section 03 Evidencia (Glowing_particles_floating_in_space_20260921040136.mp4)
+  const sec3Vid = document.getElementById('scroll-expand-video');
+  let _sec3VidSeeking = false;
+  let _sec3VidPendingTime = null;
+
+  function seekSec3Video(targetTime) {
+    if (!sec3Vid) return;
+    if (sec3Vid.readyState < 1) {
+      _sec3VidPendingTime = targetTime;
+      return;
+    }
+    if (_sec3VidSeeking || sec3Vid.seeking) {
+      _sec3VidPendingTime = targetTime;
+      return;
+    }
+    _sec3VidSeeking = true;
+    _sec3VidPendingTime = null;
+
+    if ('fastSeek' in sec3Vid) {
+      try {
+        sec3Vid.fastSeek(targetTime);
+      } catch (e) {
+        sec3Vid.currentTime = targetTime;
+      }
+    } else {
+      sec3Vid.currentTime = targetTime;
+    }
+  }
+
+  if (sec3Vid) {
+    sec3Vid.muted = true;
+    sec3Vid.playsInline = true;
+    sec3Vid.setAttribute('muted', '');
+    sec3Vid.setAttribute('playsinline', '');
+    sec3Vid.setAttribute('webkit-playsinline', '');
+    try {
+      sec3Vid.pause();
+      sec3Vid.load();
+    } catch (e) {}
+
+    sec3Vid.addEventListener('seeked', () => {
+      _sec3VidSeeking = false;
+      if (_sec3VidPendingTime !== null) {
+        const nextTime = _sec3VidPendingTime;
+        _sec3VidPendingTime = null;
+        if (Math.abs(nextTime - sec3Vid.currentTime) > 0.025) {
+          seekSec3Video(nextTime);
+        }
+      }
+    });
+
+    sec3Vid.addEventListener('canplay', () => {
+      if (_sec3VidPendingTime !== null) {
+        const nextTime = _sec3VidPendingTime;
+        _sec3VidPendingTime = null;
+        seekSec3Video(nextTime);
+      }
+    });
+  }
   const targetEyePos = new THREE.Vector3(0.85, 0.40, 1.05); // Calibrated exact target for poligonal-30-08-26.glb
 
   // Bottom dock items helper
@@ -2621,6 +2681,33 @@ function initHero3DModel() {
     const ejecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
 
     if (expandWrapper && expandFrame && expandVideo) {
+      // Sincronización de reproducción del video con el scroll:
+      // Comienza desde el momento que la ventana pequeña aparece (0.865)
+      // y termina hasta reproducirse totalmente en pantalla completa (0.940)
+      const T_SEC3_VID_START = 0.865;
+      const T_SEC3_VID_END = 0.940;
+      const vid3Dur = (expandVideo.duration && !isNaN(expandVideo.duration) && expandVideo.duration > 0)
+        ? expandVideo.duration : 10.0;
+      let sec3VidTarget = 0;
+
+      if (currentScrollLerp < T_SEC3_VID_START) {
+        sec3VidTarget = 0;
+      } else if (currentScrollLerp <= T_SEC3_VID_END) {
+        const pVid3 = (currentScrollLerp - T_SEC3_VID_START) / (T_SEC3_VID_END - T_SEC3_VID_START);
+        sec3VidTarget = Math.max(0, Math.min(1.0, pVid3)) * vid3Dur;
+      } else {
+        sec3VidTarget = vid3Dur;
+      }
+
+      if (!expandVideo.paused) {
+        try { expandVideo.pause(); } catch(e) {}
+      }
+
+      const deltaVid3 = Math.abs(sec3VidTarget - expandVideo.currentTime);
+      if (deltaVid3 > 0.025) {
+        seekSec3Video(sec3VidTarget);
+      }
+
       if (currentScrollLerp < 0.865) {
         expandWrapper.style.opacity = '0';
         expandWrapper.style.filter = 'blur(20px)';
@@ -4125,7 +4212,10 @@ function scrollToMetodologia() {
       expandFrame.style.height = '100vh';
       expandFrame.style.borderRadius = '0px';
     }
-    if (expandVideo) expandVideo.style.transform = 'scale(1)';
+    if (expandVideo) {
+      expandVideo.style.transform = 'scale(1)';
+      expandVideo.currentTime = (expandVideo.duration && !isNaN(expandVideo.duration)) ? expandVideo.duration : 10.0;
+    }
     const expandBody = document.getElementById('scroll-expand-body');
     if (expandBody) {
       expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
@@ -4705,6 +4795,11 @@ function scrollToDiagnostico(e) {
       expandFrame.style.width = '100vw';
       expandFrame.style.height = '100vh';
       expandFrame.style.borderRadius = '0px';
+    }
+    const expandVideo = document.getElementById('scroll-expand-video');
+    if (expandVideo) {
+      expandVideo.style.transform = 'scale(1)';
+      expandVideo.currentTime = (expandVideo.duration && !isNaN(expandVideo.duration)) ? expandVideo.duration : 10.0;
     }
     const expandBody = document.getElementById('scroll-expand-body');
     if (expandBody) {

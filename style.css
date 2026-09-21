@@ -688,6 +688,10 @@ body {
   will-change: clip-path, -webkit-clip-path, opacity, transform;
 }
 
+#scroll-explore-prompt {
+  margin-top: clamp(3.25rem, 6vh, 4.25rem);
+}
+
 
 /* ==================== 06 // DIAGNÓSTICO LASER POINT -> HORIZONTAL LINE -> VERTICAL PLANE REVEAL ==================== */
 #sec-06-diagnostico {
