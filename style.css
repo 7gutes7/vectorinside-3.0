@@ -376,19 +376,18 @@ body {
   background-size: 64px 64px;
 }
 
-/* Intro Video & Screen Overlay (Compact 50% Scale with Black Surroundings) */
-.skip-intro-cached #intro-screen {
-  display: none !important;
-}
-
+/* Intro Video & Screen Overlay (Hidden) */
+.skip-intro-cached #intro-screen,
 #intro-screen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
   background-color: #000000 !important;
 }
 
 #intro-video {
+  display: none !important;
   width: 50vw;
   height: 50vh;
   max-width: 50vw;
@@ -413,9 +412,9 @@ body {
   object-fit: contain;
   overflow: visible !important;
   filter: drop-shadow(0 0 50px rgba(82, 39, 255, 0.4));
-  clip-path: inset(0% 50% 0% 50%);
-  -webkit-clip-path: inset(0% 50% 0% 50%);
-  opacity: 0;
+  clip-path: none;
+  -webkit-clip-path: none;
+  opacity: 1;
 }
 
 .hero-overlay-gradient {
@@ -680,6 +679,16 @@ body {
   background: rgba(195, 244, 0, 0.85);
 }
 
+/* ==================== 03 // EJECUCIÓN Y EVIDENCIA: TOP-TO-BOTTOM CURTAIN REVEAL ==================== */
+#scroll-expand-body {
+  clip-path: inset(0 0 100% 0);
+  -webkit-clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  visibility: hidden;
+  will-change: clip-path, -webkit-clip-path, opacity, transform;
+}
+
+
 /* ==================== 06 // DIAGNÓSTICO LASER POINT -> HORIZONTAL LINE -> VERTICAL PLANE REVEAL ==================== */
 #sec-06-diagnostico {
   position: absolute;
@@ -849,17 +858,19 @@ body {
 
 /* ==================== HERO OUTLINE TEXT LEGIBILITY ENHANCEMENT ==================== */
 .stroke-draw-path {
-  stroke-width: 4.5px !important;
+  stroke-width: 2.5px !important;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.95))
           drop-shadow(0 0 20px rgba(0, 0, 0, 0.85)) !important;
 }
 
 #hero-micro-cta {
+  background-color: rgba(8, 8, 8, 0.50) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, box-shadow;
 }
 
 #hero-micro-cta:hover {
+  background-color: rgba(8, 8, 8, 0.85) !important;
   transform: translateY(-2px);
 }
 

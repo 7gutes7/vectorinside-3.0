@@ -25,7 +25,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.272" />
+  <link rel="stylesheet" href="style.css?v=3.0.278" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -117,21 +117,19 @@
     </div>
   </header>
 
-  <!-- ==================== FIXED BOTTOM NAVIGATION DOCK (01 - 06) ==================== -->
+  <!-- ==================== FIXED BOTTOM NAVIGATION DOCK (01 - 05) ==================== -->
   <nav id="bottom-dock-nav"
     class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99] flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 liquid-glass-dock rounded-full font-display font-black text-[10.5px] sm:text-xs tracking-[0.18em] uppercase max-w-[95vw] overflow-x-auto scrollbar-none transition-all">
     <a href="javascript:void(0)" onclick="scrollToSection2()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // Manifiesto</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">01 // IDENTIDAD</a>
     <a href="javascript:void(0)" onclick="scrollToSection3()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // Ecosistema</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">02 // PLATAFORMA</a>
     <a href="javascript:void(0)" onclick="scrollToSectionEjecucion()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // Ejecución</a>
-    <a href="javascript:void(0)" onclick="scrollToGaleriaFlotante()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Evidencia</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">03 // Ejecución y Evidencia</a>
     <a href="javascript:void(0)" onclick="scrollToMetodologia()"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Metodología</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">04 // Metodología</a>
     <a href="javascript:void(0)" onclick="return scrollToDiagnostico(event)" id="dock-item-diagnostico"
-      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">06 // Diagnóstico</a>
+      class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // Diagnóstico</a>
   </nav>
 
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
@@ -163,7 +161,7 @@
         <!-- Symmetrical Dual Flank Grid: 50% Left Column & 50% Right Column aligned to Margin Guides -->
         <div class="w-full grid grid-cols-2 gap-0 my-auto pointer-events-none">
 
-          <!-- Left Flank: IMPACTO COMERCIAL (Right-aligned to the left margin line) -->
+          <!-- Left Flank: DISEÑO DE MARCA (Right-aligned to the left margin line) -->
           <div class="flex flex-col items-end justify-center text-right pointer-events-auto">
             <h1
               class="font-display font-black tracking-tighter uppercase leading-[0.90] drop-shadow-sm text-right text-slate-900 flex flex-col items-end">
@@ -172,38 +170,38 @@
                 <svg viewBox="0 0 540 180" class="w-full h-auto block overflow-visible">
                   <defs>
                     <clipPath id="stroke-text-clip">
-                      <!-- IMPACTO: Relleno al 70% superior (y: 0 a 56) -->
+                      <!-- DISEÑO: Relleno al 70% superior (y: 0 a 56) -->
                       <rect id="stroke-wipe-rect" class="stroke-wipe-anim" x="0" y="0" width="0%" height="56" />
-                      <!-- COMERCIAL: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
+                      <!-- DE MARCA: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
                       <rect id="stroke-wipe-rect-2" class="stroke-wipe-anim" x="0" y="114" width="0%" height="66" />
                     </clipPath>
                   </defs>
                   <!-- Outline stroke layer for both words with enhanced visibility -->
                   <text class="stroke-draw-path font-display font-black" font-size="95" font-weight="900"
-                    letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-dasharray="3500"
+                    letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="3500"
                     stroke-dashoffset="3500">
-                    <tspan id="hero-word-impacto-stroke" x="0" y="75" text-anchor="start">IMPACTO</tspan>
-                    <tspan x="530" y="155" text-anchor="end">COMERCIAL</tspan>
+                    <tspan id="hero-word-impacto-stroke" x="0" y="75" text-anchor="start">DISEÑO</tspan>
+                    <tspan x="530" y="155" text-anchor="end">DE MARCA</tspan>
                   </text>
                   <!-- Fill layer for both words with inverted split clip -->
                   <text class="stroke-fill-path font-display font-black" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
-                    <tspan id="hero-word-impacto-fill" x="0" y="75" text-anchor="start">IMPACTO</tspan>
-                    <tspan x="530" y="155" text-anchor="end">COMERCIAL</tspan>
+                    <tspan id="hero-word-impacto-fill" x="0" y="75" text-anchor="start">DISEÑO</tspan>
+                    <tspan x="530" y="155" text-anchor="end">DE MARCA</tspan>
                   </text>
-                  <!-- Chromatic glitch clones for IMPACTO -->
+                  <!-- Chromatic glitch clones for DISEÑO -->
                   <text id="hero-impacto-glitch-cyan" x="0" y="75" text-anchor="start"
                     class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="#00E5FF" opacity="0" pointer-events="none"
-                    aria-hidden="true">IMPACTO</text>
+                    aria-hidden="true">DISEÑO</text>
                   <text id="hero-impacto-glitch-magenta" x="0" y="75" text-anchor="start"
                     class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="#FF0055" opacity="0" pointer-events="none"
-                    aria-hidden="true">IMPACTO</text>
+                    aria-hidden="true">DISEÑO</text>
                   <text id="hero-impacto-glitch-lime" x="0" y="75" text-anchor="start"
                     class="font-display font-black impacto-glitch-clone" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="#C3F400" opacity="0" pointer-events="none"
-                    aria-hidden="true">IMPACTO</text>
+                    aria-hidden="true">DISEÑO</text>
                 </svg>
               </div>
             </h1>
@@ -230,8 +228,8 @@
 
               <!-- Central Action Anchor / Micro Explore CTA below right flank -->
               <a href="#seccion-portal-revelada" onclick="scrollToSection2(); return false;" id="hero-micro-cta"
-                class="mt-3.5 sm:mt-4.5 inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-vector-black/85 hover:bg-vector-black border border-white/20 hover:border-vector-lime text-white hover:text-vector-lime rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_0_24px_rgba(195,244,0,0.45)] backdrop-blur-md group pointer-events-auto cursor-pointer select-none">
-                <span>EXPLORAR MANIFIESTO</span>
+                class="mt-3.5 sm:mt-4.5 inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-vector-black/50 hover:bg-vector-black border border-white/20 hover:border-vector-lime text-white hover:text-vector-lime rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_0_24px_rgba(195,244,0,0.45)] backdrop-blur-md group pointer-events-auto cursor-pointer select-none">
+                <span>EXPERIENCIA VI</span>
                 <span
                   class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/10 group-hover:bg-vector-lime group-hover:text-vector-black text-white transition-all duration-300">
                   <svg class="w-2.5 h-2.5 transform group-hover:translate-y-0.5 transition-transform duration-300"
@@ -265,13 +263,16 @@
         class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-4 sm:px-6 flex flex-col justify-between bg-white text-vector-black opacity-0 pointer-events-none transition-none shadow-2xl">
 
         <!-- Top Meta Badge -->
-        <div class="relative z-10 max-w-7xl w-full mx-auto flex items-center justify-between border-b border-black/15 pb-4">
+        <div
+          class="relative z-10 max-w-7xl w-full mx-auto flex items-center justify-between border-b border-black/15 pb-4">
           <div class="flex items-center gap-3">
             <span
               class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-black">
-              01 // MANIFIESTO NUCLEO
+              01 // IDENTIDAD
             </span>
-            <span class="text-neutral-600 font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">// DENTRO DE LA
+            <span
+              class="text-neutral-600 font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
+              DENTRO DE LA
               VISIÓN VECTOR</span>
           </div>
         </div>
@@ -283,9 +284,7 @@
 
             <!-- Left Background Video Layer (Pinned to left, shifted -50px left, fades to white towards right) -->
             <div class="absolute inset-y-0 left-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none z-0">
-              <video id="section2-manifesto-video"
-                src="Animar_imagen_720.mp4"
-                muted playsinline preload="auto"
+              <video id="section2-manifesto-video" src="Animar_imagen_720.mp4" muted playsinline preload="auto"
                 class="w-[calc(100%+50px)] max-w-none h-full object-cover object-left block -translate-x-[50px]"></video>
               <!-- Gradient Overlay: Smooth fade into pure white towards the right -->
               <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white pointer-events-none">
@@ -400,18 +399,12 @@
           <div class="flex items-center gap-3">
             <span
               class="font-display text-xs font-black text-vector-lime bg-vector-black px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime/40">
-              02 // ECOSISTEMA NUCLEO
+              02 // PLATAFORMA
             </span>
             <span
               class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
-              ARQUITECTURA DE CONVERSIÓN EN TIEMPO
-              REAL</span>
+              ARQUITECTURA DE CONVERSIÓN</span>
           </div>
-          <span
-            class="font-display text-xs font-black uppercase tracking-[0.20em] text-vector-lime flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-vector-lime animate-pulse"></span>
-            <span>MOTOR ACTIVO</span>
-          </span>
         </div>
 
         <!-- Section 3 Cascading Dual-Column Stream with Internal Scroll (Horizontally Compressed) -->
@@ -434,21 +427,15 @@
                       // NÚCLEO
                       ESTRUCTURAL</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">LATENCIA OPERATIVA: 240ms</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
-                  ARQUITECTURA <span class="text-vector-lime">DE MANDO</span>
+                  DIRECCIÓN <span class="text-vector-lime">ESTRATÉGICA</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Cada interacción está interconectada. Eliminamos las fugas de leads y aceleramos el paso de prospecto
                   a
                   cliente de alto valor.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>REDUCCIÓN DE ENTROPÍA</span>
-                  <span class="text-vector-lime font-bold">41.7%</span>
-                </div>
               </div>
 
               <!-- Card 03 (Col 1, Item 2) -->
@@ -462,20 +449,14 @@
                       // MOTOR
                       DE CONVERSIÓN</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">RIESGO ESTRUCTURAL: 3.8%</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
-                  INTERVENCIÓN <span class="text-vector-lime">QUIRÚRGICA</span>
+                  CORRECCIÓN <span class="text-vector-lime">DE TRAYECTORIA</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Arquitectura de captura y cierre adaptativo que califica y enruta automáticamente las oportunidades de
                   negocio en segundos.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>RECUPERACIÓN DE MARGEN</span>
-                  <span class="text-vector-lime font-bold">14.2%</span>
-                </div>
               </div>
 
               <!-- Card 05 (Col 1, Item 4) -->
@@ -489,20 +470,14 @@
                       //
                       ORQUESTACIÓN DE DATOS</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">PIPELINES 24/7</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
                   PIPELINES <span class="text-vector-lime">& CRM PREDICTIVO</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Sincronización bidireccional continua entre marketing, ventas y analítica que reduce el trabajo manual
                   en un 70%.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>REDUCCIÓN TRABAJO MANUAL</span>
-                  <span class="text-vector-lime font-bold">-70% TIEMPO</span>
-                </div>
               </div>
 
             </div>
@@ -521,20 +496,14 @@
                       //
                       SINCRONIZACIÓN TOTAL</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">VELOCIDAD DE RUTA: 1.2s</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
-                  PROCESAMIENTO <span class="text-operative-purple">COGNITIVO</span>
+                  DINÁMICA <span class="text-operative-purple">DE ELECCIÓN</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Automatización inteligente que conecta WhatsApp, CRM y analítica predictiva en un único flujo continuo
                   sin intervención manual.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>INTEGRACIÓN DE NODOS</span>
-                  <span class="text-operative-purple font-bold">94.6%</span>
-                </div>
               </div>
 
               <!-- Card 04 (Col 2, Item 3) -->
@@ -548,20 +517,14 @@
                       //
                       INTELIGENCIA OPERATIVA</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">PRECISIÓN DIAGNÓSTICA: 97.1%</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
-                  ESCRUTINIO <span class="text-operative-purple">FORENSE</span>
+                  MONITOREO <span class="text-operative-purple">ACTIVO</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Monitoreo permanente de salud estructural, cuellos de botella y rendimiento de conversión con reportes
                   accionables.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>VULNERABILIDADES AISLADAS</span>
-                  <span class="text-vector-lime font-bold">03</span>
-                </div>
               </div>
 
               <!-- Card 06 (Col 2, Item 5) -->
@@ -575,20 +538,14 @@
                       //
                       ESCALABILIDAD MODULAR</span>
                   </div>
-                  <span class="font-mono text-[10px] text-text-muted">EXPANSIÓN 3.4x</span>
                 </div>
                 <h3 class="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-white mb-2">
                   CRECIMIENTO <span class="text-operative-purple">EXPONENCIAL</span>
                 </h3>
-                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed mb-3">
+                <p class="font-body text-xs sm:text-[13px] text-text-muted leading-relaxed">
                   Infraestructura tridimensional desacoplada que permite escalar el volumen transaccional sin fricción
                   operativa.
                 </p>
-                <div
-                  class="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[10px] sm:text-[11px] text-neutral-400">
-                  <span>VELOCIDAD DE CIERRE</span>
-                  <span class="text-operative-purple font-bold">3.4x ACELERADA</span>
-                </div>
               </div>
 
             </div>
@@ -607,12 +564,13 @@
           class="relative overflow-hidden border border-vector-lime/40 shadow-[0_0_90px_rgba(195,244,0,0.22),0_30px_100px_rgba(0,0,0,0.95)] bg-vector-black flex flex-col justify-between transition-none will-change-transform"
           style="width: 44vw; height: 58vh; border-radius: 24px;">
 
-          <!-- Inner Background Media (Video Dashboard with scale 1.35 -> 1.0) -->
+          <!-- Inner Background Media (Glowing Particles Floating in Space with scale 1.35 -> 1.0) -->
           <div id="scroll-expand-media-wrapper"
             class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
             <video id="scroll-expand-video"
-              data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1786506102/dashboard.mp4" loop muted
-              playsinline preload="none"
+              src="Glowing_particles_floating_in_space_20260921040136.mp4"
+              data-lazy-src="Glowing_particles_floating_in_space_20260921040136.mp4" autoplay loop muted
+              playsinline preload="auto"
               class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
             <!-- Overlay Scrim Gradient for high contrast -->
             <div id="scroll-expand-scrim"
@@ -620,38 +578,22 @@
             </div>
           </div>
 
-          <!-- Internal Scrollable Container for 03 // EJECUCIÓN -->
+          <!-- Internal Scrollable Container for 03 // EJECUCIÓN Y EVIDENCIA -->
           <div id="sec-ejecucion-scroll-container"
             class="relative z-20 w-full h-full overflow-y-auto custom-scrollbar flex flex-col justify-between pointer-events-auto">
 
-            <!-- Sticky Top Meta Header -->
-            <div id="scroll-expand-header"
-              class="sticky top-0 z-30 w-full p-4 sm:p-5 px-6 sm:px-8 flex items-center justify-between border-b border-white/15 backdrop-blur-xl bg-vector-black/80">
-              <div class="flex items-center gap-3">
+            <!-- Stage 1: Main Cover Content for 03 // Ejecución y Evidencia -->
+            <div id="scroll-expand-body"
+              class="relative z-20 max-w-6xl w-full mx-auto px-6 sm:px-10 py-12 sm:py-16 flex flex-col justify-center items-start text-left min-h-screen">
+
+              <div class="flex items-center gap-3 mb-4">
                 <span
                   class="font-display text-xs font-black text-vector-black bg-vector-lime px-3 py-1 uppercase tracking-[0.20em] border border-vector-lime">
-                  03 // EJECUCIÓN
+                  03 // EJECUCIÓN Y EVIDENCIA
                 </span>
                 <span
                   class="text-text-muted font-display text-xs font-black uppercase tracking-[0.20em] hidden sm:inline">//
-                  ARQUITECTURAS DESPLEGADAS EN
-                  PRODUCCIÓN</span>
-              </div>
-              <span
-                class="font-display text-xs font-black uppercase tracking-[0.20em] text-vector-lime flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-vector-lime animate-ping"></span>
-                <span>SISTEMAS ACTIVOS</span>
-              </span>
-            </div>
-
-            <!-- Stage 1: Main Cover Content for 03 // Ejecución -->
-            <div id="scroll-expand-body"
-              class="relative z-20 max-w-6xl w-full mx-auto px-6 sm:px-10 py-12 sm:py-16 flex flex-col justify-center items-start text-left min-h-[82vh]">
-
-              <div
-                class="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-dark/90 border border-vector-lime/30 font-display font-black text-xs text-vector-lime uppercase tracking-[0.20em] mb-4">
-                <span class="w-1.5 h-1.5 bg-vector-lime"></span>
-                <span>PORTADA DE EJECUCIÓN // SYS_V3.0</span>
+                  ARQUITECTURAS DESPLEGADAS EN PRODUCCIÓN</span>
               </div>
 
               <h2
@@ -660,32 +602,23 @@
                 Casos de Éxito
               </h2>
 
-              <p class="font-body text-xs sm:text-sm md:text-base text-neutral-300 max-w-2xl leading-relaxed mb-6">
+              <p class="font-body text-xs sm:text-sm md:text-base text-neutral-300 max-w-2xl leading-relaxed">
                 Infraestructura modular de alta concurrencia: reducción de entropía operativa, optimización de rutas
                 críticas y aceleración determinista con telemetría en tiempo real.
               </p>
 
-              <!-- High-Reality Technical Telemetry KPI Grid (JetBrains Mono) -->
-              <div
-                class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 w-full max-w-3xl mb-6 sm:mb-8 font-mono text-xs">
-                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
-                  <span class="text-text-muted block text-[10px] uppercase">Compresión de Ciclo</span>
-                  <span class="text-vector-lime text-sm sm:text-base font-bold">72H → 14.5H</span>
-                </div>
-                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
-                  <span class="text-text-muted block text-[10px] uppercase">Recuperación Capital</span>
-                  <span class="text-vector-lime text-sm sm:text-base font-bold">18.4%</span>
-                </div>
-                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
-                  <span class="text-text-muted block text-[10px] uppercase">Tiempo Estabilización</span>
-                  <span class="text-white text-sm sm:text-base font-bold">28 DÍAS</span>
-                </div>
-                <div class="bg-vector-black/80 border border-white/15 p-3 sm:p-3.5">
-                  <span class="text-text-muted block text-[10px] uppercase">Desviación Operativa</span>
-                  <span class="text-operative-purple text-sm sm:text-base font-bold">1.2%</span>
-                </div>
+              <!-- Prompt to scroll down to evidence photos -->
+              <div class="mt-8 flex items-center gap-3 text-xs font-display uppercase tracking-[0.22em] text-vector-lime/90 select-none cursor-pointer group"
+                onclick="scrollToGaleriaFlotante()">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vector-lime opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-vector-lime"></span>
+                </span>
+                <span class="transition-colors group-hover:text-white">Desplaza para explorar evidencia</span>
+                <svg class="w-4 h-4 animate-bounce text-vector-lime transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
               </div>
-
             </div>
 
             <!-- Stage 2: Floating Gallery & Metodología Scrollytelling Pinned Curtain Track -->
@@ -701,7 +634,7 @@
                   <div class="flex items-center gap-3">
                     <span
                       class="font-display text-xs font-black text-vector-black bg-vector-lime px-2.5 py-0.5 uppercase tracking-[0.20em]">
-                      04 EVIDENCIA // GALERÍA FLOTANTE
+                      EVIDENCIA // GALERÍA FLOTANTE
                     </span>
                     <div>
                       <h3 class="font-display font-black text-lg sm:text-xl uppercase text-white tracking-tight">
@@ -1162,8 +1095,8 @@
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.272) -->
-  <script src="script.js?v=3.0.272"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.282) -->
+  <script src="script.js?v=3.0.282"></script>
 </body>
 
 </html>

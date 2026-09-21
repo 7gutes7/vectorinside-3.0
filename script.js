@@ -2,19 +2,40 @@
  * Vector Inside 3.0 - High-Performance Interactive Logic
  */
 
-// Force browser to disable scroll memory restoration so refreshes ALWAYS land on Hero
+// Preserve scroll position across page refreshes (manual restoration via sessionStorage)
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
-window.scrollTo(0, 0);
 
-window.addEventListener('beforeunload', () => {
-  window.scrollTo(0, 0);
-});
+function saveCurrentScrollPosition() {
+  try {
+    sessionStorage.setItem('vectorinside_scroll_pos', String(window.scrollY || window.pageYOffset || 0));
+  } catch (e) {}
+}
+
+function restoreCurrentScrollPosition() {
+  try {
+    const savedScroll = sessionStorage.getItem('vectorinside_scroll_pos');
+    if (savedScroll !== null) {
+      const y = parseFloat(savedScroll);
+      if (!isNaN(y) && y > 0) {
+        window.scrollTo(0, y);
+      }
+    }
+  } catch (e) {}
+}
+
+// Restore immediately on script execution
+restoreCurrentScrollPosition();
+
+// Persist scroll position continuously and on pagehide/unload
+window.addEventListener('scroll', saveCurrentScrollPosition, { passive: true });
+window.addEventListener('beforeunload', saveCurrentScrollPosition);
+window.addEventListener('pagehide', saveCurrentScrollPosition);
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Reset scroll and align Hero SVG text
-  window.scrollTo(0, 0);
+  // Restore scroll without resetting to Hero and align Hero SVG text
+  restoreCurrentScrollPosition();
   alignHeroDigitalText();
 
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
@@ -50,95 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Fullscreen Video Intro & Asset Preloader Controller
- * Loops intro until all videos in page are buffered and ready.
- * Cooldown: Plays only once every 5 minutes across visits/refreshes.
+ * (Hidden for realtime development; immediately triggers Hero text effect)
  */
-const INTRO_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos (300,000 ms)
-const INTRO_STORAGE_KEY = 'vectorinside_intro_last_played';
-
 function initPageVideoIntro() {
   const introScreen = document.getElementById('intro-screen');
   const video = document.getElementById('intro-video');
-  const skipBtn = document.getElementById('skip-intro-btn');
-  const loaderText = document.querySelector('#intro-loader span:last-child');
-
-  if (!introScreen || !video) return;
-
-  const lastPlayed = localStorage.getItem(INTRO_STORAGE_KEY);
-  const now = Date.now();
-
-  // Si han transcurrido menos de 5 minutos, omitir intro inmediatamente
-  if (lastPlayed && (now - parseInt(lastPlayed, 10)) < INTRO_INTERVAL_MS) {
+  if (introScreen) {
     introScreen.style.display = 'none';
     introScreen.style.opacity = '0';
-    video.pause();
-    setTimeout(triggerStrokeTextEffect, 200);
-    return;
+    introScreen.style.pointerEvents = 'none';
   }
-
-  // Guardar timestamp actual al iniciar la reproducción del intro
-  localStorage.setItem(INTRO_STORAGE_KEY, now.toString());
-
-  let isDismissed = false;
-
-  // El intro video se reproduce UNA vez y se cierra al terminar
-  video.loop = false;
-
-  function dismissIntro() {
-    if (isDismissed) return;
-    isDismissed = true;
-    localStorage.setItem(INTRO_STORAGE_KEY, Date.now().toString());
-    introScreen.style.opacity = '0';
-    setTimeout(() => {
-      introScreen.style.display = 'none';
-      // Trigger StrokeText effect on "Diseñamos instinto." right after intro finishes
-      triggerStrokeTextEffect();
-    }, 750);
+  if (video) {
+    try { video.pause(); } catch (e) {}
   }
-
-  // Precargar media en background (sin bloquear el intro)
-  function preloadMedia() {
-    const mediaVideos = Array.from(document.querySelectorAll('video:not(#intro-video):not(#section2-manifesto-video)'))
-      .filter(v => v.getAttribute('preload') !== 'none' && v.src);
-    mediaVideos.forEach(v => { v.preload = 'auto'; v.load(); });
-  }
-  preloadMedia();
-
-  // Dismiss al terminar el video (loop=false → ended dispara naturalmente)
-  video.addEventListener('ended', () => dismissIntro());
-
-  // Fallback: dismiss cuando queda poco tiempo
-  video.addEventListener('timeupdate', () => {
-    if (video.duration && (video.duration - video.currentTime < 0.15)) {
-      dismissIntro();
-    }
-  });
-
-  // Hard backstop: 8s máximo en pantalla bajo cualquier circunstancia
-  setTimeout(() => dismissIntro(), 8000);
-
-  // Skip intro when clicking on video or anywhere on the intro screen
-  video.style.cursor = 'pointer';
-  video.addEventListener('click', dismissIntro);
-  introScreen.style.cursor = 'pointer';
-  introScreen.addEventListener('click', (e) => {
-    dismissIntro();
-  });
-
-  // Skip button click
-  if (skipBtn) {
-    skipBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dismissIntro();
-    });
-  }
-
-  // Escape key press to skip
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !isDismissed) {
-      dismissIntro();
-    }
-  });
+  triggerStrokeTextEffect();
 }
 
 /**
@@ -1359,6 +1305,12 @@ function initHero3DModel() {
 
         syncSize();
         isHero3DModelLoaded = true;
+        const heroCanvas = document.getElementById('hero-3d-canvas');
+        if (heroCanvas) {
+          heroCanvas.style.clipPath = 'none';
+          heroCanvas.style.webkitClipPath = 'none';
+          heroCanvas.style.opacity = '1';
+        }
         triggerHero3DReveal();
       },
       (xhr) => {
@@ -1802,11 +1754,12 @@ function initHero3DModel() {
   // ==================== BIDIRECTIONAL SCROLL CONTROLLER FOR SCROLL-EXPAND (03 EJECUCIÓN) ====================
   const scrollExpandWrapperElem = document.getElementById('sec-scroll-expand-wrapper');
   const secEjecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
+  let isSec3BodyRevealed = false;
 
   if (secEjecucionScrollContainer) {
     secEjecucionScrollContainer.addEventListener('wheel', (e) => {
-      // If the section is not fully expanded yet (expansion in progress)
-      if (currentScrollLerp < 0.965) {
+      // If the section is not fully expanded yet (expansion in progress before 0.940)
+      if (currentScrollLerp < 0.940) {
         window.scrollBy({ top: e.deltaY, behavior: 'auto' });
         e.preventDefault();
         return;
@@ -1818,7 +1771,7 @@ function initHero3DModel() {
         window.scrollBy({ top: e.deltaY, behavior: 'auto' });
         e.preventDefault();
       }
-      // Otherwise allow standard internal scrolling of the 25-block matrix
+      // Otherwise allow standard internal scrolling to see photos below
     }, { passive: false });
 
     let expandTouchStartY = 0;
@@ -1834,7 +1787,7 @@ function initHero3DModel() {
       const deltaY = expandTouchStartY - currentY;
       expandTouchStartY = currentY;
 
-      if (currentScrollLerp < 0.965) {
+      if (currentScrollLerp < 0.940) {
         window.scrollBy({ top: deltaY, behavior: 'auto' });
         return;
       }
@@ -1846,12 +1799,76 @@ function initHero3DModel() {
   }
 
   // Smooth scroll tracking variables & Exact Deep Eye Cavity Target for poligonal-30-08-26.glb
-  let currentScrollLerp = 0;
+  restoreCurrentScrollPosition();
+  syncScrollProgress();
+  let currentScrollLerp = scrollProgress;
+  let initialSnapFrames = 5; // Snap directly on startup/refresh without lerping from Hero
 
-  // Video scrubbing state — persistent across render frames
+  // Re-sync after initial layout/fonts settle
+  setTimeout(() => {
+    restoreCurrentScrollPosition();
+    syncScrollProgress();
+    currentScrollLerp = scrollProgress;
+  }, 60);
+
+  // Video scrubbing state & queue — persistent across render frames for Section 01 Identidad (Animar_imagen_720.mp4)
+  const sec2Vid = document.getElementById('section2-manifesto-video');
+  let _sec2VidSeeking = false;
+  let _sec2VidPendingTime = null;
+
+  function seekSec2Video(targetTime) {
+    if (!sec2Vid) return;
+    if (sec2Vid.readyState < 1) {
+      _sec2VidPendingTime = targetTime;
+      return;
+    }
+    if (_sec2VidSeeking || sec2Vid.seeking) {
+      _sec2VidPendingTime = targetTime;
+      return;
+    }
+    _sec2VidSeeking = true;
+    _sec2VidPendingTime = null;
+
+    if ('fastSeek' in sec2Vid) {
+      try {
+        sec2Vid.fastSeek(targetTime);
+      } catch (e) {
+        sec2Vid.currentTime = targetTime;
+      }
+    } else {
+      sec2Vid.currentTime = targetTime;
+    }
+  }
+
+  if (sec2Vid) {
+    sec2Vid.muted = true;
+    sec2Vid.playsInline = true;
+    sec2Vid.setAttribute('muted', '');
+    sec2Vid.setAttribute('playsinline', '');
+    sec2Vid.setAttribute('webkit-playsinline', '');
+    try { sec2Vid.load(); } catch (e) {}
+
+    sec2Vid.addEventListener('seeked', () => {
+      _sec2VidSeeking = false;
+      if (_sec2VidPendingTime !== null) {
+        const nextTime = _sec2VidPendingTime;
+        _sec2VidPendingTime = null;
+        if (Math.abs(nextTime - sec2Vid.currentTime) > 0.025) {
+          seekSec2Video(nextTime);
+        }
+      }
+    });
+
+    sec2Vid.addEventListener('canplay', () => {
+      if (_sec2VidPendingTime !== null) {
+        const nextTime = _sec2VidPendingTime;
+        _sec2VidPendingTime = null;
+        seekSec2Video(nextTime);
+      }
+    });
+  }
+
   let _vidTargetTime = 0;  // Target time calculated from scroll position
-  let _vidLastSeek = -1;   // Last time we actually issued a seek
-  const _VID_SEEK_THRESHOLD = 1 / 24; // One frame @ 24fps — don't seek for smaller deltas
   const targetEyePos = new THREE.Vector3(0.85, 0.40, 1.05); // Calibrated exact target for poligonal-30-08-26.glb
 
   // Bottom dock items helper
@@ -1897,7 +1914,13 @@ function initHero3DModel() {
     }
 
     // Smoothly interpolate scroll progress for cinematic motion
-    currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
+    if (initialSnapFrames > 0) {
+      initialSnapFrames--;
+      syncScrollProgress();
+      currentScrollLerp = scrollProgress;
+    } else {
+      currentScrollLerp += (scrollProgress - currentScrollLerp) * 0.12;
+    }
 
     // =========================================================================
     // UNIFIED DETERMINISTIC SCROLL TIMELINE (0.0 to 1.0)
@@ -2243,37 +2266,29 @@ function initHero3DModel() {
         }
 
         // =========================================================================
-        // CONTROL DE VIDEO DE FONDO SECCIÓN 2: SCRUBBING FLUIDO CON SCROLL
-        // - NO se reproduce durante la transición Punto -> Línea -> Plano
-        // - Inicia al estar 100% desplegada y avanza frame a frame con el scroll
-        // - Al llegar al final se detiene; da paso a la transición hacia Sección 3
-        // Optimización anti-jitter: seek solo cuando delta > 1 frame (1/24s)
-        //   y únicamente si el video no está ya procesando un seek anterior.
+        // CONTROL DE VIDEO DE FONDO SECCIÓN 01 IDENTIDAD: SCRUBBING FLUIDO CON SCROLL
+        // Sincroniza frame a frame con el scroll desde la apertura de la sección
         // =========================================================================
-        const sec2Vid = document.getElementById('section2-manifesto-video');
         if (sec2Vid) {
-          // Keep paused — we drive time manually
           if (!sec2Vid.paused) sec2Vid.pause();
           const vidDur = (sec2Vid.duration && !isNaN(sec2Vid.duration) && sec2Vid.duration > 0)
             ? sec2Vid.duration : 10.0;
 
-          if (currentScrollLerp < T_REVEAL_END) {
-            // Before section opens: hold at frame 0
+          const T_VID_START = T_REVEAL_START; // 0.08 (desde que la sección empieza a revelarse)
+          const T_VID_END = 0.32;             // 0.32 (a través de toda la lectura)
+
+          if (currentScrollLerp < T_VID_START) {
             _vidTargetTime = 0;
-          } else if (currentScrollLerp <= T_EXIT_START) {
-            // Section open: map scroll progress to video time
-            const pVid = (currentScrollLerp - T_REVEAL_END) / (T_EXIT_START - T_REVEAL_END);
+          } else if (currentScrollLerp <= T_VID_END) {
+            const pVid = (currentScrollLerp - T_VID_START) / (T_VID_END - T_VID_START);
             _vidTargetTime = Math.max(0, Math.min(1.0, pVid)) * vidDur;
           } else {
-            // Section exiting: hold at last frame
             _vidTargetTime = vidDur;
           }
 
-          // Throttled seek: fire only when delta exceeds one frame AND no seek is in flight
           const delta = Math.abs(_vidTargetTime - sec2Vid.currentTime);
-          if (delta > _VID_SEEK_THRESHOLD && !sec2Vid.seeking) {
-            sec2Vid.currentTime = _vidTargetTime;
-            _vidLastSeek = _vidTargetTime;
+          if (delta > 0.025) {
+            seekSec2Video(_vidTargetTime);
           }
         }
       }
@@ -2602,6 +2617,7 @@ function initHero3DModel() {
     const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
     const expandFrame = document.getElementById('scroll-expand-frame');
     const expandVideo = document.getElementById('scroll-expand-video');
+    const expandBody = document.getElementById('scroll-expand-body');
     const ejecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
 
     if (expandWrapper && expandFrame && expandVideo) {
@@ -2613,6 +2629,15 @@ function initHero3DModel() {
         expandFrame.style.height = '58vh';
         expandFrame.style.borderRadius = '24px';
         expandVideo.style.transform = 'scale(1.35)';
+        if (expandBody) {
+          expandBody.style.clipPath = 'inset(0% 0% 100% 0%)';
+          expandBody.style.webkitClipPath = 'inset(0% 0% 100% 0%)';
+          expandBody.style.opacity = '0';
+          expandBody.style.pointerEvents = 'none';
+          expandBody.style.visibility = 'hidden';
+          expandBody.style.transform = 'translateY(-20px)';
+        }
+        isSec3BodyRevealed = false;
         if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
       } else if (currentScrollLerp < 0.885) {
         // Aparición con efecto blur después de la última tarjeta
@@ -2625,13 +2650,22 @@ function initHero3DModel() {
         expandFrame.style.height = '58vh';
         expandFrame.style.borderRadius = '24px';
         expandVideo.style.transform = 'scale(1.35)';
+        if (expandBody) {
+          expandBody.style.clipPath = 'inset(0% 0% 100% 0%)';
+          expandBody.style.webkitClipPath = 'inset(0% 0% 100% 0%)';
+          expandBody.style.opacity = '0';
+          expandBody.style.pointerEvents = 'none';
+          expandBody.style.visibility = 'hidden';
+          expandBody.style.transform = 'translateY(-20px)';
+        }
+        isSec3BodyRevealed = false;
         if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
       } else {
         // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x)
         expandWrapper.style.opacity = '1';
         expandWrapper.style.filter = 'none';
 
-        const pExp = Math.min(1.0, (currentScrollLerp - 0.885) / 0.085);
+        const pExp = Math.min(1.0, (currentScrollLerp - 0.885) / 0.055);
         const pExpEased = Math.sin((pExp * Math.PI) / 2);
 
         const curW = 44 + (pExpEased * 56);
@@ -2646,8 +2680,66 @@ function initHero3DModel() {
 
         expandWrapper.style.pointerEvents = pExpEased > 0.85 ? 'auto' : 'none';
 
-        if (pExpEased < 0.95 && ejecucionScrollContainer) {
-          ejecucionScrollContainer.scrollTop = 0;
+        if (pExpEased < 0.99) {
+          // Fase 1: El video debe ocupar toda la ventana ANTES de que los textos aparezcan
+          if (ejecucionScrollContainer) {
+            ejecucionScrollContainer.scrollTop = 0;
+          }
+          if (isSec3BodyRevealed) {
+            isSec3BodyRevealed = false;
+            if (expandBody) {
+              if (window.gsap) {
+                gsap.to(expandBody, {
+                  clipPath: 'inset(0% 0% 100% 0%)',
+                  webkitClipPath: 'inset(0% 0% 100% 0%)',
+                  opacity: 0,
+                  y: -20,
+                  duration: 0.35,
+                  overwrite: 'auto',
+                  onComplete: () => {
+                    if (!isSec3BodyRevealed) expandBody.style.visibility = 'hidden';
+                  }
+                });
+              } else {
+                expandBody.style.clipPath = 'inset(0% 0% 100% 0%)';
+                expandBody.style.webkitClipPath = 'inset(0% 0% 100% 0%)';
+                expandBody.style.opacity = '0';
+                expandBody.style.visibility = 'hidden';
+              }
+            }
+          }
+        } else {
+          // Fase 2: Una vez se despliega toda la sección a pantalla completa (100vw, 100vh),
+          // los textos aparecen con efecto cortina de arriba hacia abajo
+          if (!isSec3BodyRevealed && expandBody) {
+            isSec3BodyRevealed = true;
+            expandBody.style.visibility = 'visible';
+            expandBody.style.pointerEvents = 'auto';
+            if (window.gsap) {
+              gsap.fromTo(expandBody,
+                {
+                  clipPath: 'inset(0% 0% 100% 0%)',
+                  webkitClipPath: 'inset(0% 0% 100% 0%)',
+                  opacity: 0,
+                  y: -25
+                },
+                {
+                  clipPath: 'inset(0% 0% 0% 0%)',
+                  webkitClipPath: 'inset(0% 0% 0% 0%)',
+                  opacity: 1,
+                  y: 0,
+                  duration: 1.1,
+                  ease: 'power3.out',
+                  overwrite: 'auto'
+                }
+              );
+            } else {
+              expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
+              expandBody.style.webkitClipPath = 'inset(0% 0% 0% 0%)';
+              expandBody.style.opacity = '1';
+              expandBody.style.transform = 'translateY(0)';
+            }
+          }
         }
       }
     }
@@ -2678,21 +2770,37 @@ function initHero3DModel() {
         const pDockEcosistema = (currentScrollLerp - 0.785) / 0.03;
         dockOpacity = Math.min(1.0, Math.max(0, pDockEcosistema));
         updateActiveDockItem(1);
-      } else if (currentScrollLerp < 0.885) {
+      } else if (currentScrollLerp < 0.865) {
         // Ecosistema activo (flujo de tarjetas)
         dockOpacity = 1.0;
         updateActiveDockItem(1);
+      } else if (currentScrollLerp < 0.885) {
+        // Al entrar la Sección 03 (ScrollExpand portal entra con blur), el índice inferior se desvanece
+        const pDockFadeSec3 = (currentScrollLerp - 0.865) / 0.02;
+        dockOpacity = Math.max(0, 1.0 - pDockFadeSec3);
+        updateActiveDockItem(null);
       } else {
-        // 03 // Ejecución activa (ScrollExpand abierto)
-        // Visible en la portada; se oculta conforme nos desplazamos hacia la galería flotante
+        // Durante toda la Sección 03 (03 // EJECUCIÓN Y EVIDENCIA - portada y portal):
+        // El índice inferior se mantiene completamente desvanecido (opacity = 0).
+        // Al hacer scroll interno hacia la Galería Flotante (Sección 04 // EVIDENCIA),
+        // Metodología (05) y Diagnóstico (06), el índice reaparece suavemente.
         const internalScroll = document.getElementById('sec-ejecucion-scroll-container');
-        if (internalScroll && internalScroll.scrollTop > 40) {
-          const pGalleryFade = Math.min(1.0, (internalScroll.scrollTop - 40) / 220);
-          dockOpacity = Math.max(0, 1.0 - pGalleryFade);
+        const matrixTrack = document.getElementById('sec-matriz-25-track');
+        if (internalScroll && matrixTrack) {
+          const trackTop = matrixTrack.offsetTop;
+          if (internalScroll.scrollTop >= trackTop - 150) {
+            // Reaparece al entrar a Sección 04 (Galería Flotante) y secciones posteriores
+            const pReappear = Math.min(1.0, Math.max(0, (internalScroll.scrollTop - (trackTop - 150)) / 150));
+            dockOpacity = pReappear;
+          } else {
+            // Durante toda la Sección 03 está desvanecido
+            dockOpacity = 0;
+            updateActiveDockItem(null);
+          }
         } else {
-          dockOpacity = 1.0;
+          dockOpacity = 0;
+          updateActiveDockItem(null);
         }
-        updateActiveDockItem(2);
       }
       bottomDock.style.opacity = dockOpacity.toFixed(3);
       bottomDock.style.transform = `translate(-50%, ${(1.0 - dockOpacity) * 20}px)`;
@@ -2815,8 +2923,8 @@ let impactoGlitchInterval = null;
 let impactoGlitchTimeout = null;
 let isImpactoGlitching = false;
 let hasImpactoGlitchRunForCurrentHover = false;
-const ORIGINAL_IMPACTO_TEXT = 'IMPACTO';
-const GLITCH_GLYPHS = ['I', 'M', 'P', '4', 'C', 'T', '0', '1', '§', 'Σ', '#', '!', '?', 'Ø', 'Ξ', 'Ñ', '¥', '3', 'Z', '9', '░', '▒', '▓', '<', '>', '/', '_'];
+const ORIGINAL_IMPACTO_TEXT = 'DISEÑO';
+const GLITCH_GLYPHS = ['D', 'I', 'S', 'E', 'Ñ', 'O', '4', 'C', 'T', '0', '1', '§', 'Σ', '#', '!', '?', 'Ø', 'Ξ', '¥', '3', 'Z', '9', '░', '▒', '▓', '<', '>', '/', '_'];
 
 function triggerDisenoHoverGlitch() {
   triggerImpactoHoverGlitch();
@@ -3067,25 +3175,16 @@ function triggerHero3DReveal() {
 
   isHero3DRevealed = true;
 
+  canvas.style.clipPath = 'none';
+  canvas.style.webkitClipPath = 'none';
+  canvas.style.opacity = '1';
+
   if (typeof gsap !== 'undefined') {
-    gsap.fromTo(canvas,
-      {
-        opacity: 1,
-        clipPath: 'inset(0% 50% 0% 50%)',
-        webkitClipPath: 'inset(0% 50% 0% 50%)'
-      },
-      {
-        clipPath: 'inset(0% 0% 0% 0%)',
-        webkitClipPath: 'inset(0% 0% 0% 0%)',
-        opacity: 1,
-        duration: 1.25,
-        ease: 'power3.inOut'
-      }
-    );
-  } else {
-    canvas.style.transition = 'clip-path 1.25s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease';
-    canvas.style.clipPath = 'inset(0% 0% 0% 0%)';
-    canvas.style.opacity = '1';
+    gsap.to(canvas, {
+      opacity: 1,
+      duration: 0.8,
+      ease: 'power2.out'
+    });
   }
 }
 
@@ -3973,7 +4072,7 @@ function scrollToGaleriaFlotante() {
     if (container && matrixTrack) {
       const targetTop = matrixTrack.offsetTop;
       container.scrollTo({ top: targetTop, behavior: 'smooth' });
-      updateActiveDockItem(3);
+      updateActiveDockItem(2); // 03 // Ejecución y Evidencia
     }
   };
 
@@ -4027,6 +4126,16 @@ function scrollToMetodologia() {
       expandFrame.style.borderRadius = '0px';
     }
     if (expandVideo) expandVideo.style.transform = 'scale(1)';
+    const expandBody = document.getElementById('scroll-expand-body');
+    if (expandBody) {
+      expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.webkitClipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.opacity = '1';
+      expandBody.style.visibility = 'visible';
+      expandBody.style.pointerEvents = 'auto';
+      expandBody.style.transform = 'translateY(0)';
+      isSec3BodyRevealed = true;
+    }
   };
 
   const revealCurtain = () => {
@@ -4038,7 +4147,7 @@ function scrollToMetodologia() {
       globalHeader.classList.add('glass-nav-white-liquid');
       globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent');
     }
-    updateActiveDockItem(4);
+    updateActiveDockItem(3); // 04 // Metodología
   };
 
   if (!container) { revealCurtain(); return; }
@@ -4097,13 +4206,26 @@ function initExecutionInternalScrollListener() {
   const globalHeader = document.getElementById('main-global-header');
 
   if (container && track && metodologiaWrapper) {
+    try {
+      const savedInner = sessionStorage.getItem('vectorinside_inner_scroll_pos');
+      if (savedInner !== null) {
+        const y = parseFloat(savedInner);
+        if (!isNaN(y) && y > 0) {
+          container.scrollTop = y;
+        }
+      }
+    } catch (e) {}
+
     const updateCurtain = () => {
+      try {
+        sessionStorage.setItem('vectorinside_inner_scroll_pos', String(container.scrollTop));
+      } catch (e) {}
       const scrollY = container.scrollTop;
       const trackTop = track.offsetTop;
       const scrollableDistance = track.offsetHeight - container.clientHeight;
 
       if (scrollY < trackTop - 100) {
-        // En Sección 03 Cover
+        // En Sección 03 Cover (el índice inferior se mantiene desvanecido durante toda la Sección 03)
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
         metodologiaWrapper.style.pointerEvents = 'none';
         window.__vectorIsotipoVisible = false;
@@ -4113,12 +4235,24 @@ function initExecutionInternalScrollListener() {
           globalHeader.classList.remove('glass-nav-white-liquid');
           globalHeader.classList.add('glass-nav-dark');
         }
-        updateActiveDockItem(2); // 03 // Ejecución
+        updateActiveDockItem(null);
+      } else if (scrollableDistance > 0 && scrollY >= trackTop - 100 && scrollY < trackTop) {
+        // Transición a Sección 04 // Galería Flotante (reaparece el dock)
+        metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+        metodologiaWrapper.style.pointerEvents = 'none';
+        window.__vectorIsotipoVisible = false;
+        window.__vectorIsotipoProgress = 0;
+        if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+        if (globalHeader) {
+          globalHeader.classList.remove('glass-nav-white-liquid');
+          globalHeader.classList.add('glass-nav-dark');
+        }
+        updateActiveDockItem(2); // 03 // Evidencia (Galería)
       } else if (scrollableDistance > 0 && scrollY >= trackTop) {
         const pTrack = Math.min(1.0, Math.max(0, (scrollY - trackTop) / scrollableDistance));
 
         if (pTrack < 0.18) {
-          // Sección 04 // Galería visible
+          // Sección Evidencia // Galería visible
           metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
           metodologiaWrapper.style.pointerEvents = 'none';
           window.__vectorIsotipoVisible = false;
@@ -4128,9 +4262,9 @@ function initExecutionInternalScrollListener() {
             globalHeader.classList.remove('glass-nav-white-liquid');
             globalHeader.classList.add('glass-nav-dark');
           }
-          updateActiveDockItem(3); // 04 // Evidencia (Galería)
+          updateActiveDockItem(2); // 03 // Evidencia (Galería)
         } else if (pTrack < 0.45) {
-          // Cortina Sección 05 sube de 100% a 0%
+          // Cortina Sección 04 Metodología sube de 100% a 0%
           const pCurtain = (pTrack - 0.18) / (0.45 - 0.18);
           const yPct = (1.0 - pCurtain) * 100;
           metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
@@ -4154,9 +4288,9 @@ function initExecutionInternalScrollListener() {
               globalHeader.classList.add('glass-nav-dark');
             }
           }
-          updateActiveDockItem(pCurtain > 0.5 ? 4 : 3);
+          updateActiveDockItem(pCurtain > 0.5 ? 3 : 2);
         } else if (pTrack < 0.60) {
-          // Sección 05 fija/activa (blanca, tarjetas visibles, isotipo en slot)
+          // Sección 04 Metodología fija/activa
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
           metodologiaWrapper.style.backgroundColor = '#ffffff';
@@ -4173,9 +4307,9 @@ function initExecutionInternalScrollListener() {
             globalHeader.classList.add('glass-nav-white-liquid');
             globalHeader.classList.remove('glass-nav-dark');
           }
-          updateActiveDockItem(4); // 05 // Metodología
+          updateActiveDockItem(3); // 04 // Metodología
         } else if (pTrack < 0.72) {
-          // Sección 05 se desvanece a negro, el isotipo 3D viaja al centro y sale tras bambalinas
+          // Sección 04 Metodología se desvanece a negro, isotipo viaja al centro
           const pTransit = (pTrack - 0.60) / (0.72 - 0.60);
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
@@ -4196,7 +4330,7 @@ function initExecutionInternalScrollListener() {
             globalHeader.classList.remove('glass-nav-white-liquid');
             globalHeader.classList.add('glass-nav-dark');
           }
-          updateActiveDockItem(4);
+          updateActiveDockItem(3);
         } else {
           // ==================== SECCIÓN 06 // DIAGNÓSTICO: PUNTO -> LÍNEA -> PLANO ====================
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
@@ -4274,7 +4408,7 @@ function initExecutionInternalScrollListener() {
               diagSec.style.pointerEvents = pPlane > 0.7 ? 'auto' : 'none';
             }
           }
-          updateActiveDockItem(5); // 06 // Diagnóstico
+          updateActiveDockItem(4); // 05 // Diagnóstico
         }
       } else {
         metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
@@ -4503,7 +4637,7 @@ function initDiagnosticoTest() {
 
     if (rect.top <= triggerThreshold && rect.bottom >= 100) {
       triggerDiagCinematicReveal();
-      updateActiveDockItem(5); // 06 // Diagnóstico
+      updateActiveDockItem(4); // 05 // Diagnóstico
     } else if (rect.top > window.innerHeight * 1.2) {
       resetDiagCinematicReveal();
     }
@@ -4572,6 +4706,16 @@ function scrollToDiagnostico(e) {
       expandFrame.style.height = '100vh';
       expandFrame.style.borderRadius = '0px';
     }
+    const expandBody = document.getElementById('scroll-expand-body');
+    if (expandBody) {
+      expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.webkitClipPath = 'inset(0% 0% 0% 0%)';
+      expandBody.style.opacity = '1';
+      expandBody.style.visibility = 'visible';
+      expandBody.style.pointerEvents = 'auto';
+      expandBody.style.transform = 'translateY(0)';
+      isSec3BodyRevealed = true;
+    }
   };
 
   const internalTarget = () => {
@@ -4594,7 +4738,7 @@ function scrollToDiagnostico(e) {
       window.scrollTo(0, targetY);
       forceFullScreenFrame();
       if (container) container.scrollTop = internalTarget();
-      updateActiveDockItem(5);
+      updateActiveDockItem(4);
     };
     const deadline = performance.now() + 1500;
     const pin = () => {
@@ -4606,7 +4750,7 @@ function scrollToDiagnostico(e) {
   } else {
     forceFullScreenFrame();
     if (container) container.scrollTop = internalTarget();
-    updateActiveDockItem(5);
+    updateActiveDockItem(4);
   }
   return false;
 }
