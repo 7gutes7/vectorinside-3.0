@@ -80,10 +80,9 @@ function initPageVideoIntro() {
   localStorage.setItem(INTRO_STORAGE_KEY, now.toString());
 
   let isDismissed = false;
-  let isMediaReady = false;
 
-  // Set intro to loop while assets preload
-  video.loop = true;
+  // El intro video se reproduce UNA vez y se cierra al terminar
+  video.loop = false;
 
   function dismissIntro() {
     if (isDismissed) return;
@@ -97,61 +96,26 @@ function initPageVideoIntro() {
     }, 750);
   }
 
-  // Preload all media videos in the document
-  function preloadAllMedia() {
-    const mediaVideos = Array.from(document.querySelectorAll('video:not(#intro-video)'));
-    if (mediaVideos.length === 0) {
-      isMediaReady = true;
-      video.loop = false;
-      return;
-    }
-
-    let loadedCount = 0;
-    const checkAll = () => {
-      loadedCount++;
-      if (loadedCount >= mediaVideos.length) {
-        isMediaReady = true;
-        video.loop = false;
-        if (loaderText) {
-          loaderText.textContent = 'SYS_V.3.0 // VIDEOS PRECARGADOS • INICIANDO';
-        }
-      }
-    };
-
-    mediaVideos.forEach((v) => {
-      v.preload = 'auto';
-      if (v.readyState >= 3) {
-        checkAll();
-      } else {
-        v.addEventListener('canplaythrough', checkAll, { once: true });
-        v.addEventListener('loadeddata', checkAll, { once: true });
-        v.addEventListener('error', checkAll, { once: true });
-        v.load();
-      }
-    });
-
-    // Safety timeout after 4.5s
-    setTimeout(() => {
-      isMediaReady = true;
-      video.loop = false;
-    }, 4500);
+  // Precargar media en background (sin bloquear el intro)
+  function preloadMedia() {
+    const mediaVideos = Array.from(document.querySelectorAll('video:not(#intro-video):not(#section2-manifesto-video)'))
+      .filter(v => v.getAttribute('preload') !== 'none' && v.src);
+    mediaVideos.forEach(v => { v.preload = 'auto'; v.load(); });
   }
+  preloadMedia();
 
-  // Run preload concurrently with intro video playback
-  preloadAllMedia();
+  // Dismiss al terminar el video (loop=false → ended dispara naturalmente)
+  video.addEventListener('ended', () => dismissIntro());
 
-  // When current iteration finishes and media is ready -> dismiss
+  // Fallback: dismiss cuando queda poco tiempo
   video.addEventListener('timeupdate', () => {
-    if (isMediaReady && video.duration && (video.duration - video.currentTime < 0.15)) {
+    if (video.duration && (video.duration - video.currentTime < 0.15)) {
       dismissIntro();
     }
   });
 
-  video.addEventListener('ended', () => {
-    if (isMediaReady) {
-      dismissIntro();
-    }
-  });
+  // Hard backstop: 8s máximo en pantalla bajo cualquier circunstancia
+  setTimeout(() => dismissIntro(), 8000);
 
   // Skip intro when clicking on video or anywhere on the intro screen
   video.style.cursor = 'pointer';
@@ -1409,10 +1373,12 @@ function initHero3DModel() {
     );
 
     // 3D Model 2: smartphone2.glb (Section 3)
-    // --- Live video texture for the smartphone screen (Abstract Liquid Glass) ---
+    // --- Live video texture for the smartphone screen ---
     const screenVideo = document.createElement('video');
-    screenVideo.crossOrigin = 'anonymous'; // necesario: el video ahora viene de Cloudinary (otro origen) y se sube como textura WebGL
-    screenVideo.src = 'https://res.cloudinary.com/cci1klwx/video/upload/v1788152143/Abstract_liquid_glass_animation_1080p_202608301203.mp4';
+    screenVideo.src = 'Abstract_animation_marketing_web_1080p.mp4';
+    screenVideo.onerror = () => {
+      screenVideo.src = encodeURI('Abstract_animation_marketing_web…_1080p_20260921004014.mp4');
+    };
     screenVideo.loop = true;
     screenVideo.muted = true;
     screenVideo.defaultMuted = true;
@@ -1432,6 +1398,33 @@ function initHero3DModel() {
     section3ScreenTexture.generateMipmaps = false;
     section3ScreenTexture.wrapS = THREE.ClampToEdgeWrapping;
     section3ScreenTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+    const updateScreenAspect = () => {
+      if (!phoneScreenMesh || !phoneScreenMesh.geometry) return;
+      const geo = phoneScreenMesh.geometry;
+      const bb = geo.boundingBox;
+      if (!bb) return;
+      const ext = new THREE.Vector3().subVectors(bb.max, bb.min);
+      const order = ['x', 'y', 'z'].sort((a, b) => ext[b] - ext[a]);
+      const vAxis = order[0];
+      const uAxis = order[1];
+      const screenAspect = (ext[uAxis] || 1) / (ext[vAxis] || 1);
+      const vW = screenVideo.videoWidth || 1080;
+      const vH = screenVideo.videoHeight || 1920;
+      const videoAspect = vW / vH;
+      let rx = 1, ry = 1, ox = 0, oy = 0;
+      if (videoAspect > screenAspect) {
+        rx = screenAspect / videoAspect;
+        ox = (1 - rx) / 2;
+      } else {
+        ry = videoAspect / screenAspect;
+        oy = (1 - ry) / 2;
+      }
+      section3ScreenTexture.repeat.set(rx, ry);
+      section3ScreenTexture.offset.set(ox, oy);
+      section3ScreenTexture.needsUpdate = true;
+    };
+    screenVideo.addEventListener('loadedmetadata', updateScreenAspect);
 
     const playScreenVideo = () => {
       if (screenVideo.paused) {
@@ -1460,8 +1453,8 @@ function initHero3DModel() {
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
 
-        // Scale phone to look balanced, sharp and imposing
-        const scale = 5.8 / maxDim;
+        // Scale phone to look balanced, sharp and imposing with vertical safety margin
+        const scale = 5.2 / maxDim;
         phone.scale.set(scale, scale, scale);
         phone.position.sub(center.clone().multiplyScalar(scale));
 
@@ -1504,7 +1497,9 @@ function initHero3DModel() {
 
               // Ajuste "cover": el video llena la pantalla y se recorta lo que sobra
               const screenAspect = (ext[uAxis] || 1) / (ext[vAxis] || 1);
-              const videoAspect = 16 / 9;
+              const vW = screenVideo.videoWidth || 1080;
+              const vH = screenVideo.videoHeight || 1920;
+              const videoAspect = vW / vH;
               let rx = 1, ry = 1, ox = 0, oy = 0;
               if (videoAspect > screenAspect) {
                 rx = screenAspect / videoAspect;
@@ -1755,7 +1750,7 @@ function initHero3DModel() {
         const maxInternalScroll = sec3ScrollContainerElem.scrollHeight - sec3ScrollContainerElem.clientHeight;
         if (maxInternalScroll > 0) {
           const ratio = Math.max(0, Math.min(1.0, sec3ScrollContainerElem.scrollTop / maxInternalScroll));
-          const targetProgress = 0.725 + ratio * (0.81 - 0.725);
+          const targetProgress = 0.815 + ratio * (0.865 - 0.815);
           const track = document.getElementById('hero-scroll-track');
           if (track) {
             const trackRect = track.getBoundingClientRect();
@@ -1787,7 +1782,7 @@ function initHero3DModel() {
   if (secEjecucionScrollContainer) {
     secEjecucionScrollContainer.addEventListener('wheel', (e) => {
       // If the section is not fully expanded yet (expansion in progress)
-      if (currentScrollLerp < 0.95) {
+      if (currentScrollLerp < 0.965) {
         window.scrollBy({ top: e.deltaY, behavior: 'auto' });
         e.preventDefault();
         return;
@@ -1815,7 +1810,7 @@ function initHero3DModel() {
       const deltaY = expandTouchStartY - currentY;
       expandTouchStartY = currentY;
 
-      if (currentScrollLerp < 0.95) {
+      if (currentScrollLerp < 0.965) {
         window.scrollBy({ top: deltaY, behavior: 'auto' });
         return;
       }
@@ -1828,6 +1823,11 @@ function initHero3DModel() {
 
   // Smooth scroll tracking variables & Exact Deep Eye Cavity Target for poligonal-30-08-26.glb
   let currentScrollLerp = 0;
+
+  // Video scrubbing state — persistent across render frames
+  let _vidTargetTime = 0;  // Target time calculated from scroll position
+  let _vidLastSeek = -1;   // Last time we actually issued a seek
+  const _VID_SEEK_THRESHOLD = 1 / 24; // One frame @ 24fps — don't seek for smaller deltas
   const targetEyePos = new THREE.Vector3(0.85, 0.40, 1.05); // Calibrated exact target for poligonal-30-08-26.glb
 
   // Bottom dock items helper
@@ -1883,16 +1883,16 @@ function initHero3DModel() {
     const T_REVEAL_END = 0.16;          // 16% -> Section 2 curtains 100% open & flat
     const T_CONTENT_SCROLL_END = 0.28;  // 16% -> 28%: Section 2 content active
     const T_EXIT_START = 0.29;          // 29% -> Curtains start closing (Plano -> Línea)
-    const T_PHONE_ZOOM_START = 0.34;    // 34% -> Vertical line is formed & Smartphone starts Zoom Out!
-    const T_EXIT_END = 0.39;            // 39% -> Line collapses to center PUNTO
-    const T_PHONE_ZOOM_END = 0.50;      // 50% -> Smartphone fully centered
-    const T_SPIN_START = 0.50;          // 50% -> 360° rotation begins with scroll
-    const T_SPIN_END = 0.65;            // 65% -> 360° spin completes
-    // 65% -> 70%: Smartphone shifts upwards & Kinetic Text Background fades out
-    // 70% -> 81%: Section 3 Ecosistema cards stream active
-    // 81% -> 84%: ScrollExpand appears with blur effect
-    // 84% -> 96%: ScrollExpand expands to full screen (44vw->100vw, 58vh->100vh, 24px->0px) & flanks retreat
-    // 96% -> 100%: 03 // Ejecución full stage active
+    const T_PHONE_ZOOM_START = 0.44;    // 44% -> Vertical line formed & Smartphone starts Zoom Out!
+    const T_EXIT_END = 0.59;            // 59% -> Line collapses to center PUNTO  [3× más lento]
+    const T_PHONE_ZOOM_END = 0.60;      // 60% -> Smartphone fully centered
+    const T_SPIN_START = 0.60;          // 60% -> 360° rotation begins with scroll
+    const T_SPIN_END = 0.75;            // 75% -> 360° spin completes
+    // 75% -> 79%: Smartphone shifts upwards & Kinetic Text Background fades out
+    // 77% -> 87%: Section 3 Ecosistema cards stream active
+    // 87% -> 89%: ScrollExpand appears with blur effect
+    // 89% -> 97%: ScrollExpand expands to full screen & flanks retreat
+    // 97% -> 100%: 03 // Ejecución full stage active
 
     if (currentScrollLerp < T_PHONE_ZOOM_START) {
       // 2. Camera Deep Eye Entry (0.0 to 0.10) - Centered in Hero, zooms into eye socket
@@ -1959,12 +1959,28 @@ function initHero3DModel() {
       const hero3dContainer = document.getElementById('hero-3d-container');
       if (hero3dContainer) {
         hero3dContainer.style.zIndex = '10';
+        hero3dContainer.style.transform = (currentScrollLerp < 0.11) ? 'translateY(24px)' : 'none';
+      }
+
+      // Asegurar que el canvas esté visible únicamente en Hero y totalmente oculto en Sección 2 (Manifiesto)
+      const hero3dCanvas = document.getElementById('hero-3d-canvas');
+      if (hero3dCanvas) {
+        if (currentScrollLerp < 0.11) {
+          hero3dCanvas.style.opacity = Math.max(0, headOpacity).toFixed(3);
+          hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+          hero3dCanvas.style.pointerEvents = headOpacity > 0.05 ? 'auto' : 'none';
+        } else {
+          hero3dCanvas.style.opacity = '0';
+          hero3dCanvas.style.filter = 'none';
+          hero3dCanvas.style.pointerEvents = 'none';
+        }
       }
 
       const kineticBg = document.getElementById('kinetic-text-bg');
       if (kineticBg) {
         kineticBg.style.opacity = '0';
-        kineticBg.style.filter = 'blur(0px)';
+        kineticBg.style.filter = 'blur(20px)';
+        kineticBg.style.display = 'none';
       }
 
       // Eye Glow Controller, MERCADO Word Glow & INSTINTO Glitch Controller: Base = azul neón saturado (0x0055FF). Hover = azul brillante intenso (0x00D5FF).
@@ -2157,11 +2173,6 @@ function initHero3DModel() {
             const blurVal = (1.0 - hEased) * 10;
             secPortal.style.filter = blurVal > 0.4 ? `blur(${blurVal.toFixed(1)}px)` : 'none';
             secPortal.style.pointerEvents = h > 0.8 ? 'auto' : 'none';
-
-            const sec2Vid = document.getElementById('section2-manifesto-video');
-            if (sec2Vid && sec2Vid.paused) {
-              sec2Vid.play().catch(() => { });
-            }
           }
 
         } else if (currentScrollLerp < T_EXIT_START) {
@@ -2206,24 +2217,82 @@ function initHero3DModel() {
           }
           if (portalDot) portalDot.style.opacity = '0';
         }
+
+        // =========================================================================
+        // CONTROL DE VIDEO DE FONDO SECCIÓN 2: SCRUBBING FLUIDO CON SCROLL
+        // - NO se reproduce durante la transición Punto -> Línea -> Plano
+        // - Inicia al estar 100% desplegada y avanza frame a frame con el scroll
+        // - Al llegar al final se detiene; da paso a la transición hacia Sección 3
+        // Optimización anti-jitter: seek solo cuando delta > 1 frame (1/24s)
+        //   y únicamente si el video no está ya procesando un seek anterior.
+        // =========================================================================
+        const sec2Vid = document.getElementById('section2-manifesto-video');
+        if (sec2Vid) {
+          // Keep paused — we drive time manually
+          if (!sec2Vid.paused) sec2Vid.pause();
+          const vidDur = (sec2Vid.duration && !isNaN(sec2Vid.duration) && sec2Vid.duration > 0)
+            ? sec2Vid.duration : 10.0;
+
+          if (currentScrollLerp < T_REVEAL_END) {
+            // Before section opens: hold at frame 0
+            _vidTargetTime = 0;
+          } else if (currentScrollLerp <= T_EXIT_START) {
+            // Section open: map scroll progress to video time
+            const pVid = (currentScrollLerp - T_REVEAL_END) / (T_EXIT_START - T_REVEAL_END);
+            _vidTargetTime = Math.max(0, Math.min(1.0, pVid)) * vidDur;
+          } else {
+            // Section exiting: hold at last frame
+            _vidTargetTime = vidDur;
+          }
+
+          // Throttled seek: fire only when delta exceeds one frame AND no seek is in flight
+          const delta = Math.abs(_vidTargetTime - sec2Vid.currentTime);
+          if (delta > _VID_SEEK_THRESHOLD && !sec2Vid.seeking) {
+            sec2Vid.currentTime = _vidTargetTime;
+            _vidLastSeek = _vidTargetTime;
+          }
+        }
       }
     } else {
       // --- Phase B: Section 3 Smartphone 3D Mode ---
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
 
-      // Elevate 3D Canvas Layer: frente al fondo cinético (z-32), pero detrás de la línea y punto de cierre (z-35, z-36)
+      // Elevate 3D Canvas Layer: frente al fondo cinético (z-32) y capas de Ecosistema (z-38 a z-40)
       const hero3dContainer = document.getElementById('hero-3d-container');
       if (hero3dContainer) {
-        hero3dContainer.style.zIndex = '34';
+        hero3dContainer.style.zIndex = '45';
+        hero3dContainer.style.transform = 'none';
       }
 
-      // Kinetic Text Background (Originkit) emerges behind the smartphone (z-index: 32)
+      // Aparición y desaparición en blur + fade del Smartphone
+      // Al hacer scroll hacia adelante aparece con blur(20px) -> blur(0px) y opacity 0 -> 1
+      // Al regresar con scroll hacia atrás se desvanece en blur(0px) -> blur(20px) y se oculta totalmente
+      const hero3dCanvas = document.getElementById('hero-3d-canvas');
+      const pPhoneEntry = Math.max(0, Math.min(1.0, (currentScrollLerp - T_PHONE_ZOOM_START) / 0.05));
+      const pPhoneEntryEased = Math.sin((pPhoneEntry * Math.PI) / 2);
+      const phoneBlur = ((1.0 - pPhoneEntryEased) * 20).toFixed(1);
+
+      if (hero3dCanvas) {
+        hero3dCanvas.style.clipPath = 'none';
+        hero3dCanvas.style.webkitClipPath = 'none';
+        hero3dCanvas.style.opacity = pPhoneEntryEased.toFixed(3);
+        hero3dCanvas.style.filter = phoneBlur > 0.2
+          ? `blur(${phoneBlur}px) drop-shadow(0 0 60px rgba(82,39,255,0.45))`
+          : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+        hero3dCanvas.style.pointerEvents = pPhoneEntryEased > 0.1 ? 'auto' : 'none';
+      }
+
+      // Kinetic Text Background (Originkit) emerges behind the smartphone with blur
       const kineticBg = document.getElementById('kinetic-text-bg');
       if (kineticBg && currentScrollLerp < T_SPIN_END) {
-        const pKinetic = Math.min(1.0, (currentScrollLerp - T_PHONE_ZOOM_START) / 0.03);
-        kineticBg.style.opacity = pKinetic.toFixed(3);
-        kineticBg.style.filter = 'blur(0px)';
+        kineticBg.style.display = 'block';
+        kineticBg.style.visibility = 'visible';
+        const pKinetic = Math.max(0, Math.min(1.0, (currentScrollLerp - T_PHONE_ZOOM_START) / 0.04));
+        const pKineticEased = Math.sin((pKinetic * Math.PI) / 2);
+        const kBlur = ((1.0 - pKineticEased) * 20).toFixed(1);
+        kineticBg.style.opacity = pKineticEased.toFixed(3);
+        kineticBg.style.filter = kBlur > 0.2 ? `blur(${kBlur}px)` : 'none';
       }
 
       // Calibrated Soft Lighting for Smartphone (Crisp Text & Dark Rat-Gray Chassis Contrast)
@@ -2282,8 +2351,6 @@ function initHero3DModel() {
       camera.position.set(0, 0, 8.5);
       camera.lookAt(0, 0, 0);
 
-      const hero3dCanvas = document.getElementById('hero-3d-canvas');
-
       if (currentScrollLerp < T_PHONE_ZOOM_END) {
         // B.1 Emergence & Continuous Zoom Out to Center (0.40 -> 0.60)
         const pZoom = (currentScrollLerp - T_PHONE_ZOOM_START) / (T_PHONE_ZOOM_END - T_PHONE_ZOOM_START);
@@ -2305,9 +2372,6 @@ function initHero3DModel() {
           0
         );
 
-        if (hero3dCanvas) {
-          hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
-        }
 
       } else if (currentScrollLerp < T_SPIN_END) {
         // B.2 360° Horizontal Spin with Scroll (0.60 -> 0.80)
@@ -2327,16 +2391,24 @@ function initHero3DModel() {
         if (portalDot) portalDot.style.opacity = '0';
         if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
-        camera.position.set(0, 0, 8.5);
-        camera.lookAt(0, 0, 0);
-
-        const pUp = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.05);
+        const pUp = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.04);
         const pUpEased = Math.sin((pUp * Math.PI) / 2);
+
+        // La cámara acompaña ligeramente el ascenso para evitar cualquier corte horizontal en el borde superior
+        camera.position.set(0, pUpEased * 3.0, 8.5);
+        camera.lookAt(0, pUpEased * 3.0, 0);
 
         // Smartphone se desplaza hacia arriba suavemente
         smartphoneGroup.scale.set(1.0, 1.0, 1.0);
-        smartphoneGroup.position.set(0, pUpEased * 9.0, 0);
+        smartphoneGroup.position.set(0, pUpEased * 10.0, 0);
         smartphoneGroup.rotation.set(0, Math.PI * 2, 0); // Frontal
+
+        // Desvanecimiento suave en el tramo final del ascenso para una salida totalmente limpia sin recortes
+        if (pUpEased > 0.40 && hero3dCanvas) {
+          const pExitFade = Math.max(0, 1.0 - (pUpEased - 0.40) / 0.45);
+          hero3dCanvas.style.opacity = pExitFade.toFixed(3);
+        }
+
         // Desactivar renderizado 3D del smartphone una vez fuera del visor
         if (pUpEased > 0.85) {
           smartphoneGroup.visible = false;
@@ -2361,18 +2433,18 @@ function initHero3DModel() {
     // Section 3 Background Image (fondo ecosistema.jpeg) Transition
     const sec3BgWrapper = document.getElementById('sec3-bg-wrapper');
     if (sec3BgWrapper) {
-      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.81) {
-        const pBgSec3 = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
+      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.865) {
+        const pBgSec3 = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.025);
         const pBgEased = Math.sin((pBgSec3 * Math.PI) / 2);
         sec3BgWrapper.style.opacity = pBgEased.toFixed(3);
         sec3BgWrapper.style.filter = 'none';
-      } else if (currentScrollLerp >= 0.81 && currentScrollLerp < 0.84) {
-        // Desaparición en blur sincronizada con la aparición en blur de Ejecución (0.81 -> 0.84)
-        const pBlurOut = (currentScrollLerp - 0.81) / 0.03;
+      } else if (currentScrollLerp >= 0.865 && currentScrollLerp < 0.885) {
+        // Desaparición en blur sincronizada con la aparición en blur de Ejecución
+        const pBlurOut = (currentScrollLerp - 0.865) / 0.02;
         const pBlurOutEased = Math.sin((pBlurOut * Math.PI) / 2);
         sec3BgWrapper.style.opacity = Math.max(0, 1.0 - pBlurOutEased).toFixed(3);
         sec3BgWrapper.style.filter = `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
-      } else if (currentScrollLerp >= 0.84) {
+      } else if (currentScrollLerp >= 0.885) {
         sec3BgWrapper.style.opacity = '0';
         sec3BgWrapper.style.filter = 'blur(20px)';
       } else {
@@ -2385,9 +2457,9 @@ function initHero3DModel() {
     const flankLeft = document.getElementById('sec3-flank-left');
     const flankRight = document.getElementById('sec3-flank-right');
     if (flankLeft && flankRight) {
-      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.84) {
+      if (currentScrollLerp >= T_SPIN_END && currentScrollLerp < 0.885) {
         // Entrada de flancos: poligonal02 (-100% -> -50%), liquid01 (+100% -> +50%)
-        const pFlank = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.035);
+        const pFlank = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.025);
         const pFlankEased = Math.sin((pFlank * Math.PI) / 2);
 
         const leftX = -100 + (pFlankEased * 50);
@@ -2397,9 +2469,9 @@ function initHero3DModel() {
         const rightX = 100 - (pFlankEased * 50);
         flankRight.style.transform = `translate3d(${rightX.toFixed(2)}%, -50%, 0)`;
         flankRight.style.opacity = (pFlankEased * 0.80).toFixed(3);
-      } else if (currentScrollLerp >= 0.84) {
-        // Retirada de flancos hacia los lados conforme ScrollExpand se expande (al contrario como entraron)
-        const pRetreat = Math.min(1.0, (currentScrollLerp - 0.84) / 0.10);
+      } else if (currentScrollLerp >= 0.885) {
+        // Retirada de flancos hacia los lados conforme ScrollExpand se expande
+        const pRetreat = Math.min(1.0, (currentScrollLerp - 0.885) / 0.085);
         const pRetreatEased = Math.sin((pRetreat * Math.PI) / 2);
 
         // poligonal02 se retira hacia la izquierda: -50% -> -100%
@@ -2423,17 +2495,17 @@ function initHero3DModel() {
     const sec3Container = document.getElementById('seccion-3-ecosistema');
     const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
     if (sec3Container) {
-      if (currentScrollLerp >= 0.680 && currentScrollLerp < 0.81) {
+      if (currentScrollLerp >= 0.77 && currentScrollLerp < 0.865) {
         // Entrada sutil y progresiva del contenedor de Ecosistema
-        const pContainerIn = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.680) / 0.035));
+        const pContainerIn = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.77) / 0.025));
         const pContainerInEased = 0.5 * (1.0 - Math.cos(pContainerIn * Math.PI));
         sec3Container.style.opacity = pContainerInEased.toFixed(3);
         sec3Container.style.filter = 'none';
         sec3Container.style.pointerEvents = pContainerInEased > 0.6 ? 'auto' : 'none';
 
-        // Escalonamiento secuencial suave, sutil y progresivo para las 6 tarjetas (0.690 -> 0.745)
-        const cardStarts = [0.690, 0.698, 0.706, 0.714, 0.722, 0.730];
-        const cardDuration = 0.026;
+        // Escalonamiento secuencial suave para las 6 tarjetas
+        const cardStarts = [0.78, 0.785, 0.79, 0.795, 0.80, 0.81];
+        const cardDuration = 0.018;
 
         for (let k = 0; k < 6; k++) {
           const card = document.getElementById(`sec3-card-${k}`);
@@ -2453,21 +2525,21 @@ function initHero3DModel() {
           }
         }
 
-        // Sincronización continua y fluida del scroll de tarjetas (0.735 -> 0.81)
+        // Sincronización continua y fluida del scroll de tarjetas
         if (sec3ScrollContainer && !isUserInteractingSec3) {
           const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
           if (maxInternalScroll > 0) {
-            if (currentScrollLerp <= 0.735) {
+            if (currentScrollLerp <= 0.815) {
               sec3ScrollContainer.scrollTop = 0;
             } else {
-              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.735) / (0.81 - 0.735)));
+              const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.815) / (0.865 - 0.815)));
               sec3ScrollContainer.scrollTop = pScrollCards * maxInternalScroll;
             }
           }
         }
-      } else if (currentScrollLerp >= 0.81 && currentScrollLerp < 0.84) {
-        // Desaparición en blur de Ecosistema exactamente mientras Ejecución aparece en blur (0.81 -> 0.84)
-        const pBlurOut = (currentScrollLerp - 0.81) / 0.03;
+      } else if (currentScrollLerp >= 0.865 && currentScrollLerp < 0.885) {
+        // Desaparición en blur de Ecosistema mientras Ejecución aparece en blur
+        const pBlurOut = (currentScrollLerp - 0.865) / 0.02;
         const pBlurOutEased = Math.sin((pBlurOut * Math.PI) / 2);
         sec3Container.style.opacity = Math.max(0, 1.0 - pBlurOutEased).toFixed(3);
         sec3Container.style.filter = `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
@@ -2479,7 +2551,7 @@ function initHero3DModel() {
             sec3ScrollContainer.scrollTop = maxInternalScroll;
           }
         }
-      } else if (currentScrollLerp >= 0.84) {
+      } else if (currentScrollLerp >= 0.885) {
         sec3Container.style.opacity = '0';
         sec3Container.style.filter = 'blur(20px)';
         sec3Container.style.pointerEvents = 'none';
@@ -2509,7 +2581,7 @@ function initHero3DModel() {
     const ejecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
 
     if (expandWrapper && expandFrame && expandVideo) {
-      if (currentScrollLerp < 0.81) {
+      if (currentScrollLerp < 0.865) {
         expandWrapper.style.opacity = '0';
         expandWrapper.style.filter = 'blur(20px)';
         expandWrapper.style.pointerEvents = 'none';
@@ -2518,9 +2590,9 @@ function initHero3DModel() {
         expandFrame.style.borderRadius = '24px';
         expandVideo.style.transform = 'scale(1.35)';
         if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
-      } else if (currentScrollLerp < 0.84) {
-        // Aparición con efecto blur después de la última tarjeta (0.81 -> 0.84)
-        const pEntry = (currentScrollLerp - 0.81) / 0.03;
+      } else if (currentScrollLerp < 0.885) {
+        // Aparición con efecto blur después de la última tarjeta
+        const pEntry = (currentScrollLerp - 0.865) / 0.02;
         const pEntryEased = Math.sin((pEntry * Math.PI) / 2);
         expandWrapper.style.opacity = pEntryEased.toFixed(3);
         expandWrapper.style.filter = `blur(${((1.0 - pEntryEased) * 20).toFixed(1)}px)`;
@@ -2531,11 +2603,11 @@ function initHero3DModel() {
         expandVideo.style.transform = 'scale(1.35)';
         if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
       } else {
-        // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x) (0.84 -> 0.96)
+        // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x)
         expandWrapper.style.opacity = '1';
         expandWrapper.style.filter = 'none';
 
-        const pExp = Math.min(1.0, (currentScrollLerp - 0.84) / 0.12);
+        const pExp = Math.min(1.0, (currentScrollLerp - 0.885) / 0.085);
         const pExpEased = Math.sin((pExp * Math.PI) / 2);
 
         const curW = 44 + (pExpEased * 56);
@@ -2573,16 +2645,16 @@ function initHero3DModel() {
         const pClose = (currentScrollLerp - T_EXIT_START) / (T_EXIT_END - T_EXIT_START);
         dockOpacity = Math.max(0, 1.0 - pClose * 1.5);
         updateActiveDockItem(null);
-      } else if (currentScrollLerp < 0.70) {
-        // Mientras el smartphone está visible, emerge y gira en 3D (0.34 a 0.70), el contenedor fijo inferior se oculta por completo
+      } else if (currentScrollLerp < 0.785) {
+        // Mientras el smartphone está visible, emerge y gira en 3D, el contenedor fijo inferior se oculta
         dockOpacity = 0;
         updateActiveDockItem(null);
-      } else if (currentScrollLerp < 0.74) {
-        // Ecosistema reaparece gradualmente cuando el smartphone sale hacia arriba (0.70 -> 0.74)
-        const pDockEcosistema = (currentScrollLerp - 0.70) / 0.04;
+      } else if (currentScrollLerp < 0.815) {
+        // Ecosistema reaparece gradualmente cuando el smartphone sale hacia arriba
+        const pDockEcosistema = (currentScrollLerp - 0.785) / 0.03;
         dockOpacity = Math.min(1.0, Math.max(0, pDockEcosistema));
         updateActiveDockItem(1);
-      } else if (currentScrollLerp < 0.84) {
+      } else if (currentScrollLerp < 0.885) {
         // Ecosistema activo (flujo de tarjetas)
         dockOpacity = 1.0;
         updateActiveDockItem(1);
@@ -2622,15 +2694,15 @@ function initHero3DModel() {
       const isHeroPhase = currentScrollLerp < T_REVEAL_START;
 
       // White Liquid Glass Header in:
-      // - 01 // Manifiesto (0.08 <= currentScrollLerp < 0.34)
-      // - 02 // Ecosistema (0.70 <= currentScrollLerp < 0.84)
+      // - 01 // Manifiesto (0.08 <= currentScrollLerp < T_PHONE_ZOOM_START)
+      // - 02 // Ecosistema (0.785 <= currentScrollLerp < 0.885)
       // - 05 // Metodología (When curtain is revealed)
       const isWhiteHeaderPhase = (currentScrollLerp >= T_REVEAL_START && currentScrollLerp < T_PHONE_ZOOM_START) ||
-        (currentScrollLerp >= 0.70 && currentScrollLerp < 0.84) ||
+        (currentScrollLerp >= 0.785 && currentScrollLerp < 0.885) ||
         isMetodologiaRevealed;
 
-      // Transparent Floating Header during Smartphone Zoom & 360 Spin (0.34 <= currentScrollLerp < 0.70)
-      const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.70;
+      // Transparent Floating Header during Smartphone Zoom & 360 Spin
+      const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.785;
 
       if (isHeroPhase) {
         if (!globalHeader.classList.contains('glass-nav-hero-transparent')) {
@@ -2659,7 +2731,13 @@ function initHero3DModel() {
     // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
     const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
     if (is3DActive) {
-      renderer.render(scene, camera);
+      try {
+        renderer.render(scene, camera);
+      } catch (err) {
+        console.error('WebGL render error:', err);
+      }
+    } else {
+      renderer.clear();
     }
   }
 
@@ -3591,8 +3669,8 @@ function scrollToSection3() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 50% (0.50): Smartphone 3D centrado frontalmente con fondo cinético (Etapa Ecosistema)
-  const targetY = trackTop + maxScroll * 0.50;
+  // Posición al 60% (0.60): Smartphone 3D centrado frontalmente con video
+  const targetY = trackTop + maxScroll * 0.60;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
@@ -3627,8 +3705,8 @@ function scrollToSectionEjecucion() {
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
-  // Posición al 96% (0.96): ScrollExpand completamente abierto a pantalla completa
-  const targetY = trackTop + maxScroll * 0.96;
+  // Posición al 97%: ScrollExpand completamente abierto a pantalla completa
+  const targetY = trackTop + maxScroll * 0.97;
 
   const startY = window.scrollY;
   const distance = targetY - startY;

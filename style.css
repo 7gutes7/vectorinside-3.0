@@ -404,7 +404,6 @@ body {
 /* Hero 3D Canvas Container (Shifted down) */
 #hero-3d-container {
   pointer-events: auto;
-  transform: translateY(24px) !important;
   overflow: visible !important;
 }
 

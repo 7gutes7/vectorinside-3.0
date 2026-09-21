@@ -4,9 +4,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vector Inside 3.0 | Hub 3D & Ecosistema de Aceleración Digital</title>
+  <title>VECTOR INSIDE | MARKETING AGENCY</title>
   <meta name="description"
     content="Firma de arquitectura integral de crecimiento para empresas, líderes y proyectos creativos. Convertimos el caos en arquitectura." />
+
+  <!-- Favicon (V Isotipo Amarillo) -->
+  <link rel="icon" type="image/svg+xml" href="Vector%20inside%20Isotipo.svg?v=3.0" />
+  <link rel="apple-touch-icon" href="Vector%20inside%20Isotipo.svg?v=3.0" />
 
   <!-- Tailwind static build (compilado con build-tailwind.sh) -->
   <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
@@ -147,9 +151,9 @@
 
       <!-- Background 3D Canvas Layer -->
       <div id="hero-3d-container"
-        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto translate-y-[20px]">
+        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-visible z-10 pointer-events-auto">
         <canvas id="hero-3d-canvas"
-          class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)] transition-all duration-150"></canvas>
+          class="w-full h-full object-contain filter drop-shadow-[0_0_60px_rgba(82,39,255,0.45)] transition-none"></canvas>
       </div>
 
       <!-- ==================== LAYER 10: HERO CONTENT & 3D STAGE ==================== -->
@@ -280,8 +284,8 @@
             <!-- Left Background Video Layer (Pinned to left, shifted -50px left, fades to white towards right) -->
             <div class="absolute inset-y-0 left-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none z-0">
               <video id="section2-manifesto-video"
-                data-lazy-src="https://res.cloudinary.com/cci1klwx/video/upload/v1788152146/Animar_imagen.mp4" loop
-                muted playsinline preload="none"
+                src="Animar_imagen_720.mp4"
+                muted playsinline preload="auto"
                 class="w-[calc(100%+50px)] max-w-none h-full object-cover object-left block -translate-x-[50px]"></video>
               <!-- Gradient Overlay: Smooth fade into pure white towards the right -->
               <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white pointer-events-none">
@@ -1158,8 +1162,8 @@
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.264) -->
-  <script src="script.js?v=3.0.264"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.269) -->
+  <script src="script.js?v=3.0.269"></script>
 </body>
 
 </html>
