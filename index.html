@@ -25,7 +25,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.278" />
+  <link rel="stylesheet" href="style.css?v=3.0.287" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -86,6 +86,91 @@
       </button>
     </div>
   </div>
+
+  <!-- Inline Instant Video Intro Controller (Zero-delay, No dependency on DOMContentLoaded) -->
+  <script>
+    (function () {
+      const intro = document.getElementById('intro-screen');
+      const vid = document.getElementById('intro-video');
+      const skip = document.getElementById('skip-intro-btn');
+      if (!intro || !vid) return;
+
+      // Si el usuario recarga estando abajo, no mostrar
+      if ((window.scrollY || window.pageYOffset || 0) > 80) {
+        intro.style.display = 'none';
+        intro.style.opacity = '0';
+        intro.style.pointerEvents = 'none';
+        try { vid.pause(); } catch (e) {}
+        window.__introDismissed = true;
+        return;
+      }
+
+      let dismissed = false;
+      function hideIntro() {
+        if (dismissed) return;
+        dismissed = true;
+        window.__introDismissed = true;
+
+        intro.style.transition = 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        intro.style.opacity = '0';
+        intro.style.pointerEvents = 'none';
+
+        if (typeof window.triggerStrokeTextEffect === 'function') {
+          window.triggerStrokeTextEffect();
+        }
+
+        setTimeout(function () {
+          intro.style.display = 'none';
+          try { vid.pause(); } catch (e) {}
+        }, 320);
+      }
+
+      window.dismissIntroScreen = hideIntro;
+
+      // Eventos directos del reproductor
+      vid.addEventListener('ended', hideIntro);
+      vid.addEventListener('pause', function () {
+        if (vid.currentTime > 1) hideIntro();
+      });
+      vid.addEventListener('timeupdate', function () {
+        if (vid.duration && vid.currentTime >= (vid.duration - 0.25)) {
+          hideIntro();
+        }
+      });
+
+      // Polling de alta frecuencia para evitar cualquier congelamiento en el último frame
+      const poll = setInterval(function () {
+        if (dismissed) {
+          clearInterval(poll);
+          return;
+        }
+        if (vid.ended || (vid.duration && vid.currentTime >= (vid.duration - 0.25))) {
+          clearInterval(poll);
+          hideIntro();
+        }
+      }, 40);
+
+      // Timeout de seguridad garantizado (video dura 5s)
+      setTimeout(function () {
+        clearInterval(poll);
+        hideIntro();
+      }, 5100);
+
+      // Botón saltar y clic para omitir
+      if (skip) {
+        skip.addEventListener('click', function (e) {
+          e.stopPropagation();
+          hideIntro();
+        });
+      }
+      intro.addEventListener('click', function (e) {
+        if (e.target !== skip) hideIntro();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') hideIntro();
+      });
+    })();
+  </script>
 
   <!-- ==================== HEADER & NAVIGATION ==================== -->
   <header id="main-global-header"
@@ -1143,8 +1228,8 @@
   <script src="AccordionGallery.js?v=3.0.4"></script>
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
-  <!-- Custom Logic Script (Cache-Busting Version v3.0.285) -->
-  <script src="script.js?v=3.0.285"></script>
+  <!-- Custom Logic Script (Cache-Busting Version v3.0.287) -->
+  <script src="script.js?v=3.0.287"></script>
 </body>
 
 </html>

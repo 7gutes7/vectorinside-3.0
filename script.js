@@ -183,18 +183,31 @@ function initPageVideoIntro() {
   const video = document.getElementById('intro-video');
   const skipBtn = document.getElementById('skip-intro-btn');
 
-  if (!introScreen || !video) {
-    setTimeout(triggerStrokeTextEffect, 200);
+  // Si ya fue descartado por el script inline o no existe
+  if (window.__introDismissed || !introScreen || !video || window.getComputedStyle(introScreen).display === 'none') {
+    setTimeout(triggerStrokeTextEffect, 100);
     return;
   }
 
   // Si el usuario refresca la página estando ya en una sección inferior, omitir intro
   const currentY = window.scrollY || window.pageYOffset || 0;
   if (currentY > 120) {
-    introScreen.style.display = 'none';
-    introScreen.style.opacity = '0';
-    introScreen.style.pointerEvents = 'none';
-    try { video.pause(); } catch (e) {}
+    if (typeof window.dismissIntroScreen === 'function') {
+      window.dismissIntroScreen();
+    } else {
+      introScreen.style.display = 'none';
+      introScreen.style.opacity = '0';
+      introScreen.style.pointerEvents = 'none';
+      try { video.pause(); } catch (e) {}
+    }
+    return;
+  }
+
+  // Si el controlador inline ya está activo, verificar si el video ya terminó
+  if (typeof window.dismissIntroScreen === 'function') {
+    if (video.ended || (video.duration && video.currentTime >= video.duration - 0.25)) {
+      window.dismissIntroScreen();
+    }
     return;
   }
 
@@ -204,44 +217,41 @@ function initPageVideoIntro() {
   function dismissIntro() {
     if (isDismissed) return;
     isDismissed = true;
+    window.__introDismissed = true;
     if (rafId) cancelAnimationFrame(rafId);
 
-    introScreen.style.transition = 'opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+    introScreen.style.transition = 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
     introScreen.style.opacity = '0';
     introScreen.style.pointerEvents = 'none';
 
-    // Iniciar de inmediato la animación del hero
     triggerStrokeTextEffect();
 
     setTimeout(() => {
       introScreen.style.display = 'none';
       try { video.pause(); } catch (e) {}
-    }, 350);
+    }, 320);
   }
 
-  // Reproducir video intro de inmediato (silenciado y con soporte autoplay)
-  video.currentTime = 0;
-  const playPromise = video.play();
-  if (playPromise !== undefined) {
-    playPromise.catch((err) => {
-      console.warn('Autoplay intro video blocked or delayed:', err);
-    });
+  // Reproducir solo si está pausado
+  if (video.paused && !video.ended) {
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        console.warn('Autoplay intro video blocked or delayed:', err);
+      });
+    }
   }
 
-  // Monitoreo de alta precisión con requestAnimationFrame para ocultar justo antes del frame estático final
   function checkProgress() {
     if (isDismissed) return;
-    if (video.duration && video.duration > 0) {
-      if (video.duration - video.currentTime <= 0.2) {
-        dismissIntro();
-        return;
-      }
+    if (video.ended || (video.duration && video.duration > 0 && video.currentTime >= video.duration - 0.25)) {
+      dismissIntro();
+      return;
     }
     rafId = requestAnimationFrame(checkProgress);
   }
   rafId = requestAnimationFrame(checkProgress);
 
-  // Transición al finalizar el video
   video.addEventListener('ended', dismissIntro);
   video.addEventListener('timeupdate', () => {
     if (video.duration && (video.duration - video.currentTime < 0.25)) {
@@ -249,19 +259,16 @@ function initPageVideoIntro() {
     }
   });
 
-  // Temporizador de seguridad (video dura 5s)
   setTimeout(() => {
     if (!isDismissed) dismissIntro();
-  }, 5200);
+  }, 5100);
 
-  // Clic en video o pantalla para omitir
   video.style.cursor = 'pointer';
   video.addEventListener('click', dismissIntro);
   introScreen.addEventListener('click', (e) => {
     if (e.target !== skipBtn) dismissIntro();
   });
 
-  // Botón Saltar Intro
   if (skipBtn) {
     skipBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -269,7 +276,6 @@ function initPageVideoIntro() {
     });
   }
 
-  // Tecla ESC para omitir
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !isDismissed) {
       dismissIntro();
@@ -3410,6 +3416,7 @@ window.addEventListener('resize', () => {
 });
 
 function triggerStrokeTextEffect() {
+  window.triggerStrokeTextEffect = triggerStrokeTextEffect;
   // Si no estamos en el Hero (ej. refresh en otra sección), NUNCA ejecutar ni mostrar textos del Hero
   const currentY = window.scrollY || window.pageYOffset || 0;
   if (currentY > 80 || (typeof currentScrollLerp !== 'undefined' && currentScrollLerp > 0.06)) {
@@ -3508,6 +3515,7 @@ function triggerStrokeTextEffect() {
     }, 950);
   }
 }
+window.triggerStrokeTextEffect = triggerStrokeTextEffect;
 
 /**
  * Horizontal Split Curtain Reveal for Hero 3D Model
