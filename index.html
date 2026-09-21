@@ -133,6 +133,40 @@
       class="liquid-glass-item whitespace-nowrap px-3.5 py-1.5 rounded-full cursor-pointer">05 // DIAGNÓSTICO</a>
   </nav>
 
+  <!-- ==================== FIXED BOTTOM-LEFT PERSISTENT SCROLL INDICATOR ==================== -->
+  <div id="persistent-scroll-indicator"
+    class="fixed bottom-6 left-6 sm:bottom-8 sm:left-8 z-[95] flex flex-col items-center select-none cursor-pointer group is-visible"
+    onclick="window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' })"
+    aria-label="Desplazar hacia abajo" title="Desplazar hacia abajo">
+    <div class="scroll-indicator-wrap relative flex flex-col items-center">
+      <!-- Light mode / dark backgrounds version -->
+      <div class="scroll-icons-light relative flex flex-col items-center">
+        <!-- Faint Base Anchor Layer -->
+        <img src="scroll-icon-white.png" alt="Scroll"
+          class="w-11 sm:w-13 md:w-14 h-auto object-contain opacity-25 filter drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:opacity-45" />
+        <!-- Active Illuminated Layer with 3s Curtain Wipe -->
+        <div class="scroll-curtain-active-layer absolute inset-0 w-full h-full overflow-hidden">
+          <img src="scroll-icon-white.png" alt="Scroll Active"
+            class="w-11 sm:w-13 md:w-14 h-auto object-contain filter drop-shadow-[0_0_16px_rgba(195,244,0,0.7)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] group-hover:brightness-125 transition-all duration-300" />
+          <div class="scroll-curtain-laser-line"></div>
+        </div>
+      </div>
+
+      <!-- Dark mode / light backgrounds version (Section 04 Metodología) -->
+      <div class="scroll-icons-dark relative flex flex-col items-center hidden">
+        <!-- Faint Base Anchor Layer -->
+        <img src="scroll-icon-dark.png" alt="Scroll"
+          class="w-11 sm:w-13 md:w-14 h-auto object-contain opacity-35 filter drop-shadow-[0_1px_6px_rgba(0,0,0,0.15)] transition-all duration-300 group-hover:opacity-55" />
+        <!-- Active Illuminated Layer with 3s Curtain Wipe -->
+        <div class="scroll-curtain-active-layer absolute inset-0 w-full h-full overflow-hidden">
+          <img src="scroll-icon-dark.png" alt="Scroll Active"
+            class="w-11 sm:w-13 md:w-14 h-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] group-hover:brightness-90 transition-all duration-300" />
+          <div class="scroll-curtain-laser-line dark-laser"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== SCROLLYTELLING PINNED CONTAINER (3D ZOOM + FIXED IN-PLACE REVEAL) ==================== -->
   <div id="hero-scroll-track" class="relative w-full h-[1420vh] bg-black">
     <!-- Pinned Sticky Viewport Window -->

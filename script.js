@@ -165,6 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Lazy-load below-the-fold background videos (fetch + play only when visible)
   initLazyVideos();
 
+  // 8. Persistent Bottom-Left Scroll Indicator (Curtain animation + 20s idle timeout)
+  initPersistentScrollIndicator();
+
   // Fallback trigger if intro screen is disabled or absent
   const introScreen = document.getElementById('intro-screen');
   if (!introScreen || window.getComputedStyle(introScreen).display === 'none') {
@@ -3164,6 +3167,11 @@ function initHero3DModel() {
           globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent', 'glass-nav-transparent-section05');
         }
       }
+
+      const persistentIndicator = document.getElementById('persistent-scroll-indicator');
+      if (persistentIndicator) {
+        persistentIndicator.classList.toggle('theme-dark', isWhiteHeaderPhase);
+      }
     }
 
     // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
@@ -5546,13 +5554,72 @@ if (document.readyState === 'loading') {
     initFloatingGallery();
     initVectorIsotipo();
     initDiagnosticoTest();
+    initPersistentScrollIndicator();
   });
 } else {
   initFloatingGallery();
   initVectorIsotipo();
   initDiagnosticoTest();
+  initPersistentScrollIndicator();
 }
 
+// ==================== PERSISTENT BOTTOM-LEFT SCROLL INDICATOR ====================
+/**
+ * Icono indicador de scroll persistente en la esquina inferior izquierda.
+ * - Animación de cortina de arriba hacia abajo cada 3 segundos.
+ * - Desaparece inmediatamente al hacer scroll.
+ * - Reaparece tras 20 segundos de inactividad.
+ */
+function initPersistentScrollIndicator() {
+  const indicator = document.getElementById('persistent-scroll-indicator');
+  if (!indicator || indicator.__isInitialized) return;
+  indicator.__isInitialized = true;
 
+  let idleScrollTimer = null;
+  const IDLE_DURATION = 20000; // 20 segundos de inactividad
 
+  function show() {
+    indicator.classList.remove('is-hidden');
+    indicator.classList.add('is-visible');
+  }
 
+  function hide() {
+    indicator.classList.remove('is-visible');
+    indicator.classList.add('is-hidden');
+  }
+
+  function handleScrollActivity() {
+    // 1. Desaparece de inmediato al hacer scroll
+    hide();
+
+    // 2. Reiniciar temporizador de 20 segundos de inactividad
+    if (idleScrollTimer) {
+      clearTimeout(idleScrollTimer);
+    }
+    idleScrollTimer = setTimeout(show, IDLE_DURATION);
+  }
+
+  // Escuchar eventos de scroll en la ventana y contenedores internos
+  window.addEventListener('scroll', handleScrollActivity, { passive: true });
+  window.addEventListener('wheel', handleScrollActivity, { passive: true });
+  window.addEventListener('touchmove', handleScrollActivity, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(e.code)) {
+      handleScrollActivity();
+    }
+  }, { passive: true });
+
+  const ejecucionContainer = document.getElementById('sec-ejecucion-scroll-container');
+  if (ejecucionContainer) {
+    ejecucionContainer.addEventListener('scroll', handleScrollActivity, { passive: true });
+  }
+
+  const secPortal = document.getElementById('seccion-portal-revelada');
+  if (secPortal) {
+    secPortal.addEventListener('scroll', handleScrollActivity, { passive: true });
+  }
+
+  // Inicialmente visible, y al primer scroll se oculta e inicia el ciclo de 20s
+  show();
+}
+window.initPersistentScrollIndicator = initPersistentScrollIndicator;

@@ -1109,6 +1109,119 @@ body {
   min-height: 480vh !important;
 }
 
+/* ==================== PERSISTENT BOTTOM-LEFT SCROLL INDICATOR ==================== */
+#persistent-scroll-indicator {
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
+#persistent-scroll-indicator.is-hidden {
+  opacity: 0 !important;
+  transform: translateY(16px) scale(0.92) !important;
+  pointer-events: none !important;
+}
 
+#persistent-scroll-indicator.is-visible {
+  opacity: 1 !important;
+  transform: translateY(0px) scale(1) !important;
+  pointer-events: auto !important;
+}
 
+/* 3-Second Repeating Curtain Wipe Animation (Top to Bottom) */
+@keyframes scrollCurtainWipe {
+  0% {
+    clip-path: inset(0% 0% 100% 0%);
+    opacity: 0.15;
+  }
+  28% {
+    clip-path: inset(0% 0% 0% 0%);
+    opacity: 1;
+  }
+  78% {
+    clip-path: inset(0% 0% 0% 0%);
+    opacity: 1;
+  }
+  94% {
+    clip-path: inset(100% 0% 0% 0%);
+    opacity: 0.2;
+  }
+  100% {
+    clip-path: inset(0% 0% 100% 0%);
+    opacity: 0.15;
+  }
+}
+
+/* Scanline / Laser Curtain Edge Sweep */
+@keyframes scrollCurtainLaserSweep {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  28% {
+    top: 100%;
+    opacity: 1;
+  }
+  32% {
+    top: 100%;
+    opacity: 0;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Subtle Chevrons Downward Pulse in Sync with Curtain */
+@keyframes scrollChevronsBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(4px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  70% {
+    transform: translateY(3.5px);
+  }
+  85% {
+    transform: translateY(0);
+  }
+}
+
+.scroll-curtain-active-layer {
+  animation: scrollCurtainWipe 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: clip-path, opacity;
+}
+
+.scroll-curtain-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C3F400 30%, #FFFFFF 50%, #C3F400 70%, transparent);
+  box-shadow: 0 0 10px #C3F400, 0 0 20px #C3F400;
+  animation: scrollCurtainLaserSweep 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.scroll-curtain-laser-line.dark-laser {
+  background: linear-gradient(90deg, transparent, #111111 30%, #555555 50%, #111111 70%, transparent);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.scroll-indicator-wrap {
+  animation: scrollChevronsBounce 3s infinite ease-in-out;
+}
+
+/* Theme switching for Section 04 Metodología */
+#persistent-scroll-indicator.theme-dark .scroll-icons-light {
+  display: none !important;
+}
+
+#persistent-scroll-indicator.theme-dark .scroll-icons-dark {
+  display: flex !important;
+}
