@@ -28,6 +28,12 @@ function restoreCurrentScrollPosition() {
 // Restore immediately on script execution
 restoreCurrentScrollPosition();
 
+// Estado del reveal 3D del Hero — DEBE declararse antes de cualquier llamada a
+// ensureHeroUiVisible()/triggerStrokeTextEffect(); si no, un refresh con scroll > 80px
+// lanza "Cannot access 'isHero3DRevealed' before initialization" y aborta todo script.js.
+let isHero3DRevealed = false;
+let isHero3DModelLoaded = false;
+
 let _isHeroUiEnsured = false;
 function ensureHeroUiVisible(force = false) {
   const heroUi = document.getElementById('hero-ui-content');
@@ -1123,7 +1129,12 @@ function initHero3DModel() {
   }
 
   const dim = getContainerDimensions();
-  const camera = new THREE.PerspectiveCamera(45, dim.width / dim.height, 0.1, 1000);
+  // FOV responsivo: en móvil (< 768px) el aspect vertical hacía que el lobo
+  // llenara toda la pantalla y tapara los textos del Hero. Solo afecta a móvil.
+  function getHeroFov() {
+    return getContainerDimensions().width < 768 ? 64 : 45;
+  }
+  const camera = new THREE.PerspectiveCamera(getHeroFov(), dim.width / dim.height, 0.1, 1000);
   camera.position.set(0, 0, 10);
 
   let renderer;
@@ -1755,6 +1766,7 @@ function initHero3DModel() {
   function syncSize() {
     const d = getContainerDimensions();
     camera.aspect = d.width / d.height;
+    camera.fov = getHeroFov();
     camera.updateProjectionMatrix();
     renderer.setSize(d.width, d.height);
   }
@@ -2003,10 +2015,35 @@ function initHero3DModel() {
 
   // Video scrubbing state & queue — persistent across render frames for Section 01 Identidad (Animar_imagen_720.mp4)
   const sec2Vid = document.getElementById('section2-manifesto-video');
+  // Espejo de fondo desenfocado (solo se muestra en responsive, ver style.css)
+  const sec2BgVid = document.getElementById('sec2-bg-video');
   let _sec2VidSeeking = false;
   let _sec2VidPendingTime = null;
 
+  if (sec2BgVid) {
+    sec2BgVid.muted = true;
+    sec2BgVid.playsInline = true;
+    sec2BgVid.setAttribute('muted', '');
+    sec2BgVid.setAttribute('playsinline', '');
+    sec2BgVid.setAttribute('webkit-playsinline', '');
+    try { sec2BgVid.load(); } catch (e) {}
+  }
+
+  function mirrorSec2BgVideo(targetTime) {
+    if (!sec2BgVid || sec2BgVid.readyState < 1) return;
+    if (sec2BgVid.offsetParent === null) return; // oculto (escritorio)
+    if (Math.abs(sec2BgVid.currentTime - targetTime) < 0.02) return;
+    try {
+      if ('fastSeek' in sec2BgVid) {
+        sec2BgVid.fastSeek(targetTime);
+      } else {
+        sec2BgVid.currentTime = targetTime;
+      }
+    } catch (e) {}
+  }
+
   function seekSec2Video(targetTime) {
+    mirrorSec2BgVideo(targetTime);
     if (!sec2Vid) return;
     if (sec2Vid.readyState < 1) {
       _sec2VidPendingTime = targetTime;
@@ -3521,8 +3558,7 @@ window.triggerStrokeTextEffect = triggerStrokeTextEffect;
  * Horizontal Split Curtain Reveal for Hero 3D Model
  * Opens smoothly from the center vertical line outwards to left and right simultaneously
  */
-let isHero3DRevealed = false;
-let isHero3DModelLoaded = false;
+// isHero3DRevealed / isHero3DModelLoaded se declaran al inicio del archivo (evita error TDZ)
 
 function triggerHero3DReveal() {
   if (isHero3DRevealed || !isHero3DModelLoaded) return;

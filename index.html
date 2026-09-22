@@ -25,7 +25,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.287" />
+  <link rel="stylesheet" href="style.css?v=3.0.323" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -115,14 +115,19 @@
         intro.style.opacity = '0';
         intro.style.pointerEvents = 'none';
 
-        if (typeof window.triggerStrokeTextEffect === 'function') {
-          window.triggerStrokeTextEffect();
-        }
-
         setTimeout(function () {
           intro.style.display = 'none';
           try { vid.pause(); } catch (e) {}
         }, 320);
+
+        // Un error en la animación del hero nunca debe dejar el intro colgado
+        try {
+          if (typeof window.triggerStrokeTextEffect === 'function') {
+            window.triggerStrokeTextEffect();
+          }
+        } catch (err) {
+          console.error('triggerStrokeTextEffect falló:', err);
+        }
       }
 
       window.dismissIntroScreen = hideIntro;
@@ -382,6 +387,14 @@
       <div id="seccion-portal-revelada"
         class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-4 sm:px-6 flex flex-col justify-between bg-white text-vector-black opacity-0 pointer-events-none transition-none shadow-2xl">
 
+        <!-- Fondo de video desenfocado (solo responsive; sincronizado con el video de la tarjeta) -->
+        <div id="sec2-bg-video-layer" class="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+          aria-hidden="true">
+          <video id="sec2-bg-video" src="Animar_imagen_720.mp4" muted playsinline preload="auto"
+            class="w-full h-full object-cover"></video>
+          <div id="sec2-bg-video-veil" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+
         <!-- Top Meta Badge -->
         <div
           class="relative z-10 max-w-7xl w-full mx-auto flex items-center justify-between border-b border-black/15 pb-4">
@@ -407,7 +420,8 @@
               <video id="section2-manifesto-video" src="Animar_imagen_720.mp4" muted playsinline preload="auto"
                 class="w-[calc(100%+50px)] max-w-none h-full object-cover object-left block -translate-x-[50px]"></video>
               <!-- Gradient Overlay: Smooth fade into pure white towards the right -->
-              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white pointer-events-none">
+              <div id="sec2-video-gradient"
+                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white pointer-events-none">
               </div>
             </div>
 
@@ -415,7 +429,7 @@
             <div class="hidden lg:block relative min-h-[340px] sm:min-h-[380px] pointer-events-none z-10"></div>
 
             <!-- Right Half Kinetic Manifesto -->
-            <div
+            <div id="sec2-manifesto-panel"
               class="p-6 sm:p-10 lg:p-12 flex flex-col justify-center text-vector-black relative z-10 bg-white/90 lg:bg-transparent">
               <div>
                 <span
@@ -1229,7 +1243,7 @@
   <!-- Topography Component (React Bits WebGL) -->
   <script src="Topography.js?v=3.0.171"></script>
   <!-- Custom Logic Script (Cache-Busting Version v3.0.287) -->
-  <script src="script.js?v=3.0.287"></script>
+  <script src="script.js?v=3.0.319"></script>
 </body>
 
 </html>

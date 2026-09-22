@@ -1110,9 +1110,54 @@ body {
 }
 
 /* ==================== PERSISTENT BOTTOM-LEFT SCROLL INDICATOR ==================== */
+/* Posición, capa y tamaños explícitos: las utilidades Tailwind de este bloque
+   (left-6, sm:bottom-8, z-[95], opacity-25, sm:w-13…) no están en tailwind-build.css */
 #persistent-scroll-indicator {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 95;
   transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+#persistent-scroll-indicator img {
+  width: 44px;
+  height: auto;
+  display: block;
+}
+
+@media (min-width: 640px) {
+  #persistent-scroll-indicator { left: 32px; bottom: 32px; }
+  #persistent-scroll-indicator img { width: 52px; }
+}
+
+@media (min-width: 768px) {
+  #persistent-scroll-indicator img { width: 56px; }
+}
+
+/* En pantallas angostas el dock inferior (#bottom-dock-nav) ocupa todo el ancho:
+   subir el indicador para que quede encima del dock y no se encimen */
+@media (max-width: 900px) {
+  #persistent-scroll-indicator { bottom: 100px; }
+}
+
+/* Capa base tenue (la capa activa con la cortina va encima) */
+#persistent-scroll-indicator .scroll-icons-light > img {
+  opacity: 0.25;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.95));
+}
+
+#persistent-scroll-indicator .scroll-icons-dark > img {
+  opacity: 0.35;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.15));
+}
+
+#persistent-scroll-indicator .scroll-icons-light .scroll-curtain-active-layer img {
+  filter: drop-shadow(0 0 16px rgba(195, 244, 0, 0.7)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.95));
+}
+
+#persistent-scroll-indicator:hover .scroll-icons-light > img { opacity: 0.45; }
+#persistent-scroll-indicator:hover .scroll-icons-dark > img { opacity: 0.55; }
 
 #persistent-scroll-indicator.is-hidden {
   opacity: 0 !important;
@@ -1224,4 +1269,471 @@ body {
 
 #persistent-scroll-indicator.theme-dark .scroll-icons-dark {
   display: flex !important;
+}
+
+/* ==========================================================================
+   AJUSTES SOLO MÓVIL (≤ 767px) — NO AFECTAN LA VERSIÓN DE ESCRITORIO
+   Todo lo de aquí abajo vive dentro de media queries de ancho máximo.
+   ========================================================================== */
+@media (max-width: 767px) {
+
+  /* ---------- HERO: de dos columnas a una sola columna apilada ---------- */
+  /* En escritorio los dos bloques se encuentran en el centro; en móvil cada
+     columna mide ~170px y los textos se salían de la pantalla. */
+  #hero-ui-content > .grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  #hero-ui-content > .grid > div {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  #hero-ui-content h1 {
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100%;
+  }
+
+  #stroke-text-wrapper {
+    width: 80% !important;
+    max-width: 272px !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Título en el tercio superior */
+  #hero-ui-content > .grid {
+    margin-top: 8vh !important;
+    margin-bottom: auto !important;
+  }
+
+  /* La frase INSTINTO / PARA DOMINAR / EL MERCADO se ancla abajo, a la altura
+     del botón del chatbot, con el lobo respirando entre el título y la frase */
+  #hero-curtain-right {
+    position: absolute;
+    left: 16px;
+    bottom: 74px;
+    width: calc((100% - 32px) * 0.8) !important;
+    max-width: 254px !important;
+    margin: 0 !important;
+  }
+
+  /* Legibilidad de los textos del Hero sobre el modelo 3D claro */
+  #stroke-text-wrapper svg,
+  #hero-curtain-right svg {
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.55));
+  }
+
+  /* Botón EXPERIENCIA VI fuera del hero en móvil */
+  #hero-micro-cta {
+    display: none !important;
+  }
+
+  /* Aire inferior para que el texto no choque con el dock */
+  #hero-ui-content {
+    padding-bottom: 150px !important;
+  }
+
+  /* ---------- DOCK INFERIOR: dos filas en vez de recorte horizontal ---------- */
+  /* Índice inferior pegado al borde izquierdo */
+  #bottom-dock-nav {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 6px;
+    column-gap: 6px;
+    left: 0 !important;
+    transform: none !important;
+    width: max-content;
+    max-width: calc(100vw - 112px);
+    overflow-x: visible;
+    border-radius: 0 22px 22px 0;
+    padding: 8px 10px 8px 8px;
+  }
+
+  #bottom-dock-nav > a {
+    font-size: 8.5px;
+    letter-spacing: 0.05em;
+    padding: 5px 7px;
+  }
+
+  /* ---------- BOTÓN DEL CHATBOT: por encima del dock, no sobre él ---------- */
+  #chatbot-trigger-btn {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  /* Chatbot en la esquina inferior derecha */
+  #chatbot-trigger-btn,
+  #chatbot-launcher-wrap {
+    bottom: 10px !important;
+    right: 6px !important;
+  }
+
+  /* ---------- INDICADOR DE SCROLL: encima del dock de dos filas ---------- */
+  /* Indicador de scroll: centrado justo debajo del botón del chatbot
+     (el chatbot no se mueve), a la mitad de tamaño y sin ningún fondo */
+  #persistent-scroll-indicator {
+    left: auto !important;
+    right: 50px !important;
+    bottom: 126px !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+  }
+
+  #persistent-scroll-indicator img {
+    width: 20px;
+    filter: none !important;
+    background: transparent !important;
+  }
+}
+
+/* Pantallas muy angostas: la frase se acorta para no rozar el botón del chatbot */
+@media (max-width: 380px) {
+  #hero-curtain-right {
+    width: calc((100% - 58px) * 0.8) !important;
+    max-width: 234px !important;
+  }
+}
+
+/* ==========================================================================
+   AJUSTES SOLO TABLET (768px – 1023px) — LA VISTA DE ESCRITORIO (≥1024px)
+   NO SE TOCA
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1279px) {
+
+  /* Hero apilado: de 768px a 1279px las dos columnas se salían de la pantalla */
+  #hero-ui-content > .grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  #hero-ui-content > .grid > div {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  #hero-ui-content h1 {
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100%;
+  }
+
+  #hero-ui-content {
+    padding-bottom: 150px !important;
+  }
+
+  #stroke-text-wrapper {
+    width: 80% !important;
+    max-width: 384px !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  #hero-ui-content > .grid {
+    margin-top: 9vh !important;
+    margin-bottom: auto !important;
+  }
+
+  /* Misma bajada de la frase hasta la altura del chatbot */
+  #hero-curtain-right {
+    position: absolute;
+    left: 24px;
+    bottom: 120px;
+    width: calc((100% - 48px) * 0.8) !important;
+    max-width: 384px !important;
+    margin: 0 !important;
+  }
+
+  #stroke-text-wrapper svg,
+  #hero-curtain-right svg {
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.55));
+  }
+
+  /* Botón EXPERIENCIA VI fuera del hero en tablet */
+  #hero-micro-cta {
+    display: none !important;
+  }
+
+}
+
+/* Dock, chatbot e indicador: solo hasta 1023px; de 1024px en adelante caben tal cual */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+  /* Dock: una sola fila, sin recortes */
+  #bottom-dock-nav {
+    font-size: 9.5px;
+    gap: 4px;
+    padding: 8px 12px;
+    max-width: calc(100vw - 24px);
+    overflow-x: visible;
+  }
+
+  #bottom-dock-nav > a {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    padding: 6px 11px;
+  }
+
+}
+
+/* Hasta 1119px el botón del chatbot se encima con el dock: se sube encima de él */
+@media (min-width: 768px) and (max-width: 1119px) {
+  #chatbot-trigger-btn {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  #chatbot-trigger-btn,
+  #chatbot-launcher-wrap {
+    bottom: 104px !important;
+  }
+
+  /* Mismo criterio en tablet: debajo del chatbot, 50% y sin fondo */
+  #persistent-scroll-indicator {
+    left: auto !important;
+    right: 55px !important;
+    bottom: 105px !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+  }
+
+  #persistent-scroll-indicator img {
+    width: 26px !important;
+    filter: none !important;
+    background: transparent !important;
+  }
+}
+
+/* ==========================================================================
+   SECCIÓN 01 // IDENTIDAD — SOLO RESPONSIVE (≤ 1279px)
+   El video de fondo se ve 25% más: se bajan en esa proporción los velos
+   blancos que lo cubren (degradado + panel del texto).
+   ========================================================================== */
+@media (max-width: 1279px) {
+  #sec2-video-gradient {
+    background-image: linear-gradient(to right,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.75)) !important;
+  }
+
+}
+
+/* El panel del texto solo lleva fondo blanco por debajo de 1024px
+   (de 1024px en adelante ya es transparente por diseño) */
+@media (max-width: 1023px) {
+  #sec2-manifesto-panel {
+    background-color: rgba(255, 255, 255, 0.675) !important;
+  }
+}
+
+/* ==========================================================================
+   INDICADOR / ANIMACIÓN DE SCROLL — OCULTO EN TODA LA VISTA RESPONSIVE
+   (≤ 1279px). En escritorio sigue apareciendo igual que siempre.
+   ========================================================================== */
+@media (max-width: 1279px) {
+  #persistent-scroll-indicator {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   TEXTO CINÉTICO "Vector Inside /" (etapa del smartphone 3D) — SOLO RESPONSIVE
+   El JS cambia el contenedor a display:block para mostrarlo/ocultarlo, lo que
+   anula el centrado flex y dejaba el texto pegado arriba. Dándole altura
+   completa al wrapper, sus filas se centran solas en la pantalla.
+   ========================================================================== */
+@media (max-width: 1279px) {
+  #kinetic-text-bg .kinetic-text-wrapper {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   04 // METODOLOGÍA — SOLO MÓVIL (≤ 767px)
+   El escenario mide más que la pantalla y, al ir centrado dentro de un
+   contenedor h-screen con overflow hidden, el encabezado se cortaba por
+   arriba. Se compacta y las 4 fases pasan a rejilla 2x2 para que quepa todo.
+   ========================================================================== */
+@media (max-width: 767px) {
+  #sec-metodologia-stage {
+    padding-top: 76px !important;
+    /* deja libre la franja del dock inferior */
+    padding-bottom: 104px !important;
+  }
+
+  /* Encabezado más compacto */
+  #sec-metodologia-stage > div:first-child {
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
+    gap: 8px !important;
+  }
+
+  #sec-metodologia-stage h2 {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Las 4 fases en 2x2 */
+  #sec-metodologia-stage .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #sec-metodologia-stage .phase-card {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  #sec-metodologia-stage .phase-card > div > div:first-child {
+    margin-bottom: 8px !important;
+  }
+
+  #sec-metodologia-stage .phase-card h3 {
+    font-size: 13px !important;
+    margin-bottom: 5px !important;
+  }
+
+  #sec-metodologia-stage .phase-card p {
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 10px !important;
+  }
+
+  #sec-metodologia-stage .phase-card > div:last-child {
+    padding: 7px !important;
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* ==========================================================================
+   01 // IDENTIDAD — FONDO DE VIDEO DESENFOCADO, SOLO RESPONSIVE (≤ 1279px)
+   Mismo archivo que el video de la tarjeta y sincronizado con él desde
+   script.js (mirrorSec2BgVideo), para que ambos avancen con el scroll igual.
+   ========================================================================== */
+#sec2-bg-video-layer {
+  display: none;
+}
+
+@media (max-width: 1279px) {
+  #sec2-bg-video-layer {
+    display: block;
+  }
+
+  #sec2-bg-video {
+    filter: blur(11px) saturate(1.05);
+    transform: scale(1.12);
+    transform-origin: center;
+    will-change: filter;
+  }
+
+  #sec2-bg-video-veil {
+    background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.38) 45%,
+      rgba(255, 255, 255, 0.6));
+  }
+}
+
+/* ==========================================================================
+   02 // PLATAFORMA — ORDEN DE LAS FICHAS, SOLO MÓVIL (≤ 767px)
+   En escritorio son dos columnas en zigzag (01,03,05 a la izquierda y
+   02,04,06 a la derecha). Al colapsar a una sola columna el DOM las servía
+   como 01,03,05,02,04,06. Aquí se disuelven las columnas y se ordenan 01→06.
+   ========================================================================== */
+@media (max-width: 767px) {
+  #sec3-cards-stream {
+    display: flex !important;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* Las dos columnas dejan de existir como caja: sus fichas suben al stream */
+  #sec3-cards-stream > div {
+    display: contents;
+  }
+
+  #sec3-card-0 { order: 1; }
+  #sec3-card-1 { order: 2; }
+  #sec3-card-2 { order: 3; }
+  #sec3-card-3 { order: 4; }
+  #sec3-card-4 { order: 5; }
+  #sec3-card-5 { order: 6; }
+}
+
+/* ==========================================================================
+   05 // DIAGNÓSTICO — SOLO MÓVIL (≤ 767px)
+   El contenido (866px) era más alto que la sección (811px) y, al ir centrado
+   con overflow hidden, se cortaba arriba (título) y abajo (CTA). Se compacta
+   y, si aún no cabe, el bloque se desplaza con scroll propio.
+   ========================================================================== */
+@media (max-width: 767px) {
+  #sec-06-diagnostico {
+    /* libra el header fijo arriba y el índice inferior abajo */
+    padding-top: 88px !important;
+    padding-bottom: 124px !important;
+  }
+
+  #diag-content-stage {
+    max-height: calc(100vh - 212px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
+    padding-right: 4px;
+  }
+
+  #diag-content-stage::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  #diag-content-stage::-webkit-scrollbar-thumb {
+    background: rgba(195, 244, 0, 0.5);
+    border-radius: 3px;
+  }
+
+  /* Encabezado compacto */
+  #diag-content-stage > div:first-child {
+    margin-bottom: 10px !important;
+  }
+
+  #diag-content-stage h1 {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Panel del test */
+  #diag-content-stage .glass-panel {
+    padding: 14px !important;
+  }
+
+  #diag-content-stage .glass-panel > div + div {
+    margin-top: 10px !important;
+  }
+
+  /* Opciones de respuesta */
+  #diag-content-stage .glass-panel label.flex {
+    padding: 7px 8px !important;
+    font-size: 10px !important;
+    gap: 6px !important;
+  }
+
+  #diag-content-stage .glass-panel label.flex strong {
+    font-size: 11px !important;
+  }
+
+  #diag-content-stage .glass-panel .grid {
+    gap: 6px !important;
+  }
 }
