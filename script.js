@@ -1141,6 +1141,10 @@ function initHero3DModel() {
 
   // Responsive (≤ 1023px): modelo ligero y resolución de render contenida para que el hero no se trabe
   const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
+  // En responsive se quita el resplandor drop-shadow (60px) del canvas 3D: un filtro así sobre un
+  // canvas a pantalla completa obliga al celular a recomponer toda la pantalla en cada cuadro,
+  // y eso hacía que el video de fondo del hero se viera trabado.
+  const HERO_GLOW = IS_MOBILE_HERO ? '' : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
   let renderer;
   try {
@@ -2208,6 +2212,14 @@ function initHero3DModel() {
       const bgOpacity = Math.max(0, 1.0 - Math.min(1.0, pBgFade));
       heroBgVideo.style.opacity = bgOpacity.toFixed(3);
       heroBgVideo.style.visibility = bgOpacity > 0.001 ? 'visible' : 'hidden';
+      // Responsive: el video de fondo del hero solo se decodifica mientras se ve
+      if (IS_MOBILE_HERO) {
+        const hv = heroBgVideo.querySelector('video');
+        if (hv) {
+          if (bgOpacity > 0.001 && hv.paused) { const hp = hv.play(); if (hp && hp.catch) hp.catch(() => {}); }
+          else if (bgOpacity <= 0.001 && !hv.paused) hv.pause();
+        }
+      }
     }
 
 
@@ -2336,7 +2348,7 @@ function initHero3DModel() {
       if (hero3dCanvas) {
         if (currentScrollLerp < 0.11) {
           hero3dCanvas.style.opacity = Math.max(0, headOpacity).toFixed(3);
-          hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+          hero3dCanvas.style.filter = HERO_GLOW || 'none';
           hero3dCanvas.style.pointerEvents = headOpacity > 0.05 ? 'auto' : 'none';
         } else {
           hero3dCanvas.style.opacity = '0';
@@ -2679,8 +2691,8 @@ function initHero3DModel() {
         hero3dCanvas.style.webkitClipPath = 'none';
         hero3dCanvas.style.opacity = pPhoneEntryEased.toFixed(3);
         hero3dCanvas.style.filter = phoneBlur > 0.2
-          ? `blur(${phoneBlur}px) drop-shadow(0 0 60px rgba(82,39,255,0.45))`
-          : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+          ? `blur(${phoneBlur}px) ${HERO_GLOW}`.trim()
+          : (HERO_GLOW || 'none');
         hero3dCanvas.style.pointerEvents = pPhoneEntryEased > 0.1 ? 'auto' : 'none';
       }
 
@@ -2777,7 +2789,7 @@ function initHero3DModel() {
       } else if (currentScrollLerp < T_SPIN_END) {
         // B.2 360° Horizontal Spin with Scroll (0.60 -> 0.80)
         if (portalDot) portalDot.style.opacity = '0';
-        if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+        if (hero3dCanvas) hero3dCanvas.style.filter = HERO_GLOW || 'none';
 
         camera.position.set(0, 0, 8.5);
         camera.lookAt(0, 0, 0);
@@ -2790,7 +2802,7 @@ function initHero3DModel() {
       } else {
         // B.3 Desplazamiento hacia arriba con scroll y desvanecimiento en blur del fondo (0.65 -> 0.70)
         if (portalDot) portalDot.style.opacity = '0';
-        if (hero3dCanvas) hero3dCanvas.style.filter = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+        if (hero3dCanvas) hero3dCanvas.style.filter = HERO_GLOW || 'none';
 
         const pUp = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.04);
         const pUpEased = Math.sin((pUp * Math.PI) / 2);

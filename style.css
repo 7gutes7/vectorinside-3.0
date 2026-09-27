@@ -2140,8 +2140,13 @@ body {
    Estilo de etiqueta técnica del sitio; alineada igual que el título en cada tamaño.
    ========================================================================== */
 .hero-h1-kicker {
-  display: block;
-  margin-top: 14px;
+  /* Va dentro de #stroke-text-wrapper, justo ARRIBA de "DISEÑO DE MARCA" */
+  position: absolute;
+  bottom: 100%;
+  left: 0;              /* alineado con la "D" de DISEÑO (inicio del título) */
+  margin: 0 0 12px;
+  white-space: nowrap;
+  text-align: left;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 11px;
@@ -2163,7 +2168,7 @@ body {
   to { opacity: 1; transform: none; }
 }
 @media (max-width: 767px) {
-  .hero-h1-kicker { font-size: 9px; letter-spacing: 0.08em; margin-top: 10px; white-space: nowrap; }
+  .hero-h1-kicker { font-size: 9px; letter-spacing: 0.08em; margin: 0 0 8px; white-space: nowrap; }
   .hero-h1-kicker i { margin: 0 2px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2321,4 +2326,14 @@ body {
     bottom: 157px !important;  /* centrada con el chatbot, que en tablet va sobre el índice */
     z-index: 101 !important;
   }
+}
+
+/* HERO — responsive: sin el resplandor drop-shadow del canvas 3D (ver HERO_GLOW en script.js) */
+@media (max-width: 1023px) {
+  #hero-3d-canvas { filter: none; }
+}
+
+/* En responsive el título del hero se alinea a la izquierda: la línea de arriba también */
+@media (max-width: 1279px) {
+  .hero-h1-kicker { right: auto; left: 0; text-align: left; }
 }
