@@ -1588,7 +1588,8 @@ body {
     margin-bottom: 10px !important;
   }
 
-  #diag-content-stage h1 {
+  #diag-content-stage h1,
+  #diag-content-stage h2 {
     font-size: 20px !important;
     line-height: 1.1 !important;
   }
@@ -1683,4 +1684,488 @@ body {
     object-position: center center !important;
     border-radius: 0 !important;
   }
+}
+
+
+/* ==========================================================================
+   01 // IDENTIDAD — RECUADRO DE SERVICIOS (debajo del recuadro principal)
+   Morado, letras blancas, bordes redondeados, 6 servicios en dos columnas.
+   ========================================================================== */
+.sec2-servicios {
+  margin-top: 16px;
+  background-color: #6f00be; /* operative-purple-dark */
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 18px 24px;
+  box-shadow: 0 18px 40px rgba(111, 0, 190, 0.25);
+}
+.sec2-servicios-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  color: #ffffff;
+}
+.sec2-servicios-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 6px;
+}
+.sec2-servicios-list li {
+  position: relative;
+  padding-left: 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #ffffff;
+}
+.sec2-servicios-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background-color: #c3f400; /* vector-lime */
+}
+@media (max-width: 767px) {
+  .sec2-servicios {
+    margin-top: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+  }
+  .sec2-servicios-title { font-size: 11px; margin-bottom: 8px; }
+  .sec2-servicios-list { column-gap: 14px; row-gap: 5px; }
+  .sec2-servicios-list li { font-size: 11.5px; padding-left: 12px; }
+  .sec2-servicios-list li::before { width: 6px; height: 6px; }
+}
+
+/* 01 // IDENTIDAD — AJUSTE DE ALTURA EN CELULAR (≤ 767px)
+   Con el recuadro de Servicios, todo debe caber sobre el índice inferior:
+   el video se adapta a la altura disponible y se compactan los espacios. */
+@media (max-width: 767px) {
+  #sec2-video-frame {
+    height: clamp(100px, calc(100dvh - 650px), 240px) !important;
+  }
+  #sec2-manifesto-card { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
+  #sec2-servicios { margin-top: 10px; }
+  #sec2-manifesto-panel {
+    padding: 14px 16px !important;
+  }
+  #sec2-manifesto-panel h2 {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+  #sec2-manifesto-panel span.block {
+    margin-bottom: 6px !important;
+  }
+  .sec2-servicios { padding: 12px 14px; }
+  .sec2-servicios-list li { font-size: 11px; line-height: 1.3; }
+}
+@media (max-width: 767px) {
+  #sec2-manifesto-wrap { padding-top: 6px !important; padding-bottom: 6px !important; }
+}
+/* Tablet (768px – 1279px): el video se adapta a la altura disponible para que
+   el recuadro de Servicios no quede debajo del índice inferior. */
+@media (min-width: 768px) and (max-width: 1279px) {
+  #sec2-video-frame {
+    height: clamp(120px, calc(100dvh - 600px), 340px) !important;
+  }
+}
+
+/* 01 // IDENTIDAD — SERVICIOS EN ESCRITORIO (≥ 1280px): 3 columnas
+   Col 1: "Servicios:" centrado verticalmente · Col 2: servicios 1-3 · Col 3: servicios 4-6 */
+@media (min-width: 1280px) {
+  .sec2-servicios {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 36px;
+    padding: 20px 32px;
+  }
+  .sec2-servicios-title {
+    margin: 0;
+    align-self: center;
+    padding-right: 32px;
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+  .sec2-servicios-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    column-gap: 36px;
+    row-gap: 8px;
+  }
+}
+
+/* ==========================================================================
+   01 // IDENTIDAD — RECUADRO DE SERVICIOS CLICABLE + FLECHA ↗
+   ========================================================================== */
+.sec2-servicios {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, background-color 0.35s ease;
+  outline: none;
+}
+.sec2-servicios:hover,
+.sec2-servicios:focus-visible {
+  transform: translateY(-2px);
+  background-color: #7a0fd0;
+  box-shadow: 0 22px 48px rgba(111, 0, 190, 0.38), 0 0 0 1px rgba(195, 244, 0, 0.35);
+}
+.sec2-servicios-arrow {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sec2-servicios:hover .sec2-servicios-arrow,
+.sec2-servicios:focus-visible .sec2-servicios-arrow {
+  background: #c3f400;
+  color: #080808;
+  transform: translate(2px, -2px);
+}
+@media (max-width: 767px) {
+  .sec2-servicios-arrow { top: 9px; right: 9px; width: 26px; height: 26px; }
+  .sec2-servicios-arrow svg { width: 15px; height: 15px; }
+}
+
+/* ==========================================================================
+   VENTANA EMERGENTE: SERVICIOS + PREGUNTAS FRECUENTES ("EXPEDIENTE VECTOR")
+   Negro profundo, retícula técnica, acentos lima y morado, numeración "01 //".
+   ========================================================================== */
+.svm {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  visibility: hidden;
+  pointer-events: none;
+}
+.svm.is-open { visibility: visible; pointer-events: auto; }
+.svm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 8, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.svm.is-open .svm-backdrop { opacity: 1; }
+
+.svm-panel {
+  position: relative;
+  width: min(1080px, 100%);
+  max-height: min(86vh, 860px);
+  display: flex;
+  flex-direction: column;
+  background: #0d0d0f;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(157, 78, 221, 0.15);
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  filter: blur(8px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+}
+.svm.is-open .svm-panel { opacity: 1; transform: none; filter: none; }
+/* Línea superior morado → lima */
+.svm-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6f00be, #9d4edd 45%, #c3f400);
+  z-index: 2;
+}
+/* Retícula técnica de fondo, como la de 02 // Plataforma */
+.svm-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at top right, #000 10%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at top right, #000 10%, transparent 75%);
+}
+
+.svm-head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 30px 36px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.svm-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #c3f400;
+  margin: 0 0 10px;
+}
+.svm-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.svm-title span { color: #9d4edd; }
+.svm-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+.svm-close:hover { border-color: #c3f400; color: #c3f400; }
+
+.svm-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.svm-col { padding: 26px 36px 30px; }
+.svm-col + .svm-col { border-left: 1px solid rgba(255, 255, 255, 0.08); }
+.svm-col-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #c3f400;
+  margin: 0 0 18px;
+}
+.svm-col-label i { width: 8px; height: 8px; background: currentColor; display: inline-block; }
+.svm-col-label--purple { color: #b57cf0; }
+
+.svm-services { list-style: none; margin: 0; padding: 0; }
+.svm-services li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.svm-services li:last-child { border-bottom: 0; }
+.svm-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9d4edd;
+  padding-top: 2px;
+}
+.svm-services strong {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+.svm-services p {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c4c9ac;
+}
+
+.svm-faq details {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 10px;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.svm-faq details[open] {
+  border-color: rgba(157, 78, 221, 0.55);
+  background: rgba(111, 0, 190, 0.12);
+}
+.svm-faq summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.svm-faq summary::-webkit-details-marker { display: none; }
+.svm-faq summary::after {
+  content: '+';
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  color: #c3f400;
+  border: 1px solid rgba(195, 244, 0, 0.4);
+  transition: transform 0.3s ease;
+}
+.svm-faq details[open] summary::after { content: '–'; }
+.svm-faq details p {
+  margin: 0;
+  padding: 0 16px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #d9d9d9;
+}
+
+.svm-foot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+.svm-foot p {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #ffffff;
+}
+.svm-foot p span { color: #c4c9ac; }
+.svm-cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #c3f400;
+  color: #080808;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(195, 244, 0, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.svm-cta:hover { transform: translateY(-1px); box-shadow: 0 0 34px rgba(195, 244, 0, 0.55); }
+
+@media (max-width: 900px) {
+  .svm { padding: 0; align-items: flex-end; }
+  .svm-panel {
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(40px);
+  }
+  .svm-head { padding: 22px 20px 16px; }
+  .svm-kicker { font-size: 9.5px; letter-spacing: 0.14em; }
+  .svm-body { grid-template-columns: 1fr; }
+  .svm-col { padding: 20px 20px 8px; }
+  .svm-col + .svm-col { border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px; }
+  .svm-foot { flex-direction: column; align-items: stretch; text-align: center; padding: 14px 20px 18px; }
+  .svm-cta { justify-content: center; }
+}
+
+/* El recuadro de Servicios debe ser clicable aunque la sección 01 tenga pointer-events:none.
+   Y el contenedor de 03 // Evidencia (invisible mientras su portal no está activo) no debe
+   capturar los clics de las secciones anteriores. */
+#sec2-servicios { pointer-events: auto; }
+#sec-scroll-expand-wrapper[style*="pointer-events: none"] #sec-ejecucion-scroll-container {
+  pointer-events: none !important;
+}
+#seccion-3-ecosistema[style*="pointer-events: none"] #sec3-cards-scroll-container {
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   HERO — LÍNEA VISIBLE DENTRO DEL <h1> (SEO): "VECTOR INSIDE // AGENCIA DE MARKETING DIGITAL"
+   Estilo de etiqueta técnica del sitio; alineada igual que el título en cada tamaño.
+   ========================================================================== */
+.hero-h1-kicker {
+  display: block;
+  margin-top: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  animation: heroKickerIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+.hero-h1-kicker i {
+  font-style: normal;
+  color: #c3f400;
+  margin: 0 4px;
+}
+@keyframes heroKickerIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 767px) {
+  .hero-h1-kicker { font-size: 9px; letter-spacing: 0.08em; margin-top: 10px; white-space: nowrap; }
+  .hero-h1-kicker i { margin: 0 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-h1-kicker { animation: none; opacity: 1; }
 }

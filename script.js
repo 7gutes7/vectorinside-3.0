@@ -4079,7 +4079,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `*WhatsApp:* ${auditState.phone}\n` +
       `*Desafío actual:* ${auditState.challenge}`
     );
-    const waUrl = `https://wa.me/527203323957?text=${waText}`;
+    const waUrl = `https://wa.me/525549184259?text=${waText}`;
 
     const subject = encodeURIComponent(`Auditoría Nuclear - ${auditState.name}`);
     const bodyText = encodeURIComponent(
@@ -5682,7 +5682,7 @@ function initDiagnosticoTest() {
 
     if (whatsappLink) {
       const msg = encodeURIComponent('Hola Vector Inside, realicé el Test de Madurez Digital (Puntaje: ' + total + '/120 - ' + statusText + ') y me gustaría agendar la sesión estratégica.');
-      whatsappLink.href = 'https://wa.me/527203323957?text=' + msg;
+      whatsappLink.href = 'https://wa.me/525549184259?text=' + msg;
     }
   }
 
@@ -5976,3 +5976,56 @@ function initPersistentScrollIndicator() {
   };
 }
 window.initPersistentScrollIndicator = initPersistentScrollIndicator;
+
+// ==================== VENTANA EMERGENTE: SERVICIOS + PREGUNTAS FRECUENTES ====================
+(function () {
+  let lastFocus = null;
+  const getModal = () => document.getElementById('servicios-modal');
+
+  function openServiciosModal(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = getModal();
+    if (!modal || modal.classList.contains('is-open')) return;
+    lastFocus = document.activeElement;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    // Bloquear el scroll de la página (que mueve la línea de tiempo) mientras está abierta
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    const body = modal.querySelector('.svm-body');
+    if (body) body.scrollTop = 0;
+    setTimeout(() => {
+      const closeBtn = modal.querySelector('.svm-close');
+      if (closeBtn) closeBtn.focus({ preventScroll: true });
+    }, 60);
+  }
+
+  function closeServiciosModal() {
+    const modal = getModal();
+    if (!modal || !modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  }
+
+  window.openServiciosModal = openServiciosModal;
+  window.closeServiciosModal = closeServiciosModal;
+
+  function init() {
+    const modal = getModal();
+    if (!modal) return;
+    modal.querySelectorAll('[data-svm-close]').forEach((el) => el.addEventListener('click', closeServiciosModal));
+    // Evitar que la rueda/touch dentro de la ventana muevan la página de fondo
+    ['wheel', 'touchmove'].forEach((evt) => {
+      modal.addEventListener(evt, (ev) => ev.stopPropagation(), { passive: true });
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && modal.classList.contains('is-open')) closeServiciosModal();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
