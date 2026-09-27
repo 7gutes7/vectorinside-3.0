@@ -1139,6 +1139,9 @@ function initHero3DModel() {
   const camera = new THREE.PerspectiveCamera(getHeroFov(), dim.width / dim.height, 0.1, 1000);
   camera.position.set(0, 0, 10);
 
+  // Responsive (≤ 1023px): modelo ligero y resolución de render contenida para que el hero no se trabe
+  const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
+
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({
@@ -1155,7 +1158,7 @@ function initHero3DModel() {
 
   renderer.setSize(dim.width, dim.height);
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, IS_MOBILE_HERO ? 1.5 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
@@ -1407,8 +1410,9 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // 3D Model: poligonal-30-08-26.glb
-    const modelUrl = './poligonal-30-08-26.glb';
+    // 3D Model: poligonal-30-08-26.glb (escritorio, 1.56M triángulos)
+    // En responsive se usa poligonal-mobile.glb: misma forma simplificada a 60k triángulos (~0.7 MB)
+    const modelUrl = IS_MOBILE_HERO ? './poligonal-mobile.glb' : './poligonal-30-08-26.glb';
     loader.load(
       modelUrl,
       (gltf) => {
@@ -1444,6 +1448,8 @@ function initHero3DModel() {
               clearcoat: 0.35,        // menos barniz blanco encima
               clearcoatRoughness: 0.18,
               envMapIntensity: 0.22,  // HDR balanceado
+              // El modelo ligero no trae normales: sombreado plano = mismas facetas del original
+              flatShading: !(child.geometry && child.geometry.attributes && child.geometry.attributes.normal),
             });
             if (srcMat) {
               if (srcMat.map) physMat.map = srcMat.map;
@@ -1530,7 +1536,10 @@ function initHero3DModel() {
     // 3D Model 2: smartphone2.glb (Section 3)
     // --- Live video texture for the smartphone screen ---
     const screenVideo = document.createElement('video');
-    screenVideo.src = 'Abstract_animation_marketing_web_1080p.mp4';
+    // Responsive: versión 360x640 (~0.65 MB) — la pantalla del teléfono se ve pequeña en celular
+    // y subir un video 1080x1920 a la GPU en cada cuadro era lo que trababa la sección.
+    screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile.mp4' : 'Abstract_animation_marketing_web_1080p.mp4';
+    window.__phoneScreenVideo = screenVideo;
     screenVideo.onerror = () => {
       screenVideo.src = encodeURI('Abstract_animation_marketing_web…_1080p_20260921004014.mp4');
     };
@@ -1582,6 +1591,8 @@ function initHero3DModel() {
     screenVideo.addEventListener('loadedmetadata', updateScreenAspect);
 
     const playScreenVideo = () => {
+      // En responsive solo se reproduce mientras el smartphone está en pantalla (lo controla animate())
+      if (IS_MOBILE_HERO && !window.__phoneScreenActive) return;
       if (screenVideo.paused) {
         const p = screenVideo.play();
         if (p && p.catch) p.catch(() => { });
@@ -2209,6 +2220,18 @@ function initHero3DModel() {
         currentScrollLerp = window.__forceTimelineProgress;
       } else {
         window.__forceTimelineProgress = null;
+      }
+    }
+
+    // Responsive: el video de la pantalla del smartphone solo se decodifica mientras el teléfono está visible
+    if (IS_MOBILE_HERO && window.__phoneScreenVideo) {
+      const phoneOn = currentScrollLerp >= 0.42 && currentScrollLerp < 0.80;
+      const sv = window.__phoneScreenVideo;
+      window.__phoneScreenActive = phoneOn;
+      if (phoneOn && sv.paused) {
+        const pp = sv.play(); if (pp && pp.catch) pp.catch(() => {});
+      } else if (!phoneOn && !sv.paused) {
+        sv.pause();
       }
     }
 
@@ -4841,7 +4864,7 @@ const matrizData = [
     id: 2,
     code: 'BLK-02',
     category: 'operativo',
-    file: 'imagotipo valor Green.png',
+    file: 'imagotipo valor Green sin fondo.png',
     title: 'Valor Máximo',
     desc: 'Plataforma de match inmobiliario y conexión estratégica de espacios comerciales con empresarios y emprendedores.',
     link: 'www.valor-maximo.com',
@@ -5856,7 +5879,7 @@ function initFloatingGallery() {
     height: 480,
     gap: 12,
     radius: 16,
-    showPagination: true
+    showPagination: false // solo hay 5 marcas (una página): se quita la barra de flechas
   });
 
   const filterBtns = document.querySelectorAll('.matriz-filter-btn');

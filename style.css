@@ -2169,3 +2169,156 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero-h1-kicker { animation: none; opacity: 1; }
 }
+
+/* ==========================================================================
+   03 // EVIDENCIA, 04 // METODOLOGÍA y 05 // DIAGNÓSTICO — SCROLL EN RESPONSIVE (≤ 1023px)
+   1) La galería de marcas tenía touch-action:none: al deslizar el dedo sobre las
+      tarjetas el navegador no desplazaba la sección ("se atasca").
+   2) El contenido de Diagnóstico (con scroll propio) seguía recibiendo toques aunque
+      estuviera invisible, y con overscroll "contain" atrapaba el gesto en Metodología.
+   ========================================================================== */
+@media (max-width: 1023px) {
+  #floating-gallery-root,
+  #floating-gallery-root .accordion-gallery,
+  #floating-gallery-root .ag-panel {
+    touch-action: pan-y !important;
+  }
+
+  #sec-06-diagnostico[style*="pointer-events: none"] #diag-content-stage {
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Diagnóstico: el título quedaba fuera de vista (contenido centrado dentro de un
+     bloque con scroll) y el gesto no pasaba a la sección al llegar al final. */
+  #diag-content-stage {
+    justify-content: flex-start !important;
+    overscroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   03 // EVIDENCIA — TARJETA SELECCIONADA SE ABRE EN CELULAR (≤ 520px, galería en columna)
+   Arriba el logo completo sobre blanco; abajo nombre, categoría, descripción y enlace.
+   ========================================================================== */
+@media (max-width: 520px) {
+  #floating-gallery-root .ag-panel {
+    min-height: 60px;
+    transition: min-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  #floating-gallery-root .ag-panel .ag-panel__badge { top: 10px; left: 10px; }
+
+  #floating-gallery-root .ag-panel--active {
+    min-height: 250px;
+  }
+  /* Zona del logo */
+  #floating-gallery-root .ag-panel--active .ag-panel__media {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 118px !important;
+    transform: none !important;
+  }
+  #floating-gallery-root .ag-panel--active .ag-panel__media img {
+    object-fit: contain !important;
+    padding: 18px 24px 10px !important;
+    transform: none !important;
+  }
+  #floating-gallery-root .ag-panel--active .ag-panel__overlay {
+    opacity: 0;
+  }
+  /* Zona de texto */
+  #floating-gallery-root .ag-panel--active .ag-panel__label {
+    top: 118px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 16px 14px;
+    gap: 6px;
+    background: #0d0d0f;
+    border-top: 1px solid rgba(195, 244, 0, 0.35);
+    justify-content: flex-start;
+  }
+  #floating-gallery-root .ag-panel--active .ag-panel__text {
+    font-size: 15px;
+    white-space: normal;
+  }
+  #floating-gallery-root .ag-panel--active .ag-panel__bar { height: 18px; }
+  #floating-gallery-root .ag-panel--active .ag-panel__details p {
+    font-size: 11.5px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  #floating-gallery-root .ag-panel--active .ag-panel__link { margin-top: 4px; }
+  /* Tarjetas cerradas: sin textos encimados sobre el logo */
+  #floating-gallery-root .ag-panel:not(.ag-panel--active) .ag-panel__label { display: none; }
+}
+@media (max-width: 520px) {
+  /* Compactar para que la paginación no quede debajo del índice inferior */
+  #floating-gallery-root .accordion-gallery { --ag-gap: 6px; gap: 6px; }
+  #floating-gallery-root .ag-panel { min-height: 50px; }
+  #floating-gallery-root .ag-panel--active { min-height: 232px; }
+  #floating-gallery-root .ag-panel--active .ag-panel__media { height: 104px !important; }
+  #floating-gallery-root .ag-panel--active .ag-panel__label { top: 104px; padding: 10px 14px 12px; }
+
+  /* Tarjetas cerradas: logo completo y limpio sobre blanco, sin degradado oscuro */
+  #floating-gallery-root .ag-panel:not(.ag-panel--active) .ag-panel__overlay { opacity: 0; }
+  #floating-gallery-root .ag-panel:not(.ag-panel--active) .ag-panel__media {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+  }
+  #floating-gallery-root .ag-panel:not(.ag-panel--active) .ag-panel__media img {
+    object-fit: contain !important;
+    padding: 6px 60px 6px 90px !important;
+    transform: none !important;
+  }
+}
+@media (max-width: 520px) {
+  #floating-gallery-root {
+    justify-content: flex-start !important;
+    padding-top: 44px;
+  }
+}
+
+/* 03 // EVIDENCIA — Valor Máximo: el PNG ahora viene sin fondo ni contorno y recortado
+   al logo, así que ya se ve más grande sin escalarlo (el +40% lo sacaba del recuadro). */
+@media (min-width: 1024px) {
+  /* La zona de imagen es más ancha que la tarjeta abierta: margen lateral para que el
+     logo horizontal (ahora sin fondo) no se corte a los lados */
+  #floating-gallery-root .ag-panel__media img[src*="valor"] {
+    padding: 70px 150px !important;
+  }
+}
+@media (max-width: 520px) {
+  /* Sin la barra de flechas hay más espacio: la tarjeta abierta crece para que
+     siempre quepan 3 líneas de descripción y el enlace */
+  #floating-gallery-root .ag-panel--active { min-height: 258px; }
+}
+
+/* ==========================================================================
+   FLECHA DE NAVEGACIÓN — RESPONSIVE: junto al chatbot (a su izquierda), centrada
+   con él, para que no quede detrás del índice inferior.
+   ========================================================================== */
+@media (max-width: 767px) {
+  #persistent-scroll-indicator {
+    left: auto !important;
+    right: 114px !important;   /* a la izquierda del chatbot, con ~10px de separación */
+    bottom: 56px !important;   /* centrada con el botón del chatbot */
+    z-index: 101 !important;   /* por encima del índice */
+  }
+}
+@media (min-width: 768px) and (max-width: 1119px) {
+  #persistent-scroll-indicator {
+    left: auto !important;
+    right: 133px !important;   /* a la izquierda del chatbot de tablet (≈90px) */
+    bottom: 157px !important;  /* centrada con el chatbot, que en tablet va sobre el índice */
+    z-index: 101 !important;
+  }
+}
