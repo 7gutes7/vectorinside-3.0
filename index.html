@@ -247,9 +247,19 @@
 
       <!-- ==================== HERO BACKGROUND VIDEO: purpleyellow.mp4 ==================== -->
       <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <video id="hero-bg-video" src="purpleyellow.mp4" autoplay loop muted playsinline
+        <video id="hero-bg-video" autoplay loop muted playsinline
           class="w-full h-full object-cover opacity-90 transition-opacity duration-300">
         </video>
+        <script>
+          // Celular en vertical: versión recortada y ligera (~1.1 MB). Resto: original.
+          (function () {
+            var v = document.getElementById('hero-bg-video');
+            if (!v) return;
+            var mobile = window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
+            v.src = mobile ? 'purpleyellow_mobile.mp4' : 'purpleyellow.mp4';
+            var p = v.play && v.play(); if (p && p.catch) p.catch(function () {});
+          })();
+        </script>
         <!-- Dark gradient vignette overlay for depth & typography contrast -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none">
         </div>
@@ -369,13 +379,6 @@
       <div id="seccion-portal-revelada"
         class="absolute inset-0 z-[30] w-full h-full overflow-hidden pt-24 pb-32 px-4 sm:px-6 flex flex-col justify-between bg-white text-vector-black opacity-0 pointer-events-none transition-none shadow-2xl">
 
-        <!-- Fondo de video desenfocado (solo responsive; sincronizado con el video de la tarjeta) -->
-        <div id="sec2-bg-video-layer" class="absolute inset-0 z-0 overflow-hidden pointer-events-none"
-          aria-hidden="true">
-          <video id="sec2-bg-video" src="Animar_imagen_720.mp4" muted playsinline preload="auto"
-            class="w-full h-full object-cover"></video>
-          <div id="sec2-bg-video-veil" class="absolute inset-0 pointer-events-none"></div>
-        </div>
 
         <!-- Top Meta Badge -->
         <div
@@ -399,7 +402,7 @@
 
             <!-- Left Background Video Layer (Pinned to left, shifted -50px left, fades to white towards right) -->
             <div id="sec2-video-frame" class="absolute inset-y-0 left-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none z-0">
-              <video id="section2-manifesto-video" src="Animar_imagen_720.mp4" muted playsinline preload="auto"
+              <video id="section2-manifesto-video" src="Animar_imagen_720_scrub.mp4" muted playsinline preload="auto"
                 class="w-[calc(100%+50px)] max-w-none h-full object-cover object-left block -translate-x-[50px]"></video>
               <!-- Gradient Overlay: Smooth fade into pure white towards the right -->
               <div id="sec2-video-gradient"
@@ -683,7 +686,7 @@
           <!-- Inner Background Media (Glowing Particles Floating in Space with scale 1.35 -> 1.0) -->
           <div id="scroll-expand-media-wrapper"
             class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
-            <video id="scroll-expand-video" src="Glowing_particles_floating_in_space_720.mp4" muted playsinline
+            <video id="scroll-expand-video" src="Glowing_particles_floating_in_space_720_scrub.mp4" muted playsinline
               preload="auto"
               class="w-full h-full object-cover object-center scale-[1.35] will-change-transform transition-none opacity-85"></video>
             <!-- Overlay Scrim Gradient for high contrast -->
