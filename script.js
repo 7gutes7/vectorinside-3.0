@@ -80,8 +80,10 @@ function ensureHeroUiVisible(force = false) {
   }
   const curtainRect = document.getElementById('hero-curtain-rect');
   if (curtainRect) {
-    curtainRect.setAttribute('y', '0');
-    curtainRect.setAttribute('height', '270');
+    curtainRect.setAttribute('x', '-100');
+    curtainRect.setAttribute('width', '1400');
+    curtainRect.setAttribute('y', '-50');
+    curtainRect.setAttribute('height', '380');
   }
   const microCta = document.getElementById('hero-micro-cta');
   if (microCta) {
@@ -1823,6 +1825,8 @@ function initHero3DModel() {
     }
   }
 
+  window.mapHeroToSection2Scroll = mapHeroToSection2Scroll;
+
   // Register ScrollTrigger if available
   let scrollProgress = 0;
   const heroUi = document.getElementById('hero-ui-content');
@@ -2115,7 +2119,10 @@ function initHero3DModel() {
     _sec3VidSeeking = true;
     _sec3VidPendingTime = null;
 
-    if ('fastSeek' in sec3Vid) {
+    const nearEnd = sec3Vid.duration && (targetTime >= sec3Vid.duration - 0.3);
+    if (nearEnd) {
+      sec3Vid.currentTime = targetTime; // preciso: evita quedar oscilando entre dos keyframes
+    } else if ('fastSeek' in sec3Vid) {
       try {
         sec3Vid.fastSeek(targetTime);
       } catch (e) {
@@ -2970,6 +2977,8 @@ function initHero3DModel() {
       } else {
         sec3VidTarget = vid3Dur;
       }
+      // Nunca pedir exactamente el final: se queda en el último frame estable
+      sec3VidTarget = Math.min(sec3VidTarget, Math.max(0, vid3Dur - 0.05));
 
       if (!expandVideo.paused) {
         try { expandVideo.pause(); } catch(e) {}
@@ -3417,26 +3426,45 @@ function alignHeroRightText() {
   if (!svg || !textEl) return;
 
   try {
-    let line1W = 0;
-    let line2W = 0;
-    let line3W = 0;
-    const tspans = textEl.querySelectorAll('tspan');
-    const tspanLine1 = document.getElementById('hero-word-instinto') || tspans[0];
-    const tspanLine2 = tspans[1];
-    const tspanLine3Intro = tspans[2];
-    const tspanLine3Key = document.getElementById('hero-word-mercado') || tspans[3];
+    const tspanLine1 = document.getElementById('hero-word-instinto');
+    const tspanLine2 = document.getElementById('hero-word-dominar') || textEl.querySelectorAll('tspan')[1];
+    const tspanLine3 = document.getElementById('hero-line-mercado') || textEl.querySelectorAll('tspan')[2];
+    const tspanMercado = document.getElementById('hero-word-mercado');
 
-    if (tspanLine1) line1W = tspanLine1.getComputedTextLength();
-    if (tspanLine2) line2W = tspanLine2.getComputedTextLength();
-    if (tspanLine3Intro) line3W += tspanLine3Intro.getComputedTextLength();
-    if (tspanLine3Key) line3W += tspanLine3Key.getComputedTextLength();
+    let line1W = tspanLine1 ? tspanLine1.getComputedTextLength() : 0;
+    let line2W = tspanLine2 ? tspanLine2.getComputedTextLength() : 0;
+    let line3W = 0;
+    if (tspanLine3) {
+      line3W = tspanLine3.getComputedTextLength();
+    } else if (tspanMercado) {
+      line3W = tspanMercado.getComputedTextLength();
+    }
 
     const maxW = Math.max(line1W, line2W, line3W, 600);
-    const finalW = Math.ceil(maxW + 25);
-    svg.setAttribute('viewBox', `0 0 ${finalW} 270`);
+    // Margen holgado a la derecha para que ningún filtro drop-shadow o resplandor neón se recorte
+    const anchorX = Math.ceil(maxW + 15);
+    const totalViewW = Math.ceil(anchorX + 90);
+    svg.setAttribute('viewBox', `0 0 ${totalViewW} 270`);
+    
     const curtainRect = document.getElementById('hero-curtain-rect');
     if (curtainRect) {
-      curtainRect.setAttribute('width', `${finalW}`);
+      curtainRect.setAttribute('x', '-100');
+      curtainRect.setAttribute('width', `${totalViewW + 200}`);
+    }
+
+    // Cada línea se alinea exactamente al margen derecho sin cortar el resplandor
+    textEl.setAttribute('text-anchor', 'end');
+    if (tspanLine1) {
+      tspanLine1.setAttribute('x', `${anchorX}`);
+      tspanLine1.setAttribute('text-anchor', 'end');
+    }
+    if (tspanLine2) {
+      tspanLine2.setAttribute('x', `${anchorX}`);
+      tspanLine2.setAttribute('text-anchor', 'end');
+    }
+    if (tspanLine3) {
+      tspanLine3.setAttribute('x', `${anchorX}`);
+      tspanLine3.setAttribute('text-anchor', 'end');
     }
   } catch (e) {}
 }
@@ -3626,12 +3654,18 @@ function triggerCurtainRevealEffect() {
     if (right) {
       gsap.set(right, { opacity: 1 });
       if (curtainRect) {
+        curtainRect.setAttribute('x', '-100');
+        curtainRect.setAttribute('width', '1400');
         curtainRect.setAttribute('y', '135');
         curtainRect.setAttribute('height', '0');
         tl.to(curtainRect, {
-          attr: { y: 0, height: 270 },
+          attr: { y: -50, height: 380 },
           duration: 0.9,
-          ease: "power3.inOut"
+          ease: "power3.inOut",
+          onComplete: () => {
+            const tEl = right.querySelector('text');
+            if (tEl) tEl.removeAttribute('clip-path');
+          }
         }, 0.05);
       } else {
         gsap.fromTo(right,
@@ -4314,6 +4348,8 @@ window.handleLogoClick = handleLogoClick;
 
 // ==================== CINEMATIC SMOOTH SCROLL TO SECTION 2 (MANIFIESTO) ====================
 function scrollToSection2() {
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const glideJumpId = window.__activeNavJumpId;
   const track = document.getElementById('hero-scroll-track');
   if (!track) return;
   const trackRect = track.getBoundingClientRect();
@@ -4331,6 +4367,7 @@ function scrollToSection2() {
   }
 
   function step(currentTime) {
+    if (window.__activeNavJumpId !== glideJumpId) return;
     if (!startTime) startTime = currentTime;
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1.0);
@@ -4349,29 +4386,33 @@ window.scrollToSection2 = scrollToSection2;
 
 // ==================== CINEMATIC SMOOTH SCROLL TO SECTION 3 (ECOSISTEMA) ====================
 function scrollToSection3() {
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const glideJumpId = window.__activeNavJumpId;
   const track = document.getElementById('hero-scroll-track');
   if (!track) return;
   const trackRect = track.getBoundingClientRect();
   const trackTop = window.scrollY + trackRect.top;
   const maxScroll = track.offsetHeight - window.innerHeight;
   // Posición al 62%: T_PHONE_ZOOM_END — Smartphone 3D completamente centrado y frontal
-  // con el kinetic text "Vector Inside /" visible de fondo (imagen de referencia)
+  // con el kinetic text "Vector Inside /" visible de fondo
   const targetY = trackTop + maxScroll * 0.62;
 
   const startY = window.scrollY;
   const distance = targetY - startY;
-  const duration = 1800; // 1.8s smooth cinematic glide
+  const duration = 3200; // 3.2s suave, sereno y fluido sin aceleraciones bruscas
   let startTime = null;
 
-  function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  // Easing sinusoidal ultra-suave para una aceleración y desaceleración orgánica y relajada
+  function easeInOutSine(t) {
+    return -(Math.cos(Math.PI * t) - 1) / 2;
   }
 
   function step(currentTime) {
+    if (window.__activeNavJumpId !== glideJumpId) return;
     if (!startTime) startTime = currentTime;
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1.0);
-    const easeProgress = easeInOutCubic(progress);
+    const easeProgress = easeInOutSine(progress);
 
     window.scrollTo(0, startY + distance * easeProgress);
 
@@ -4383,6 +4424,215 @@ function scrollToSection3() {
   requestAnimationFrame(step);
 }
 window.scrollToSection3 = scrollToSection3;
+
+// ==================== CINEMATIC SMOOTH SCROLL TO 02 // PLATAFORMA (ARQUITECTURA DE CONVERSIÓN / CARDS) ====================
+const PLATAFORMA_CARDS_TIMELINE = 0.814;
+function getPlataformaCardsRawRatio() {
+  // Inversa de mapHeroToSection2Scroll en el tramo "Ecosistema Cards Stream"
+  const u = (PLATAFORMA_CARDS_TIMELINE - 0.77) / (0.885 - 0.77);
+  return 0.6504 + u * (0.8171 - 0.6504); // ≈ 0.7142
+}
+window.getPlataformaCardsRawRatio = getPlataformaCardsRawRatio;
+
+function scrollToPlataformaCards() {
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
+  window.__forceTimelineProgress = null;
+  window.__forceTimelineUntil = 0;
+
+  const track = document.getElementById('hero-scroll-track');
+  const sec3ScrollContainer = document.getElementById('sec3-cards-scroll-container');
+  if (sec3ScrollContainer) {
+    sec3ScrollContainer.scrollTop = 0;
+  }
+  if (!track) return;
+  const trackRect = track.getBoundingClientRect();
+  const trackTop = window.scrollY + trackRect.top;
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  // IMPORTANTE: la línea de tiempo NO es lineal respecto al scroll físico (ver mapHeroToSection2Scroll).
+  // Objetivo en la LÍNEA DE TIEMPO: 0.814 -> la ficha 04 (sec3-card-3) termina su entrada en 0.813
+  // y el scroll interno de las fichas empieza en 0.815. Así quedan las fichas 01-04 completas,
+  // con el encabezado "02 // PLATAFORMA" visible y sin desplazamiento interno.
+  // Conversión inversa del tramo Ecosistema: timeline 0.77 -> 0.885  <=>  raw 0.6504 -> 0.8171
+  const PLATAFORMA_CARDS_RAW = getPlataformaCardsRawRatio();
+  const targetY = trackTop + maxScroll * PLATAFORMA_CARDS_RAW;
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const duration = 2400; // 2.4s suave, sereno y preciso
+  let startTime = null;
+
+  function easeInOutSine(t) {
+    return -(Math.cos(Math.PI * t) - 1) / 2;
+  }
+
+  function step(currentTime) {
+    if (window.__activeNavJumpId !== jumpId) return;
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1.0);
+    const easeProgress = easeInOutSine(progress);
+
+    window.scrollTo(0, startY + distance * easeProgress);
+
+    if (sec3ScrollContainer) {
+      sec3ScrollContainer.scrollTop = 0;
+    }
+
+    if (progress < 1.0) {
+      requestAnimationFrame(step);
+    } else {
+      window.scrollTo(0, targetY);
+      if (sec3ScrollContainer) {
+        sec3ScrollContainer.scrollTop = 0;
+      }
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+window.scrollToPlataformaCards = scrollToPlataformaCards;
+
+// ==================== RECORRIDO SUAVE 02 // PLATAFORMA (FICHAS) -> 03 // EVIDENCIA (FLECHA) ====================
+// Recorre la página de forma fluida (como las secciones anteriores) y al llegar
+// aplica el mismo estado final que el salto directo de 03 // EVIDENCIA.
+function glideToSectionEjecucion() {
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
+  window.__forceTimelineProgress = null;
+  window.__forceTimelineUntil = 0;
+
+  const track = document.getElementById('hero-scroll-track');
+  if (!track) { scrollToSectionEjecucion(); return; }
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  const targetY = Math.round(maxScroll * 0.96); // mismo destino que scrollToSectionEjecucion
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const duration = 3000; // 3.0s suave y sereno (recorre la transición al portal de Evidencia)
+  let startTime = null;
+
+  function easeInOutSine(t) {
+    return -(Math.cos(Math.PI * t) - 1) / 2;
+  }
+
+  function step(currentTime) {
+    if (window.__activeNavJumpId !== jumpId) return;
+    if (!startTime) startTime = currentTime;
+    const progress = Math.min((currentTime - startTime) / duration, 1.0);
+    window.scrollTo(0, startY + distance * easeInOutSine(progress));
+    if (progress < 1.0) {
+      requestAnimationFrame(step);
+    } else {
+      // Deja que la animación termine de asentarse y fija la portada de Evidencia
+      setTimeout(() => {
+        if (window.__activeNavJumpId === jumpId) scrollToSectionEjecucion();
+      }, 350);
+    }
+  }
+  requestAnimationFrame(step);
+}
+window.glideToSectionEjecucion = glideToSectionEjecucion;
+
+// ==================== ÍNDICE INFERIOR: 02 // PLATAFORMA -> VISTA SMARTPHONE (CAMBIO INSTANTÁNEO) ====================
+function jumpToPlataformaInstant(event) {
+  return jumpInstantToRaw(event, 0.62, 1); // smartphone centrado (mismo punto que la flecha)
+}
+window.jumpToPlataformaInstant = jumpToPlataformaInstant;
+
+// Índice inferior: 01 // IDENTIDAD. Desde el Hero conserva el recorrido suave corto;
+// desde cualquier sección posterior es un cambio de pantalla instantáneo (sin recorrer todo).
+function jumpToIdentidadFromDock(event) {
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
+  const track = document.getElementById('hero-scroll-track');
+  if (track) {
+    const maxScroll = track.offsetHeight - window.innerHeight;
+    const trackTop = window.scrollY + track.getBoundingClientRect().top;
+    const raw = maxScroll > 0 ? (window.scrollY - trackTop) / maxScroll : 0;
+    if (raw < 0.17) { scrollToSection2(); return false; }
+  }
+  return jumpInstantToRaw(event, 0.17, 0);
+}
+window.jumpToIdentidadFromDock = jumpToIdentidadFromDock;
+
+function jumpInstantToRaw(event, RAW, dockIndex) {
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
+  const jumpId = window.__activeNavJumpId;
+
+  const track = document.getElementById('hero-scroll-track');
+  if (!track) return false;
+  const trackTop = window.scrollY + track.getBoundingClientRect().top;
+  const maxScroll = track.offsetHeight - window.innerHeight;
+  const targetY = Math.round(trackTop + maxScroll * RAW);
+  const timelineP = (typeof window.mapHeroToSection2Scroll === 'function')
+    ? window.mapHeroToSection2Scroll(RAW) : RAW;
+
+  // Congelar la línea de tiempo en el destino para que no "recorra" las secciones intermedias
+  window._isDiagnosticoActive = false;
+  window.__forceTimelineProgress = timelineP;
+  window.__forceTimelineUntil = performance.now() + 700;
+  setTimeout(() => {
+    if (window.__activeNavJumpId === jumpId) window.__forceTimelineProgress = null;
+  }, 800);
+
+  // Ocultar capas de 03 // Evidencia, 04 // Metodología, 05 // Diagnóstico y Cierre
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  if (container) container.scrollTop = 0;
+  try { sessionStorage.setItem('vectorinside_inner_scroll_pos', '0'); } catch (e) {}
+
+  const expandWrapper = document.getElementById('sec-scroll-expand-wrapper');
+  if (expandWrapper) {
+    expandWrapper.style.opacity = '0';
+    expandWrapper.style.filter = 'blur(20px)';
+    expandWrapper.style.pointerEvents = 'none';
+  }
+  const expandBody = document.getElementById('scroll-expand-body');
+  if (expandBody) {
+    expandBody.style.opacity = '0';
+    expandBody.style.visibility = 'hidden';
+    expandBody.style.pointerEvents = 'none';
+  }
+  const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
+  if (metodologiaWrapper) {
+    metodologiaWrapper.style.transform = 'translate3d(0, 100%, 0)';
+    metodologiaWrapper.style.pointerEvents = 'none';
+  }
+  const stage = document.getElementById('sec-metodologia-stage');
+  if (stage) { stage.style.opacity = '0'; stage.style.pointerEvents = 'none'; }
+  const diagSec = document.getElementById('sec-06-diagnostico');
+  if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
+  const diagDot = document.getElementById('diag-reveal-dot');
+  if (diagDot) diagDot.style.opacity = '0';
+  const diagLine = document.getElementById('diag-reveal-line');
+  if (diagLine) diagLine.style.opacity = '0';
+  const cierreSec = document.getElementById('sec-07-cierre-footer');
+  if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
+  const sec3Cards = document.getElementById('sec3-cards-scroll-container');
+  if (sec3Cards) sec3Cards.scrollTop = 0;
+
+  if (typeof updateActiveDockItem === 'function') updateActiveDockItem(dockIndex);
+
+  // Salto instantáneo (sin smooth) y fijado por unos frames
+  const html = document.documentElement;
+  const prevBehavior = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  window.scrollTo(0, targetY);
+  const apply = () => {
+    if (window.__activeNavJumpId !== jumpId) return;
+    window.scrollTo(0, targetY);
+  };
+  const deadline = performance.now() + 600;
+  const pin = () => {
+    if (window.__activeNavJumpId !== jumpId) { html.style.scrollBehavior = prevBehavior; return; }
+    apply();
+    if (performance.now() < deadline) requestAnimationFrame(pin);
+    else html.style.scrollBehavior = prevBehavior;
+  };
+  requestAnimationFrame(pin);
+  return false;
+}
+window.jumpInstantToRaw = jumpInstantToRaw;
 
 // ==================== CINEMATIC JUMP TO 03 // EVIDENCIA (PORTADA / EXPAND COVER) ====================
 function scrollToSectionEjecucion(e) {
@@ -4459,9 +4709,8 @@ function scrollToSectionEjecucion(e) {
     }
     if (expandVideo) {
       expandVideo.style.transform = 'scale(1)';
-      if (expandVideo.paused) {
-        expandVideo.play().catch(() => {});
-      }
+      // No se llama a play(): este video se controla con el scroll (scrub). Reproducirlo aquí
+      // peleaba con el bucle de animación (pause + seek cada frame) y el fondo "tartamudeaba".
     }
     if (expandBody) {
       expandBody.style.clipPath = 'inset(0% 0% 0% 0%)';
@@ -4704,6 +4953,8 @@ window._updateActiveDockItem = updateActiveDockItem;
 
 // ==================== CINEMATIC SMOOTH SCROLL TO 04 // EVIDENCIA (GALERÍA FLOTANTE) ====================
 function scrollToGaleriaFlotante() {
+  // Cancela cualquier recorrido/fijado pendiente (p. ej. el recorrido suave hacia 03 // EVIDENCIA)
+  window.__activeNavJumpId = (window.__activeNavJumpId || 0) + 1;
   const mainTrack = document.getElementById('hero-scroll-track');
   const container = document.getElementById('sec-ejecucion-scroll-container');
   const matrixTrack = document.getElementById('sec-matriz-25-track');
@@ -4935,9 +5186,14 @@ function initExecutionInternalScrollListener() {
       saveInnerScroll(scrollY);
       const trackTop = track.offsetTop;
       const scrollableDistance = track.offsetHeight - container.clientHeight;
+      const persistentArrow = document.getElementById('persistent-scroll-indicator');
 
       if (scrollY < trackTop - 100) {
-        // En Sección 03 Cover (el índice inferior se mantiene desvanecido durante toda la Sección 03)
+        // En Sección 03 Cover
+        if (persistentArrow) {
+          persistentArrow.classList.remove('is-hidden');
+          persistentArrow.classList.add('is-visible');
+        }
         window._isDiagnosticoActive = false;
         if (sec3Wrapper) {
           sec3Wrapper.style.opacity = '1';
@@ -5292,6 +5548,15 @@ function initExecutionInternalScrollListener() {
             bottomDock.style.opacity = dockFade.toFixed(3);
             bottomDock.style.pointerEvents = dockFade > 0.4 ? 'auto' : 'none';
           }
+          if (persistentArrow) {
+            if (pCierre > 0.4) {
+              persistentArrow.classList.remove('is-visible');
+              persistentArrow.classList.add('is-hidden');
+            } else {
+              persistentArrow.classList.remove('is-hidden');
+              persistentArrow.classList.add('is-visible');
+            }
+          }
           updateActiveDockItem(pCierre > 0.5 ? null : 4);
         } else {
           // ==================== SECCIÓN 07 // CIERRE & FOOTER 100% ACTIVA ====================
@@ -5322,6 +5587,10 @@ function initExecutionInternalScrollListener() {
             cierreSec.style.opacity = '1';
             cierreSec.style.transform = 'none';
             cierreSec.style.pointerEvents = 'auto';
+          }
+          if (persistentArrow) {
+            persistentArrow.classList.remove('is-visible');
+            persistentArrow.classList.add('is-hidden');
           }
           const bottomDock = document.getElementById('bottom-dock-nav');
           if (bottomDock) {
@@ -5627,63 +5896,83 @@ if (document.readyState === 'loading') {
   initPersistentScrollIndicator();
 }
 
-// ==================== PERSISTENT BOTTOM-LEFT SCROLL INDICATOR ====================
+// ==================== PERSISTENT NEXT-SECTION DOWNWARD ARROW ====================
 /**
- * Icono indicador de scroll persistente en la esquina inferior izquierda.
- * - Animación de cortina de arriba hacia abajo cada 3 segundos.
- * - Desaparece inmediatamente al hacer scroll.
- * - Reaparece tras 20 segundos de inactividad.
+ * Flecha fija hacia abajo en la esquina inferior izquierda.
+ * - Aparece visible desde el Hero.
+ * - Al hacer click navega fluidamente a la siguiente sección en secuencia.
+ * - Desaparece de forma suave al llegar a la última sección (Cierre & Footer).
  */
+function scrollToNextSection() {
+  const mainTrack = document.getElementById('hero-scroll-track');
+  const container = document.getElementById('sec-ejecucion-scroll-container');
+  const matrixTrack = document.getElementById('sec-matriz-25-track');
+  const scrollY = window.scrollY || window.pageYOffset || 0;
+  
+  if (!mainTrack) return;
+  const maxScroll = mainTrack.offsetHeight - window.innerHeight;
+  const currentRatio = maxScroll > 0 ? scrollY / maxScroll : 0;
+
+  // 1. En Hero (ratio < 0.08) -> Ir a 01 // IDENTIDAD (Manifiesto)
+  if (currentRatio < 0.08) {
+    scrollToSection2();
+    return;
+  }
+
+  // 2. En 01 // Identidad (ratio < 0.38) -> Ir a 02 // PLATAFORMA (Smartphone 3D)
+  if (currentRatio < 0.38) {
+    scrollToSection3();
+    return;
+  }
+
+  // 3. En 02 // Plataforma Smartphone (antes de la vista de fichas) -> Ir a 02 // PLATAFORMA (Arquitectura de Conversión, fichas 01-04)
+  //    Umbral un poco antes del destino para que un segundo clic, ya posicionado en las fichas, avance a 03 // EVIDENCIA.
+  if (currentRatio < getPlataformaCardsRawRatio() - 0.004) {
+    scrollToPlataformaCards();
+    return;
+  }
+
+  // 4. En 02 // Plataforma Tarjetas (ya en la vista de fichas) -> Recorrido suave a 03 // EVIDENCIA
+  if (currentRatio < 0.88) {
+    glideToSectionEjecucion();
+    return;
+  }
+
+  // 4. En Sección 03 Evidencia y etapas internas dentro del contenedor
+  if (container) {
+    const innerScrollY = container.scrollTop;
+    const trackTop = matrixTrack ? matrixTrack.offsetTop : 800;
+    const scrollableDistance = matrixTrack ? (matrixTrack.offsetHeight - container.clientHeight) : 1000;
+    const pTrack = scrollableDistance > 0 ? Math.max(0, (innerScrollY - trackTop) / scrollableDistance) : 0;
+
+    if (innerScrollY < trackTop - 100) {
+      // Portada Evidencia -> Ir a Galería Flotante
+      scrollToGaleriaFlotante();
+    } else if (pTrack < 0.10) {
+      // Galería Flotante -> Ir a Metodología
+      scrollToMetodologia();
+    } else if (pTrack < 0.45) {
+      // Metodología -> Ir a Diagnóstico
+      scrollToDiagnostico();
+    } else {
+      // Diagnóstico -> Ir a Cierre & Footer
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+  }
+}
+window.scrollToNextSection = scrollToNextSection;
+
 function initPersistentScrollIndicator() {
   const indicator = document.getElementById('persistent-scroll-indicator');
   if (!indicator || indicator.__isInitialized) return;
   indicator.__isInitialized = true;
 
-  let idleScrollTimer = null;
-  const IDLE_DURATION = 20000; // 20 segundos de inactividad
+  indicator.classList.remove('is-hidden');
+  indicator.classList.add('is-visible');
 
-  function show() {
-    indicator.classList.remove('is-hidden');
-    indicator.classList.add('is-visible');
-  }
-
-  function hide() {
-    indicator.classList.remove('is-visible');
-    indicator.classList.add('is-hidden');
-  }
-
-  function handleScrollActivity() {
-    // 1. Desaparece de inmediato al hacer scroll
-    hide();
-
-    // 2. Reiniciar temporizador de 20 segundos de inactividad
-    if (idleScrollTimer) {
-      clearTimeout(idleScrollTimer);
-    }
-    idleScrollTimer = setTimeout(show, IDLE_DURATION);
-  }
-
-  // Escuchar eventos de scroll en la ventana y contenedores internos
-  window.addEventListener('scroll', handleScrollActivity, { passive: true });
-  window.addEventListener('wheel', handleScrollActivity, { passive: true });
-  window.addEventListener('touchmove', handleScrollActivity, { passive: true });
-  window.addEventListener('keydown', (e) => {
-    if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(e.code)) {
-      handleScrollActivity();
-    }
-  }, { passive: true });
-
-  const ejecucionContainer = document.getElementById('sec-ejecucion-scroll-container');
-  if (ejecucionContainer) {
-    ejecucionContainer.addEventListener('scroll', handleScrollActivity, { passive: true });
-  }
-
-  const secPortal = document.getElementById('seccion-portal-revelada');
-  if (secPortal) {
-    secPortal.addEventListener('scroll', handleScrollActivity, { passive: true });
-  }
-
-  // Inicialmente visible, y al primer scroll se oculta e inicia el ciclo de 20s
-  show();
+  indicator.onclick = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    scrollToNextSection();
+  };
 }
 window.initPersistentScrollIndicator = initPersistentScrollIndicator;

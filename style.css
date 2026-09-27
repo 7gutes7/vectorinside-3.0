@@ -854,6 +854,10 @@ body {
 }
 
 #hero-curtain-right {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  text-align: right !important;
   width: 235px !important;
   max-width: 100%;
   margin-left: 110px !important;
@@ -961,6 +965,14 @@ body {
 }
 
 /* ==================== HERO MERCADO WORD GLOW ON 3D MODEL HOVER ==================== */
+#hero-curtain-right,
+#hero-curtain-right svg,
+#hero-curtain-right text,
+#hero-line-mercado,
+#hero-word-mercado {
+  overflow: visible !important;
+}
+
 #hero-word-nucleo,
 #hero-word-mercado {
   fill: #ECEEF2;
@@ -1109,59 +1121,31 @@ body {
   min-height: 480vh !important;
 }
 
-/* ==================== PERSISTENT BOTTOM-LEFT SCROLL INDICATOR ==================== */
-/* Posición, capa y tamaños explícitos: las utilidades Tailwind de este bloque
-   (left-6, sm:bottom-8, z-[95], opacity-25, sm:w-13…) no están en tailwind-build.css */
+/* ==================== FIXED BOTTOM-LEFT NEXT-SECTION ARROW ==================== */
 #persistent-scroll-indicator {
   position: fixed;
   left: 24px;
   bottom: 24px;
   z-index: 95;
-  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-#persistent-scroll-indicator img {
-  width: 44px;
-  height: auto;
-  display: block;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  cursor: pointer;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 640px) {
-  #persistent-scroll-indicator { left: 32px; bottom: 32px; }
-  #persistent-scroll-indicator img { width: 52px; }
+  #persistent-scroll-indicator {
+    left: 32px;
+    bottom: 32px;
+  }
 }
-
-@media (min-width: 768px) {
-  #persistent-scroll-indicator img { width: 56px; }
-}
-
-/* En pantallas angostas el dock inferior (#bottom-dock-nav) ocupa todo el ancho:
-   subir el indicador para que quede encima del dock y no se encimen */
-@media (max-width: 900px) {
-  #persistent-scroll-indicator { bottom: 100px; }
-}
-
-/* Capa base tenue (la capa activa con la cortina va encima) */
-#persistent-scroll-indicator .scroll-icons-light > img {
-  opacity: 0.25;
-  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.95));
-}
-
-#persistent-scroll-indicator .scroll-icons-dark > img {
-  opacity: 0.35;
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.15));
-}
-
-#persistent-scroll-indicator .scroll-icons-light .scroll-curtain-active-layer img {
-  filter: drop-shadow(0 0 16px rgba(195, 244, 0, 0.7)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.95));
-}
-
-#persistent-scroll-indicator:hover .scroll-icons-light > img { opacity: 0.45; }
-#persistent-scroll-indicator:hover .scroll-icons-dark > img { opacity: 0.55; }
 
 #persistent-scroll-indicator.is-hidden {
   opacity: 0 !important;
-  transform: translateY(16px) scale(0.92) !important;
+  transform: translateY(20px) scale(0.85) !important;
   pointer-events: none !important;
 }
 
@@ -1171,104 +1155,20 @@ body {
   pointer-events: auto !important;
 }
 
-/* 3-Second Repeating Curtain Wipe Animation (Top to Bottom) */
-@keyframes scrollCurtainWipe {
-  0% {
-    clip-path: inset(0% 0% 100% 0%);
-    opacity: 0.15;
-  }
-  28% {
-    clip-path: inset(0% 0% 0% 0%);
-    opacity: 1;
-  }
-  78% {
-    clip-path: inset(0% 0% 0% 0%);
-    opacity: 1;
-  }
-  94% {
-    clip-path: inset(100% 0% 0% 0%);
-    opacity: 0.2;
-  }
-  100% {
-    clip-path: inset(0% 0% 100% 0%);
-    opacity: 0.15;
-  }
+/* Theme Dark for Section 04 Metodología (White Background) */
+#persistent-scroll-indicator.theme-dark .scroll-arrow-btn {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 0 15px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Scanline / Laser Curtain Edge Sweep */
-@keyframes scrollCurtainLaserSweep {
-  0% {
-    top: 0%;
-    opacity: 0;
-  }
-  6% {
-    opacity: 1;
-  }
-  28% {
-    top: 100%;
-    opacity: 1;
-  }
-  32% {
-    top: 100%;
-    opacity: 0;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
+#persistent-scroll-indicator.theme-dark svg {
+  color: #0b0b0d !important;
 }
 
-/* Subtle Chevrons Downward Pulse in Sync with Curtain */
-@keyframes scrollChevronsBounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(4px);
-  }
-  50% {
-    transform: translateY(1px);
-  }
-  70% {
-    transform: translateY(3.5px);
-  }
-  85% {
-    transform: translateY(0);
-  }
-}
-
-.scroll-curtain-active-layer {
-  animation: scrollCurtainWipe 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: clip-path, opacity;
-}
-
-.scroll-curtain-laser-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #C3F400 30%, #FFFFFF 50%, #C3F400 70%, transparent);
-  box-shadow: 0 0 10px #C3F400, 0 0 20px #C3F400;
-  animation: scrollCurtainLaserSweep 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-}
-
-.scroll-curtain-laser-line.dark-laser {
-  background: linear-gradient(90deg, transparent, #111111 30%, #555555 50%, #111111 70%, transparent);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
-}
-
-.scroll-indicator-wrap {
-  animation: scrollChevronsBounce 3s infinite ease-in-out;
-}
-
-/* Theme switching for Section 04 Metodología */
-#persistent-scroll-indicator.theme-dark .scroll-icons-light {
-  display: none !important;
-}
-
-#persistent-scroll-indicator.theme-dark .scroll-icons-dark {
-  display: flex !important;
+#persistent-scroll-indicator.theme-dark:hover .scroll-arrow-btn {
+  border-color: #0b0b0d !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* ==========================================================================
@@ -1311,15 +1211,18 @@ body {
     margin-bottom: auto !important;
   }
 
-  /* La frase INSTINTO / PARA DOMINAR / EL MERCADO se ancla abajo, a la altura
-     del botón del chatbot, con el lobo respirando entre el título y la frase */
+  /* La frase INSTINTO / PARA DOMINAR / EL MERCADO se ancla a la derecha con margen cómodo */
   #hero-curtain-right {
     position: absolute;
-    left: 16px;
-    bottom: 74px;
-    width: calc((100% - 32px) * 0.8) !important;
+    right: 24px !important;
+    left: auto !important;
+    bottom: 80px;
+    width: calc((100% - 48px) * 0.8) !important;
     max-width: 254px !important;
     margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
   }
 
   /* Legibilidad de los textos del Hero sobre el modelo 3D claro */
@@ -1373,29 +1276,20 @@ body {
     right: 6px !important;
   }
 
-  /* ---------- INDICADOR DE SCROLL: encima del dock de dos filas ---------- */
-  /* Indicador de scroll: centrado justo debajo del botón del chatbot
-     (el chatbot no se mueve), a la mitad de tamaño y sin ningún fondo */
+  /* Indicador de scroll flecha: ubicado en la esquina inferior izquierda */
   #persistent-scroll-indicator {
-    left: auto !important;
-    right: 50px !important;
-    bottom: 126px !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    filter: none !important;
-  }
-
-  #persistent-scroll-indicator img {
-    width: 20px;
-    filter: none !important;
-    background: transparent !important;
+    left: 16px !important;
+    right: auto !important;
+    bottom: 84px !important;
   }
 }
 
-/* Pantallas muy angostas: la frase se acorta para no rozar el botón del chatbot */
+/* Pantallas muy angostas: la frase mantiene margen y proporción */
 @media (max-width: 380px) {
   #hero-curtain-right {
-    width: calc((100% - 58px) * 0.8) !important;
+    right: 18px !important;
+    left: auto !important;
+    width: calc((100% - 36px) * 0.8) !important;
     max-width: 234px !important;
   }
 }
@@ -1441,14 +1335,18 @@ body {
     margin-bottom: auto !important;
   }
 
-  /* Misma bajada de la frase hasta la altura del chatbot */
+  /* Frase colocada en la parte derecha con margen cómodo */
   #hero-curtain-right {
     position: absolute;
-    left: 24px;
+    right: 36px !important;
+    left: auto !important;
     bottom: 120px;
-    width: calc((100% - 48px) * 0.8) !important;
+    width: calc((100% - 72px) * 0.8) !important;
     max-width: 384px !important;
     margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
   }
 
   #stroke-text-wrapper svg,
@@ -1495,20 +1393,11 @@ body {
     bottom: 104px !important;
   }
 
-  /* Mismo criterio en tablet: debajo del chatbot, 50% y sin fondo */
+  /* Indicador de scroll flecha en tablet */
   #persistent-scroll-indicator {
-    left: auto !important;
-    right: 55px !important;
-    bottom: 105px !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    filter: none !important;
-  }
-
-  #persistent-scroll-indicator img {
-    width: 26px !important;
-    filter: none !important;
-    background: transparent !important;
+    left: 20px !important;
+    right: auto !important;
+    bottom: 84px !important;
   }
 }
 
@@ -1535,27 +1424,18 @@ body {
   }
 }
 
-/* ==========================================================================
-   INDICADOR / ANIMACIÓN DE SCROLL — OCULTO EN TODA LA VISTA RESPONSIVE
-   (≤ 1279px). En escritorio sigue apareciendo igual que siempre.
-   ========================================================================== */
-@media (max-width: 1279px) {
-  #persistent-scroll-indicator {
-    display: none !important;
-  }
-}
+
 
 /* ==========================================================================
-   TEXTO CINÉTICO "Vector Inside /" (etapa del smartphone 3D) — SOLO RESPONSIVE
+   TEXTO CINÉTICO "Vector Inside /" (etapa del smartphone 3D) — TODAS LAS PANTALLAS
    El JS cambia el contenedor a display:block para mostrarlo/ocultarlo, lo que
    anula el centrado flex y dejaba el texto pegado arriba. Dándole altura
    completa al wrapper, sus filas se centran solas en la pantalla.
+   (Antes solo aplicaba ≤1279px; ahora también en escritorio.)
    ========================================================================== */
-@media (max-width: 1279px) {
-  #kinetic-text-bg .kinetic-text-wrapper {
-    height: 100%;
-    width: 100%;
-  }
+#kinetic-text-bg .kinetic-text-wrapper {
+  height: 100%;
+  width: 100%;
 }
 
 /* ==========================================================================
@@ -1735,5 +1615,72 @@ body {
 
   #diag-content-stage .glass-panel .grid {
     gap: 6px !important;
+  }
+}
+
+
+/* ==========================================================================
+   01 // IDENTIDAD — SOLO RESPONSIVE (≤ 1279px)
+   El video (scrub con el scroll) va ARRIBA del cuadro de texto, no de fondo.
+   El fondo de la sección queda totalmente claro (blanco), sin video desenfocado.
+   Escritorio (≥ 1280px) no cambia.
+   ========================================================================== */
+@media (max-width: 1279px) {
+  /* Fondo de la sección: solo blanco, sin el video desenfocado */
+  #sec2-bg-video-layer {
+    display: none !important;
+  }
+
+  /* Tarjeta en una sola columna: video arriba, texto abajo */
+  #sec2-manifesto-card {
+    display: flex !important;
+    flex-direction: column;
+  }
+  #sec2-video-clearance {
+    display: none !important;
+  }
+
+  #sec2-video-frame {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: clamp(150px, 30vh, 340px);
+    flex: 0 0 auto;
+  }
+  #section2-manifesto-video {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    object-position: center;
+    transform: none !important;
+    --tw-translate-x: 0 !important;
+  }
+  /* Sin velo blanco sobre el video: se ve completo y nítido */
+  #sec2-video-gradient {
+    display: none !important;
+  }
+
+  /* Cuadro de texto debajo, con fondo blanco sólido */
+  #sec2-manifesto-panel {
+    background-color: #ffffff !important;
+  }
+}
+
+/* ==========================================================================
+   INTRO — SOLO RESPONSIVE (≤ 1279px)
+   El video llena la pantalla a lo alto (antes se ajustaba al ancho y dejaba
+   franjas negras arriba y abajo). Se recortan los lados, centrado.
+   ========================================================================== */
+@media (max-width: 1279px) {
+  #intro-video {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    border-radius: 0 !important;
   }
 }
