@@ -144,8 +144,12 @@
   </script>
 
   <!-- Favicon (V Isotipo Amarillo) -->
-  <link rel="icon" type="image/svg+xml" href="Vector%20inside%20Isotipo.svg?v=3.0" />
-  <link rel="apple-touch-icon" href="Vector%20inside%20Isotipo.svg?v=3.0" />
+  <!-- Íconos cuadrados (Google pide favicon 1:1, múltiplo de 48px y accesible en la raíz) -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
   <!-- Tailwind static build (compilado con build-tailwind.sh) -->
   <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
@@ -160,7 +164,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.348" />
+  <link rel="stylesheet" href="style.css?v=3.0.350" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -331,7 +335,7 @@
 
       <!-- Header Right CTA Button -->
       <div class="flex items-center gap-3 ml-auto z-10">
-        <button type="button" onclick="openNuclearModal(event)"
+        <button type="button" onclick="openSolicitudModal(event)"
           class="btn-pill-nuclear header-cta-btn group cursor-pointer" id="header-pill-nav-btn">
           <span class="btn-pill-bg transition-colors duration-300"></span>
           <span class="btn-pill-label transition-colors duration-300">
@@ -1232,7 +1236,7 @@
 
                         <!-- Bottom Action Bar: CTA Button (Matching header  style, aligned left) -->
                         <div class="pt-3 border-t border-white/10 flex items-center justify-start">
-                          <button type="button" onclick="openNuclearModal(event)"
+                          <button type="button" onclick="openSolicitudModal(event, { fromDiagnostico: true })"
                             class="btn-pill-nuclear group cursor-pointer py-2.5 px-6">
                             <span class="btn-pill-bg transition-colors duration-300"></span>
                             <span class="btn-pill-label transition-colors duration-300">
@@ -1453,15 +1457,108 @@
 
       <footer class="svm-foot">
         <p>¿No sabes por dónde empezar? <span>Te decimos qué está frenando tus ventas.</span></p>
-        <button type="button" class="svm-cta" onclick="closeServiciosModal(); openNuclearModal(event);">
-          Iniciar diagnóstico
+        <button type="button" class="svm-cta" onclick="closeServiciosModal(); openSolicitudModal(event);">
+          Solicitar auditoría
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </button>
       </footer>
     </div>
   </div>
 
-  <script src="script.js?v=3.0.332"></script>
+
+  <!-- ==================== VENTANA EMERGENTE: FORMULARIO DE SOLICITUD (AUDITORÍA) ==================== -->
+  <!-- Mismas preguntas que el chatbot; envía al mismo Google Apps Script con origen "formulario". -->
+  <div id="solicitud-modal" class="svm svm--form" role="dialog" aria-modal="true" aria-labelledby="sfm-title" aria-hidden="true">
+    <div class="svm-backdrop" data-sfm-close></div>
+    <div class="svm-panel" role="document">
+      <div class="svm-grid-bg" aria-hidden="true"></div>
+
+      <header class="svm-head">
+        <div>
+          <p class="svm-kicker">SOLICITUD // VECTOR INSIDE</p>
+          <h2 id="sfm-title" class="svm-title">Hablemos de <span>tu</span> crecimiento</h2>
+          <p class="sfm-lead">Cuéntanos sobre tu negocio y te contactamos en menos de 24 horas hábiles con un diagnóstico inicial.</p>
+        </div>
+        <button type="button" class="svm-close" data-sfm-close aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <span>ESC</span>
+        </button>
+      </header>
+
+      <div class="svm-body sfm-body">
+        <form id="solicitud-form" class="sfm-form" novalidate>
+          <!-- Resultado del Test de Fricción (solo si viene de Diagnóstico) -->
+          <div id="sfm-diag-chip" class="sfm-diag-chip" hidden>
+            <span class="sfm-diag-label">RESULTADO DEL TEST DE FRICCIÓN</span>
+            <strong id="sfm-diag-score">—</strong>
+            <span id="sfm-diag-level"></span>
+          </div>
+
+          <div class="sfm-step">
+            <span class="sfm-n">01 //</span>
+            <label for="sfm-name" class="sfm-q">¿Cuál es tu nombre?</label>
+            <input id="sfm-name" name="name" type="text" autocomplete="name" placeholder="Nombre y apellido" required>
+            <input id="sfm-company" name="company" type="text" autocomplete="organization" placeholder="Empresa o marca (opcional)">
+          </div>
+
+          <fieldset class="sfm-step">
+            <legend class="sfm-q"><span class="sfm-n sfm-n--block">02 //</span>¿En qué te podemos ayudar? <small>(selecciona 1 o más)</small></legend>
+            <div class="sfm-options">
+              <label class="sfm-opt"><input type="checkbox" name="services" value="Diseñar o rediseñar tu página web"><span><b>01</b>Diseñar o rediseñar tu página web</span></label>
+              <label class="sfm-opt"><input type="checkbox" name="services" value="Branding o rebrandeo de marca"><span><b>02</b>Branding o rebrandeo de marca</span></label>
+              <label class="sfm-opt"><input type="checkbox" name="services" value="Automatización de sistema de ventas"><span><b>03</b>Automatización de sistema de ventas</span></label>
+              <label class="sfm-opt"><input type="checkbox" name="services" value="Campañas de marketing"><span><b>04</b>Campañas de marketing</span></label>
+            </div>
+          </fieldset>
+
+          <div class="sfm-step">
+            <span class="sfm-n">03 //</span>
+            <span class="sfm-q">¿Dónde te contactamos?</span>
+            <div class="sfm-row">
+              <input id="sfm-email" name="email" type="email" autocomplete="email" placeholder="tu@empresa.com" required aria-label="Correo electrónico">
+              <input id="sfm-phone" name="phone" type="tel" autocomplete="tel" placeholder="WhatsApp: +52 55 1234 5678" required aria-label="WhatsApp o teléfono">
+            </div>
+          </div>
+
+          <div class="sfm-step">
+            <span class="sfm-n">04 //</span>
+            <label for="sfm-challenge" class="sfm-q">¿Cuál es el principal desafío de tu negocio hoy?</label>
+            <textarea id="sfm-challenge" name="challenge" rows="3" placeholder="Ej. Recibimos mensajes pero pocos se convierten en clientes…" required></textarea>
+          </div>
+
+          <!-- Campo trampa anti-spam (invisible para personas) -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="sfm-hp" aria-hidden="true">
+
+          <label class="sfm-consent">
+            <input type="checkbox" id="sfm-consent" required>
+            <span>Acepto que Vector Inside use estos datos únicamente para contactarme sobre mi solicitud.</span>
+          </label>
+
+          <p id="sfm-error" class="sfm-error" role="alert" hidden></p>
+        </form>
+
+        <!-- Estado de éxito -->
+        <div id="sfm-success" class="sfm-success" hidden>
+          <span class="sfm-success-icon" aria-hidden="true">✓</span>
+          <h3>Solicitud recibida</h3>
+          <p>Gracias, <strong id="sfm-success-name"></strong>. Revisaremos tu caso y te contactaremos por correo o WhatsApp en menos de 24 horas hábiles.</p>
+          <div class="sfm-success-actions">
+            <a id="sfm-wa-link" class="svm-cta" href="#" target="_blank" rel="noopener">Continuar en WhatsApp</a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="svm-foot sfm-foot">
+        <p>¿Prefieres conversar? <button type="button" class="sfm-chat-link" onclick="closeSolicitudModal(); openNuclearModal(event);">Habla con Vector en el chat</button></p>
+        <button type="submit" form="solicitud-form" id="sfm-submit" class="svm-cta">
+          Enviar solicitud
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js?v=3.0.334"></script>
 </body>
 
 </html>

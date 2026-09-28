@@ -2337,3 +2337,114 @@ body {
 @media (max-width: 1279px) {
   .hero-h1-kicker { right: auto; left: 0; text-align: left; }
 }
+
+/* ==========================================================================
+   FORMULARIO DE SOLICITUD ("EXPEDIENTE VECTOR · SOLICITUD DE AUDITORÍA")
+   Reutiliza la ventana .svm de Servicios; una sola columna.
+   ========================================================================== */
+.svm--form .svm-panel { width: min(720px, 100%); }
+.sfm-lead {
+  margin: 10px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #c4c9ac;
+  max-width: 520px;
+}
+.sfm-body { display: block; padding: 22px 36px 26px; }
+.sfm-form { display: flex; flex-direction: column; gap: 20px; }
+.sfm-step { position: relative; border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sfm-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9d4edd;
+}
+.sfm-q {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: #ffffff;
+  padding: 0;
+}
+.sfm-q small { font-weight: 500; color: #8b8f7a; font-size: 12px; }
+.sfm-form input[type="text"],
+.sfm-form input[type="email"],
+.sfm-form input[type="tel"],
+.sfm-form textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+}
+.sfm-form input::placeholder, .sfm-form textarea::placeholder { color: #6f7266; }
+.sfm-form input:focus, .sfm-form textarea:focus {
+  border-color: #c3f400;
+  box-shadow: 0 0 0 3px rgba(195, 244, 0, 0.15);
+}
+.sfm-form .is-invalid { border-color: #ff5a6e !important; }
+.sfm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sfm-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sfm-opt { position: relative; cursor: pointer; }
+.sfm-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.sfm-opt span {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #e5e5e5;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.sfm-opt span b { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #c3f400; }
+.sfm-opt input:checked + span { border-color: #c3f400; background: rgba(195, 244, 0, 0.12); color: #ffffff; }
+.sfm-opt input:focus-visible + span { box-shadow: 0 0 0 3px rgba(195, 244, 0, 0.25); }
+.sfm-consent { display: flex; gap: 10px; align-items: flex-start; font-family: 'Inter', sans-serif; font-size: 12px; color: #a9ad97; cursor: pointer; }
+.sfm-consent input { margin-top: 2px; accent-color: #c3f400; }
+.sfm-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+.sfm-error {
+  margin: 0; padding: 10px 12px; border-radius: 10px;
+  background: rgba(255, 90, 110, 0.12); border: 1px solid rgba(255, 90, 110, 0.45);
+  color: #ffb3bd; font-family: 'Inter', sans-serif; font-size: 12.5px;
+}
+.sfm-diag-chip {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px;
+  padding: 12px 14px; border-radius: 12px;
+  background: rgba(111, 0, 190, 0.18); border: 1px solid rgba(157, 78, 221, 0.5);
+}
+.sfm-diag-chip[hidden] { display: none; }
+.sfm-diag-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: #b57cf0; width: 100%; }
+.sfm-diag-chip strong { font-family: 'Montserrat', sans-serif; font-size: 18px; color: #ffffff; }
+.sfm-diag-chip span:last-child { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #c3f400; }
+.sfm-chat-link { background: none; border: 0; padding: 0; color: #c3f400; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+.sfm-success { text-align: center; padding: 30px 10px 20px; }
+.sfm-success[hidden] { display: none; }
+.sfm-success-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; border-radius: 999px;
+  background: #c3f400; color: #080808; font-size: 26px; font-weight: 900;
+  box-shadow: 0 0 30px rgba(195, 244, 0, 0.45);
+}
+.sfm-success h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 22px; margin: 16px 0 8px; }
+.sfm-success p { font-family: 'Inter', sans-serif; font-size: 14px; color: #c4c9ac; max-width: 460px; margin: 0 auto; line-height: 1.55; }
+.sfm-success-actions { margin-top: 20px; display: flex; justify-content: center; }
+.svm--form.is-sent .sfm-foot #sfm-submit { display: none; }
+#sfm-submit[disabled] { opacity: 0.6; cursor: wait; }
+
+@media (max-width: 900px) {
+  .sfm-body { padding: 18px 20px 20px; }
+  .sfm-row, .sfm-options { grid-template-columns: 1fr; }
+  .sfm-lead { font-size: 12.5px; }
+}
+.sfm-n--block { display: block; margin-bottom: 8px; }
+fieldset.sfm-step legend { float: left; width: 100%; margin-bottom: 8px; }
+fieldset.sfm-step .sfm-options { clear: both; }

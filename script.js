@@ -6064,3 +6064,159 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+// ==================== FORMULARIO DE SOLICITUD (mismas preguntas que el chatbot) ====================
+(function () {
+  const WEBHOOK = 'https://script.google.com/macros/s/AKfycbw3vZ2dQYYfXf9QMOTFnGUj2CKl61R_iJEEt_kyvaudXT2WRq3BDLZKTfu2rVDRzGVsBQ/exec';
+  const WHATSAPP = '525549184259';
+  let lastFocus = null;
+  const $ = (id) => document.getElementById(id);
+
+  function readDiagnostico() {
+    const sec = $('sec-06-diagnostico');
+    if (!sec) return null;
+    const answers = [];
+    let total = 0;
+    sec.querySelectorAll('.diag-radio:checked').forEach((r) => {
+      total += parseInt(r.value, 10) || 0;
+      const q = r.closest('div') && r.closest('.grid') ? r.closest('.grid').previousElementSibling : null;
+      const opt = r.closest('label') ? r.closest('label').innerText.replace(/\s+/g, ' ').trim() : r.value;
+      answers.push((q ? q.innerText.replace(/\s+/g, ' ').trim() + ' → ' : '') + opt);
+    });
+    // Mismos umbrales que calculateScore() del Test de Fricción
+    const level = total <= 45 ? 'NIVEL: IMPROVISACIÓN CRÍTICA'
+      : total <= 85 ? 'NIVEL: FRICCIÓN OPERATIVA MODERADA'
+      : 'NIVEL: LISTO PARA ACELERACIÓN';
+    return { score: total + ' / 120', level, answers };
+  }
+
+  function openSolicitudModal(e, opts) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = $('solicitud-modal');
+    if (!modal) return;
+    if (typeof window.closeServiciosModal === 'function') window.closeServiciosModal();
+    lastFocus = document.activeElement;
+
+    // Resultado del test si viene de Diagnóstico
+    const chip = $('sfm-diag-chip');
+    modal.__diag = null;
+    if (opts && opts.fromDiagnostico) {
+      const d = readDiagnostico();
+      if (d) {
+        modal.__diag = d;
+        $('sfm-diag-score').textContent = d.score;
+        $('sfm-diag-level').textContent = d.level.replace(/^NIVEL:\s*/i, '');
+        chip.hidden = false;
+      }
+    } else if (chip) {
+      chip.hidden = true;
+    }
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    const body = modal.querySelector('.svm-body');
+    if (body) body.scrollTop = 0;
+    setTimeout(() => { const n = $('sfm-name'); if (n && !modal.classList.contains('is-sent')) n.focus({ preventScroll: true }); }, 80);
+  }
+
+  function closeSolicitudModal() {
+    const modal = $('solicitud-modal');
+    if (!modal || !modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  }
+
+  window.openSolicitudModal = openSolicitudModal;
+  window.closeSolicitudModal = closeSolicitudModal;
+
+  function init() {
+    const modal = $('solicitud-modal');
+    const form = $('solicitud-form');
+    if (!modal || !form) return;
+
+    modal.querySelectorAll('[data-sfm-close]').forEach((el) => el.addEventListener('click', closeSolicitudModal));
+    ['wheel', 'touchmove'].forEach((evt) => modal.addEventListener(evt, (ev) => ev.stopPropagation(), { passive: true }));
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && modal.classList.contains('is-open')) closeSolicitudModal(); });
+    form.querySelectorAll('input, textarea').forEach((el) => el.addEventListener('input', () => el.classList.remove('is-invalid')));
+
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const err = $('sfm-error');
+      const name = $('sfm-name').value.trim();
+      const company = $('sfm-company').value.trim();
+      const email = $('sfm-email').value.trim();
+      const phone = $('sfm-phone').value.trim();
+      const challenge = $('sfm-challenge').value.trim();
+      const services = [...form.querySelectorAll('input[name="services"]:checked')].map((c) => c.value);
+      const consent = $('sfm-consent').checked;
+
+      // Anti-spam: si el campo trampa trae algo, se ignora en silencio
+      if (form.querySelector('.sfm-hp').value) return;
+
+      const problems = [];
+      const mark = (id) => $(id).classList.add('is-invalid');
+      if (name.length < 2) { problems.push('tu nombre'); mark('sfm-name'); }
+      if (!services.length) problems.push('al menos un servicio');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { problems.push('un correo válido'); mark('sfm-email'); }
+      if (phone.replace(/\D/g, '').length < 10) { problems.push('un WhatsApp o teléfono válido (10 dígitos o más)'); mark('sfm-phone'); }
+      if (challenge.length < 5) { problems.push('tu principal desafío'); mark('sfm-challenge'); }
+      if (!consent) problems.push('aceptar el uso de tus datos');
+      if (problems.length) {
+        err.textContent = 'Falta: ' + problems.join(', ') + '.';
+        err.hidden = false;
+        return;
+      }
+      err.hidden = true;
+
+      const diag = modal.__diag;
+      const payload = {
+        name, services, email, phone, challenge,
+        company,
+        origen: 'formulario',
+        diagnostico: diag ? `${diag.score} — ${diag.level}` : '',
+        diagnosticoRespuestas: diag ? diag.answers : []
+      };
+
+      const btn = $('sfm-submit');
+      btn.disabled = true;
+
+      const done = () => {
+        const waText = encodeURIComponent(
+          `⚡ *SOLICITUD DE AUDITORÍA // VECTOR INSIDE (formulario)*\n\n` +
+          `*Nombre:* ${name}${company ? `\n*Empresa:* ${company}` : ''}\n` +
+          `*Servicios de interés:* ${services.join(', ')}\n*Correo:* ${email}\n*WhatsApp:* ${phone}\n` +
+          `*Desafío actual:* ${challenge}` + (diag ? `\n*Test de Fricción:* ${diag.score} — ${diag.level}` : '')
+        );
+        $('sfm-wa-link').href = `https://wa.me/${WHATSAPP}?text=${waText}`;
+        $('sfm-success-name').textContent = name.split(' ')[0];
+        form.hidden = true;
+        $('sfm-success').hidden = false;
+        modal.classList.add('is-sent');
+        const body = modal.querySelector('.svm-body'); if (body) body.scrollTop = 0;
+      };
+
+      try {
+        fetch(WEBHOOK, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).then(done).catch(() => {
+          btn.disabled = false;
+          err.textContent = 'No pudimos enviar tu solicitud. Revisa tu conexión o escríbenos por WhatsApp al +52 55 4918 4259.';
+          err.hidden = false;
+        });
+      } catch (e) {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
