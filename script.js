@@ -4125,7 +4125,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `• Enfoque: ${auditState.services.join(', ')}\n` +
       `• Desafío: ${auditState.challenge}\n`
     );
-    const mailtoUrl = `mailto:contactovectorinside@gmail.com?subject=${subject}&body=${bodyText}`;
+    const mailtoUrl = `mailto:contacto@vectorinside.com?subject=${subject}&body=${bodyText}`;
 
     // Envío en segundo plano al Micro-Backend de Google Apps Script (Registra en Sheets + Alerta a Gmail + Auto-respuesta)
     const APPS_SCRIPT_WEBHOOK = 'https://script.google.com/macros/s/AKfycbw3vZ2dQYYfXf9QMOTFnGUj2CKl61R_iJEEt_kyvaudXT2WRq3BDLZKTfu2rVDRzGVsBQ/exec';
@@ -4165,7 +4165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
             <a href="${mailtoUrl}" class="btn-vector-outline py-2 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl text-neutral-300 hover:text-white">
               <span class="material-symbols-outlined text-sm">mail</span>
-              <span>NOTIFICAR A contactovectorinside@gmail.com</span>
+              <span>NOTIFICAR A contacto@vectorinside.com</span>
             </a>
           </div>
         </div>
