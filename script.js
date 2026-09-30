@@ -1550,7 +1550,7 @@ function initHero3DModel() {
     screenVideo.loop = true;
     screenVideo.muted = true;
     screenVideo.defaultMuted = true;
-    screenVideo.autoplay = true;
+    screenVideo.autoplay = false; // lo arranca animate() cuando el smartphone va al 20%
     screenVideo.playsInline = true;
     screenVideo.setAttribute('muted', '');
     screenVideo.setAttribute('playsinline', '');
@@ -1595,8 +1595,8 @@ function initHero3DModel() {
     screenVideo.addEventListener('loadedmetadata', updateScreenAspect);
 
     const playScreenVideo = () => {
-      // En responsive solo se reproduce mientras el smartphone está en pantalla (lo controla animate())
-      if (IS_MOBILE_HERO && !window.__phoneScreenActive) return;
+      // Solo se reproduce mientras el smartphone está desplegado (lo controla animate())
+      if (!window.__phoneScreenActive) return;
       if (screenVideo.paused) {
         const p = screenVideo.play();
         if (p && p.catch) p.catch(() => { });
@@ -2235,15 +2235,42 @@ function initHero3DModel() {
       }
     }
 
-    // Responsive: el video de la pantalla del smartphone solo se decodifica mientras el teléfono está visible
-    if (IS_MOBILE_HERO && window.__phoneScreenVideo) {
-      const phoneOn = currentScrollLerp >= 0.42 && currentScrollLerp < 0.80;
-      const sv = window.__phoneScreenVideo;
-      window.__phoneScreenActive = phoneOn;
-      if (phoneOn && sv.paused) {
-        const pp = sv.play(); if (pp && pp.catch) pp.catch(() => {});
-      } else if (!phoneOn && !sv.paused) {
-        sv.pause();
+    // ================= VIDEOS DE 01 // IDENTIDAD Y DEL SMARTPHONE =================
+    // - Identidad: se reproduce solo (en loop) desde que la sección va al 50% de su
+    //   despliegue (0.08 -> 0.16, o sea 0.12) y mientras siga en pantalla.
+    // - Smartphone: arranca cuando el teléfono lleva un 20% de su despliegue
+    //   (0.48 -> 0.62, o sea ~0.508) y se detiene al salir (0.80). En ese mismo punto
+    //   se pausa el video de Identidad, así nunca corren los dos a la vez.
+    {
+      const V_ID_START = 0.12;
+      const V_PHONE_START = 0.48 + (0.62 - 0.48) * 0.20;
+      const V_PHONE_END = 0.80;
+      const lerpNow = currentScrollLerp;
+
+      const idOn = lerpNow >= V_ID_START && lerpNow < V_PHONE_START;
+      [sec2Vid, sec2BgVid].forEach((v) => {
+        if (!v) return;
+        if (!v.loop) v.loop = true;
+        if (idOn) {
+          if (v.paused) { const pp = v.play(); if (pp && pp.catch) pp.catch(() => {}); }
+        } else {
+          if (!v.paused) v.pause();
+          // Fuera de la sección (antes de que empiece a abrirse) se regresa al inicio
+          if (lerpNow < 0.08 && v.currentTime > 0.05 && v.readyState >= 1) {
+            try { v.currentTime = 0; } catch (e) {}
+          }
+        }
+      });
+
+      if (window.__phoneScreenVideo) {
+        const sv = window.__phoneScreenVideo;
+        const phoneOn = lerpNow >= V_PHONE_START && lerpNow < V_PHONE_END;
+        window.__phoneScreenActive = phoneOn;
+        if (phoneOn && sv.paused) {
+          const pp = sv.play(); if (pp && pp.catch) pp.catch(() => {});
+        } else if (!phoneOn && !sv.paused) {
+          sv.pause();
+        }
       }
     }
 
@@ -2631,33 +2658,6 @@ function initHero3DModel() {
           if (portalDot) portalDot.style.opacity = '0';
         }
 
-        // =========================================================================
-        // CONTROL DE VIDEO DE FONDO SECCIÓN 01 IDENTIDAD: SCRUBBING FLUIDO CON SCROLL
-        // Inicia solo cuando la sección se ha desplegado totalmente (T_REVEAL_END = 0.16)
-        // y se reproduce en su totalidad a lo largo de la lectura hasta T_VID_END = 0.36
-        // =========================================================================
-        if (sec2Vid) {
-          if (!sec2Vid.paused) sec2Vid.pause();
-          const vidDur = (sec2Vid.duration && !isNaN(sec2Vid.duration) && sec2Vid.duration > 0)
-            ? sec2Vid.duration : 10.0;
-
-          const T_VID_START = T_REVEAL_END;   // 0.16 (inicia hasta que la sección se despliega totalmente)
-          const T_VID_END = T_EXIT_START;     // 0.36 (se reproduce totalmente antes de comenzar la salida)
-
-          if (currentScrollLerp < T_VID_START) {
-            _vidTargetTime = 0;
-          } else if (currentScrollLerp <= T_VID_END) {
-            const pVid = (currentScrollLerp - T_VID_START) / (T_VID_END - T_VID_START);
-            _vidTargetTime = Math.max(0, Math.min(1.0, pVid)) * vidDur;
-          } else {
-            _vidTargetTime = vidDur;
-          }
-
-          const delta = Math.abs(_vidTargetTime - sec2Vid.currentTime);
-          if (delta > 0.025) {
-            seekSec2Video(_vidTargetTime);
-          }
-        }
       }
     } else {
       // --- Phase B: Section 3 Smartphone 3D Mode & Posteriores ---
