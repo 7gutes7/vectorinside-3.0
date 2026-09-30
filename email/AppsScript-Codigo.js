@@ -21,7 +21,10 @@ const CONFIG = {
   CORREO_NOTIFICACIONES: 'contacto@vectorinside.com',
   NOMBRE_HOJA: 'Solicitudes', // Nombre de la pestaña en Google Sheets
   ASUNTO_CLIENTE: 'Recibimos tu solicitud — Vector Inside',
-  URL_PLANTILLA_EXTERNA: 'https://vectorinside.com/email/solicitud-recibida.html'
+  URL_PLANTILLA_EXTERNA: 'https://vectorinside.com/email/solicitud-recibida.html',
+  // Remitente del acuse: requiere que contacto@vectorinside.com esté agregado en Gmail como
+  // "Enviar correo como" (Configuración > Cuentas e importación). Si no existe, sale desde la cuenta de Gmail.
+  CORREO_REMITENTE: 'contacto@vectorinside.com'
 };
 
 // ==================== PLANTILLA HTML EMBEBIDA (FALLBACK INMEDIATO) ====================
@@ -244,7 +247,7 @@ function doPost(e) {
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({
     status: 'ok',
-    servicio: 'Vector Inside - Webhook y Motor de Correos v3.0',
+    servicio: 'Vector Inside - Webhook y Motor de Correos',
     timestamp: new Date().toISOString()
   })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -308,11 +311,21 @@ function procesarSolicitud(data) {
   // 3. Enviar correo de confirmación al prospecto (HTML Formateado)
   if (correo && correo.indexOf('@') !== -1) {
     try {
-      GmailApp.sendEmail(correo, CONFIG.ASUNTO_CLIENTE, '', {
+      const opciones = {
         htmlBody: htmlParaProspecto,
         name: CONFIG.NOMBRE_REMITENTE,
         replyTo: CONFIG.CORREO_NOTIFICACIONES
-      });
+      };
+      const alias = obtenerAliasRemitente();
+      if (alias) opciones.from = alias;
+      GmailApp.sendEmail(correo, CONFIG.ASUNTO_CLIENTE, construirTextoPlano({
+        nombre: primerNombre,
+        empresa: empresa || 'tu negocio',
+        servicios: serviciosStr,
+        desafio: desafio,
+        folio: folio,
+        fecha: fechaTexto
+      }), opciones);
       Logger.log('Correo enviado con éxito a: ' + correo);
     } catch (mailErr) {
       Logger.log('Error enviando con GmailApp, intentando MailApp: ' + mailErr.toString());
@@ -383,6 +396,40 @@ function construirHtmlEmail(params) {
     .replace(/\{\{DESAFIO\}\}/g, escapeHtml(params.desafio))
     .replace(/\{\{FOLIO\}\}/g, escapeHtml(params.folio))
     .replace(/\{\{FECHA\}\}/g, escapeHtml(params.fecha));
+}
+
+// ==================== VERSIÓN EN TEXTO PLANO (mejora la entrega y evita spam) ====================
+function construirTextoPlano(p) {
+  return [
+    'Hola, ' + p.nombre + '. Ya estamos en ello.',
+    '',
+    'Gracias por confiar en Vector Inside para impulsar el crecimiento de ' + p.empresa + '.',
+    'Recibimos tu solicitud y en menos de 24 horas hábiles te contactaremos por correo o WhatsApp.',
+    '',
+    'RESUMEN DE TU SOLICITUD',
+    'Folio: ' + p.folio,
+    'Fecha: ' + p.fecha,
+    'Empresa: ' + p.empresa,
+    'Servicios: ' + p.servicios,
+    'Tu desafío: ' + p.desafio,
+    '',
+    '¿Quieres adelantar? Escríbenos por WhatsApp: https://wa.me/525549184259',
+    '',
+    'Vector Inside — Agencia de marketing digital',
+    'contacto@vectorinside.com // +52 55 4918 4259',
+    'https://vectorinside.com'
+  ].join('\n');
+}
+
+// Devuelve contacto@vectorinside.com solo si ya está configurado como alias en Gmail
+function obtenerAliasRemitente() {
+  try {
+    const aliases = GmailApp.getAliases();
+    for (let i = 0; i < aliases.length; i++) {
+      if (aliases[i].toLowerCase() === CONFIG.CORREO_REMITENTE.toLowerCase()) return aliases[i];
+    }
+  } catch (e) {}
+  return null;
 }
 
 // ==================== HELPERS ====================
