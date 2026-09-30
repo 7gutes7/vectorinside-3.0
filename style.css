@@ -2462,3 +2462,39 @@ fieldset.sfm-step .sfm-options { clear: both; }
 #chatbot-messages {
   flex: 1 1 auto;
 }
+
+/* ==========================================================================
+   HERO RESPONSIVE — EQUILIBRIO VERTICAL Y BARRAS DEL NAVEGADOR (iPhone)
+   En Safari de iPhone 100vh mide la pantalla SIN las barras del navegador, así
+   que el hero (h-screen) quedaba más alto que lo visible: el lobo se veía bajo
+   y la frase INSTINTO / PARA DOMINAR / EL MERCADO caía encima del índice.
+   --vi-bar = altura que ocupan las barras (0 en navegadores sin barras que se
+   ocultan). Todo se acomoda al área visible real.
+   ========================================================================== */
+@supports (height: 100svh) {
+  @media (max-width: 1279px) {
+    :root { --vi-bar: calc(100vh - 100svh); }
+
+    /* El lienzo 3D se centra en lo visible, no en la pantalla "completa" */
+    #hero-3d-container {
+      height: auto !important;
+      bottom: var(--vi-bar) !important;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  /* Título un poco más arriba para equilibrar con el lobo y la frase */
+  #hero-ui-content > .grid {
+    margin-top: 5vh !important;
+  }
+  #hero-curtain-right {
+    bottom: calc(104px + var(--vi-bar, 0px)) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  #hero-curtain-right {
+    bottom: calc(120px + var(--vi-bar, 0px)) !important;
+  }
+}

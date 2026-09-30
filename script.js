@@ -51,12 +51,11 @@ function ensureHeroUiVisible(force = false) {
     strokeTextWrapper.style.opacity = '1';
     strokeTextWrapper.style.visibility = 'visible';
   }
-  const strokePath = document.querySelector('.stroke-draw-path');
-  if (strokePath) {
+  document.querySelectorAll('.stroke-draw-path').forEach((strokePath) => {
     strokePath.style.strokeDashoffset = '0';
     strokePath.style.stroke = '#FFFFFF';
     strokePath.style.opacity = '1';
-  }
+  });
   const wipeRect = document.getElementById('stroke-wipe-rect');
   if (wipeRect) {
     wipeRect.setAttribute('width', '100%');
@@ -3316,8 +3315,8 @@ function initHero3DModel() {
 function alignHeroDigitalText() {
   const strokePath = document.querySelector('.stroke-draw-path');
   if (!strokePath) return;
-  const firstTspan = strokePath.querySelector('tspan:first-child');
-  const lastTspan = strokePath.querySelector('tspan:last-child');
+  const firstTspan = document.getElementById('hero-word-impacto-stroke');
+  const lastTspan = document.querySelector('.stroke-draw-path.stroke-line-2 tspan');
   if (!firstTspan) return;
 
   try {
@@ -3325,7 +3324,7 @@ function alignHeroDigitalText() {
     const w2 = lastTspan ? lastTspan.getComputedTextLength() : 0;
     const maxW = Math.max(w1, w2, 450);
     const targetX = Math.ceil(maxW).toString();
-    document.querySelectorAll('.stroke-draw-path tspan:last-child, .stroke-fill-path tspan:last-child').forEach(el => {
+    document.querySelectorAll('.stroke-line-2 tspan').forEach(el => {
       el.setAttribute('x', targetX);
       el.setAttribute('text-anchor', 'end');
     });
@@ -3537,7 +3536,8 @@ function triggerStrokeTextEffect() {
   }
 
   const wrapper = document.getElementById('stroke-text-wrapper');
-  const strokePath = document.querySelector('.stroke-draw-path');
+  const strokePaths = Array.from(document.querySelectorAll('.stroke-draw-path'));
+  const strokePath = strokePaths[0];
   const wipeRect = document.getElementById('stroke-wipe-rect');
   const wipeRect2 = document.getElementById('stroke-wipe-rect-2');
 
@@ -3554,8 +3554,10 @@ function triggerStrokeTextEffect() {
   if (wrapper && typeof gsap !== 'undefined') {
     gsap.set(wrapper, { filter: "blur(18px)", opacity: 0, y: 15 });
   }
-  strokePath.style.strokeDashoffset = '4500';
-  strokePath.style.stroke = '#FFFFFF';
+  strokePaths.forEach((sp) => {
+    sp.style.strokeDashoffset = '4500';
+    sp.style.stroke = '#FFFFFF';
+  });
   wipeRect.setAttribute('width', '0%');
   wipeRect.setAttribute('height', '56');
   if (wipeRect2) {
@@ -3579,7 +3581,7 @@ function triggerStrokeTextEffect() {
       }, 0);
     }
 
-    tl.to(strokePath, {
+    tl.to(strokePaths, {
       strokeDashoffset: 0,
       duration: 0.9,
       ease: "power3.out"
@@ -3602,8 +3604,10 @@ function triggerStrokeTextEffect() {
       wrapper.style.opacity = '1';
       wrapper.style.transform = 'translateY(0px)';
     }
-    strokePath.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
-    strokePath.style.strokeDashoffset = '0';
+    strokePaths.forEach((sp) => {
+      sp.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+      sp.style.strokeDashoffset = '0';
+    });
     setTimeout(() => {
       wipeRect.style.transition = 'width 0.65s cubic-bezier(0.65, 0, 0.35, 1)';
       wipeRect.setAttribute('width', '100%');

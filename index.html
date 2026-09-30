@@ -164,7 +164,7 @@
     rel="stylesheet" />
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.351" />
+  <link rel="stylesheet" href="style.css?v=3.0.352" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -435,16 +435,25 @@
                     </clipPath>
                   </defs>
                   <!-- Outline stroke layer for both words with enhanced visibility -->
+                  <!-- Cada línea va en su propio <text>: en iPhone (Safari) dos <tspan> con x/y
+                       propios dentro del mismo <text> se desalineaban ("DISEÑO D" / "E MA...") -->
                   <text class="stroke-draw-path font-display font-black" aria-hidden="true" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="3500"
                     stroke-dashoffset="3500">
                     <tspan id="hero-word-impacto-stroke" x="0" y="75" text-anchor="start">DISEÑO</tspan>
+                  </text>
+                  <text class="stroke-draw-path stroke-line-2 font-display font-black" aria-hidden="true" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="3500"
+                    stroke-dashoffset="3500">
                     <tspan x="530" y="155" text-anchor="end">DE MARCA</tspan>
                   </text>
                   <!-- Fill layer for both words with inverted split clip -->
                   <text class="stroke-fill-path font-display font-black" font-size="95" font-weight="900"
                     letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
                     <tspan id="hero-word-impacto-fill" x="0" y="75" text-anchor="start">DISEÑO</tspan>
+                  </text>
+                  <text class="stroke-fill-path stroke-line-2 font-display font-black" font-size="95" font-weight="900"
+                    letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
                     <tspan x="530" y="155" text-anchor="end">DE MARCA</tspan>
                   </text>
                   <!-- Chromatic glitch clones for DISEÑO -->
@@ -1558,7 +1567,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=3.0.336"></script>
+  <script src="script.js?v=3.0.337"></script>
 </body>
 
 </html>
