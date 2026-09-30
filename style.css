@@ -2448,3 +2448,17 @@ body {
 .sfm-n--block { display: block; margin-bottom: 8px; }
 fieldset.sfm-step legend { float: left; width: 100%; margin-bottom: 8px; }
 fieldset.sfm-step .sfm-options { clear: both; }
+
+/* ==================== CHATBOT: ventana siempre en columna flexible ====================
+   La ventana no llevaba la clase "flex", así que se mostraba como bloque: el área de
+   mensajes crecía sin scroll y la barra de escribir/enviar quedaba recortada abajo. */
+#chatbot-window:not(.hidden) {
+  display: flex !important;
+  flex-direction: column;
+}
+#chatbot-window > *:not(#chatbot-messages) {
+  flex-shrink: 0;
+}
+#chatbot-messages {
+  flex: 1 1 auto;
+}
