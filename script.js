@@ -4142,10 +4142,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: JSON.stringify({
           name: auditState.name,
+          company: auditState.company || '',
           services: auditState.services,
           email: auditState.email,
           phone: auditState.phone,
-          challenge: auditState.challenge
+          challenge: auditState.challenge,
+          origen: 'chatbot'
         })
       }).catch(err => console.warn('Google Apps Script dispatch:', err));
     } catch (e) {
