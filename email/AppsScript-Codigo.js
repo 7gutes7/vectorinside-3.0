@@ -24,7 +24,12 @@ const CONFIG = {
   URL_PLANTILLA_EXTERNA: 'https://vectorinside.com/email/solicitud-recibida.html',
   // Remitente del acuse: requiere que contacto@vectorinside.com esté agregado en Gmail como
   // "Enviar correo como" (Configuración > Cuentas e importación). Si no existe, sale desde la cuenta de Gmail.
-  CORREO_REMITENTE: 'contacto@vectorinside.com'
+  CORREO_REMITENTE: 'contacto@vectorinside.com',
+  // WhatsApp automático vía n8n. Pega aquí la URL de PRODUCCIÓN del nodo Webhook de n8n.
+  // Mientras esté vacía, no se envía nada a n8n (los correos siguen funcionando igual).
+  N8N_WEBHOOK_URL: '',
+  // Clave compartida: debe ser idéntica a SECRETO en el nodo "Preparar mensaje" de n8n.
+  N8N_SECRETO: 'cambia-esta-clave-vi'
 };
 
 // ==================== PLANTILLA HTML EMBEBIDA (FALLBACK INMEDIATO) ====================
@@ -366,6 +371,32 @@ function procesarSolicitud(data) {
     });
   } catch (adminErr) {
     Logger.log('Aviso notificación admin: ' + adminErr.toString());
+  }
+
+  // 5. Avisar a n8n para el WhatsApp automático (si está configurado)
+  if (CONFIG.N8N_WEBHOOK_URL && telefono) {
+    try {
+      UrlFetchApp.fetch(CONFIG.N8N_WEBHOOK_URL, {
+        method: 'post',
+        contentType: 'application/json',
+        headers: { 'X-VI-Token': CONFIG.N8N_SECRETO },
+        muteHttpExceptions: true,
+        payload: JSON.stringify({
+          folio: folio,
+          fecha: fechaTexto,
+          nombre: nombreCompleto,
+          primerNombre: primerNombre,
+          empresa: empresa,
+          correo: correo,
+          telefono: telefono,
+          servicios: serviciosStr,
+          desafio: desafio,
+          origen: origen
+        })
+      });
+    } catch (n8nErr) {
+      Logger.log('Aviso n8n: ' + n8nErr.toString());
+    }
   }
 
   return { folio, fecha: fechaTexto };

@@ -4055,6 +4055,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>CONFIRMAR DATOS</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
+          <p class="text-[10px] leading-snug text-neutral-400">Al confirmar aceptas que Vector Inside te contacte por correo y WhatsApp sobre tu solicitud.</p>
         </div>
       `);
 
@@ -4162,7 +4163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="font-bold text-xs uppercase tracking-wider">SOLICITUD REGISTRADA</span>
           </div>
           <p class="leading-relaxed text-neutral-200">
-            Te acabo de enviar un mensaje a <strong>${auditState.phone}</strong> y a tu correo <strong>${auditState.email}</strong>. Sigamos conversando por cualquiera de esas dos vías.
+            Te enviamos la confirmación a <strong>${auditState.email}</strong> y te escribiremos por WhatsApp al <strong>${auditState.phone}</strong>. Sigamos conversando por cualquiera de esas dos vías.
           </p>
           <div class="pt-2 flex flex-col gap-2">
             <a href="${waUrl}" target="_blank" class="btn-vector-primary py-2.5 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl shadow-[0_0_20px_rgba(195,244,0,0.3)]">
