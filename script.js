@@ -423,6 +423,7 @@ function initHero3DModel() {
 
   // Responsive (≤ 1023px): modelo ligero y resolución de render contenida para que el hero no se trabe
   const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
+  const heroGlowEl = document.getElementById('hero-3d-glow');
   // En responsive se quita el resplandor drop-shadow (60px) del canvas 3D: un filtro así sobre un
   // canvas a pantalla completa obliga al celular a recomponer toda la pantalla en cada cuadro,
   // y eso hacía que el video de fondo del hero se viera trabado.
@@ -595,8 +596,8 @@ function initHero3DModel() {
     }
 
     // 3D Model: poligonal-30-08-26.glb (escritorio, 1.56M triángulos)
-    // En responsive se usa poligonal-mobile.glb: misma forma simplificada a 60k triángulos (~0.7 MB)
-    const modelUrl = IS_MOBILE_HERO ? './poligonal-mobile.glb' : './poligonal-30-08-26.glb';
+    // En responsive se usa poligonal-mobile.glb: misma forma simplificada a ~12k triángulos con normales y Draco (~64 KB)
+    const modelUrl = IS_MOBILE_HERO ? './poligonal-mobile.glb?v=3.0.362' : './poligonal-30-08-26.glb';
     loader.load(
       modelUrl,
       (gltf) => {
@@ -2499,6 +2500,10 @@ function initHero3DModel() {
     const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
     // En responsive el dibujado WebGL se hace cada 2 cuadros (~30 fps): es lo mas pesado y no se nota.
     heroRenderTick = !heroRenderTick;
+    if (IS_MOBILE_HERO && heroGlowEl) {
+      const op = canvas.style.opacity === '' ? 1 : (parseFloat(canvas.style.opacity) || 0);
+      heroGlowEl.style.opacity = isHero3DModelLoaded ? (op * 0.9).toFixed(3) : '0';
+    }
     if (is3DActive) {
       if (IS_MOBILE_HERO && !heroRenderTick) return;
       try {

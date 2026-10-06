@@ -2536,3 +2536,20 @@ fieldset.sfm-step .sfm-options { clear: both; }
   transform: scaleX(0);
   transform-origin: left center;
 }
+
+#hero-3d-glow { display: none; }
+@media (max-width: 1023px) {
+  #hero-3d-glow {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s linear;
+    background: radial-gradient(ellipse 52% 46% at 50% 50%,
+      rgba(82, 39, 255, 0.55) 0%,
+      rgba(82, 39, 255, 0.28) 45%,
+      rgba(82, 39, 255, 0) 75%);
+  }
+}
+
