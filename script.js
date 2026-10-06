@@ -6104,6 +6104,26 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
     if (typeof window.closeServiciosModal === 'function') window.closeServiciosModal();
     lastFocus = document.activeElement;
 
+    const form = $('solicitud-form');
+    const success = $('sfm-success');
+    const submitBtn = $('sfm-submit');
+    const err = $('sfm-error');
+
+    // Reiniciar estado si se había enviado previamente
+    if (modal.classList.contains('is-sent')) {
+      modal.classList.remove('is-sent');
+      if (form) {
+        form.hidden = false;
+        form.reset();
+      }
+      if (success) success.hidden = true;
+      if (submitBtn) submitBtn.disabled = false;
+      if (err) {
+        err.hidden = true;
+        err.textContent = '';
+      }
+    }
+
     // Resultado del test si viene de Diagnóstico
     const chip = $('sfm-diag-chip');
     modal.__diag = null;
@@ -6204,7 +6224,11 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
         form.hidden = true;
         $('sfm-success').hidden = false;
         modal.classList.add('is-sent');
-        const body = modal.querySelector('.svm-body'); if (body) body.scrollTop = 0;
+        const body = modal.querySelector('.svm-body');
+        if (body) body.scrollTop = 0;
+        const panel = modal.querySelector('.svm-panel');
+        if (panel) panel.scrollTop = 0;
+        modal.scrollTop = 0;
       };
 
       try {
