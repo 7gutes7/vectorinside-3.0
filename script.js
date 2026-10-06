@@ -1541,7 +1541,7 @@ function initHero3DModel() {
     const screenVideo = document.createElement('video');
     // Responsive: versión 360x640 (~0.65 MB) — la pantalla del teléfono se ve pequeña en celular
     // y subir un video 1080x1920 a la GPU en cada cuadro era lo que trababa la sección.
-    screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile.mp4' : 'Abstract_animation_marketing_web_1080p.mp4';
+    screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile.mp4' : 'Abstract_animation_marketing_web_1080p.mp4?v=3.0.341';
     window.__phoneScreenVideo = screenVideo;
     screenVideo.onerror = () => {
       screenVideo.src = encodeURI('Abstract_animation_marketing_web…_1080p_20260921004014.mp4');
@@ -4163,12 +4163,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="font-bold text-xs uppercase tracking-wider">SOLICITUD REGISTRADA</span>
           </div>
           <p class="leading-relaxed text-neutral-200">
-            Te enviamos la confirmación a <strong>${auditState.email}</strong> y te escribiremos por WhatsApp al <strong>${auditState.phone}</strong>. Sigamos conversando por cualquiera de esas dos vías.
+            Te enviamos la confirmación a <strong>${auditState.email}</strong>. Para adelantar tu atención, envíanos tu solicitud por WhatsApp con el botón y un asesor te responde en cuanto la vea.
           </p>
           <div class="pt-2 flex flex-col gap-2">
             <a href="${waUrl}" target="_blank" class="btn-vector-primary py-2.5 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl shadow-[0_0_20px_rgba(195,244,0,0.3)]">
               <span class="material-symbols-outlined text-sm">chat</span>
-              <span>CONTINUAR EN WHATSAPP</span>
+              <span>ENVIAR MI SOLICITUD POR WHATSAPP</span>
             </a>
             <a href="${mailtoUrl}" class="btn-vector-outline py-2 px-3 text-xs font-mono tracking-wider flex items-center justify-center gap-2 text-center rounded-xl text-neutral-300 hover:text-white">
               <span class="material-symbols-outlined text-sm">mail</span>
