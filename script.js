@@ -1543,8 +1543,11 @@ function initHero3DModel() {
     // y subir un video 1080x1920 a la GPU en cada cuadro era lo que trababa la sección.
     screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile.mp4' : 'Abstract_animation_marketing_web_1080p.mp4?v=3.0.341';
     window.__phoneScreenVideo = screenVideo;
+    // Si el video principal falla, reintenta UNA vez con la versión ligera (antes bajaba un archivo de 6.5 MB).
     screenVideo.onerror = () => {
-      screenVideo.src = encodeURI('Abstract_animation_marketing_web…_1080p_20260921004014.mp4');
+      if (screenVideo.dataset.fallback) return;
+      screenVideo.dataset.fallback = '1';
+      screenVideo.src = 'Abstract_animation_marketing_web_mobile.mp4';
     };
     screenVideo.loop = true;
     screenVideo.muted = true;
@@ -2031,6 +2034,30 @@ function initHero3DModel() {
     currentScrollLerp = scrollProgress;
   }, 60);
 
+  // Carga diferida de los videos "scrub": se descargan tras la primera interacción (o a los 10 s),
+  // para no competir con el primer render. El scrub ya espera 'canplay' antes de buscar el cuadro.
+  const _scrubQueue = [];
+  let _scrubStarted = false;
+  const _SCRUB_EVENTS = ['scroll', 'touchstart', 'wheel', 'keydown', 'pointerdown'];
+  function _loadScrubVideo(vid, delay) {
+    setTimeout(() => { try { vid.preload = 'auto'; vid.load(); } catch (e) {} }, delay || 0);
+  }
+  function _startScrubLoads() {
+    if (_scrubStarted) return;
+    _scrubStarted = true;
+    _SCRUB_EVENTS.forEach(ev => window.removeEventListener(ev, _startScrubLoads));
+    _scrubQueue.forEach(item => _loadScrubVideo(item.vid, item.delay));
+  }
+  function lazyLoadScrubVideo(vid, delay) {
+    if (!vid) return;
+    if (_scrubStarted) { _loadScrubVideo(vid, delay); return; }
+    _scrubQueue.push({ vid, delay });
+    if (_scrubQueue.length === 1) {
+      _SCRUB_EVENTS.forEach(ev => window.addEventListener(ev, _startScrubLoads, { passive: true }));
+      setTimeout(_startScrubLoads, 10000);
+    }
+  }
+
   // Video scrubbing state & queue — persistent across render frames for Section 01 Identidad (Animar_imagen_720.mp4)
   const sec2Vid = document.getElementById('section2-manifesto-video');
   // Espejo de fondo desenfocado (solo se muestra en responsive, ver style.css)
@@ -2091,7 +2118,7 @@ function initHero3DModel() {
     sec2Vid.setAttribute('muted', '');
     sec2Vid.setAttribute('playsinline', '');
     sec2Vid.setAttribute('webkit-playsinline', '');
-    try { sec2Vid.load(); } catch (e) {}
+    lazyLoadScrubVideo(sec2Vid, 0);
 
     sec2Vid.addEventListener('seeked', () => {
       _sec2VidSeeking = false;
@@ -2153,10 +2180,8 @@ function initHero3DModel() {
     sec3Vid.setAttribute('muted', '');
     sec3Vid.setAttribute('playsinline', '');
     sec3Vid.setAttribute('webkit-playsinline', '');
-    try {
-      sec3Vid.pause();
-      sec3Vid.load();
-    } catch (e) {}
+    try { sec3Vid.pause(); } catch (e) {}
+    lazyLoadScrubVideo(sec3Vid, 1500);
 
     sec3Vid.addEventListener('seeked', () => {
       _sec3VidSeeking = false;

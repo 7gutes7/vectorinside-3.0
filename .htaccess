@@ -1,0 +1,37 @@
+# Vector Inside - cache y compresion (Hostinger / LiteSpeed-Apache)
+# Todo lo que usa ?v=NNN en el HTML se renueva solo al subir la version.
+# Si reemplazas un video/imagen SIN cambiar su nombre ni su ?v=, haz "Purge All" en Cache Manager
+# y cambia el ?v= en el HTML para que los visitantes recurrentes lo vean.
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+
+  # HTML siempre fresco
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # Datos que cambian poco
+  ExpiresByType application/json "access plus 1 day"
+  ExpiresByType application/xml "access plus 1 day"
+  ExpiresByType text/xml "access plus 1 day"
+  ExpiresByType text/plain "access plus 1 day"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript text/javascript application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Archivos pesados y estaticos: cache publica de 30 dias
+  <FilesMatch "\.(mp4|webm|glb|exr|webp|avif|jpe?g|png|gif|svg|ico|woff2?|css|js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+AddType model/gltf-binary .glb
+AddType video/mp4 .mp4
