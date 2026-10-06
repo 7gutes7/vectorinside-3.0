@@ -421,13 +421,10 @@ function initHero3DModel() {
   const camera = new THREE.PerspectiveCamera(getHeroFov(), dim.width / dim.height, 0.1, 1000);
   camera.position.set(0, 0, 10);
 
-  // Responsive (≤ 1023px): modelo ligero y resolución de render contenida para que el hero no se trabe
+  // Responsive (≤ 1023px): solo cambia el video de pantalla y la pausa del video de fondo;
+  // el lobo, su resplandor y la resolución son los mismos que en escritorio.
   const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
-  const heroGlowEl = document.getElementById('hero-3d-glow');
-  // En responsive se quita el resplandor drop-shadow (60px) del canvas 3D: un filtro así sobre un
-  // canvas a pantalla completa obliga al celular a recomponer toda la pantalla en cada cuadro,
-  // y eso hacía que el video de fondo del hero se viera trabado.
-  const HERO_GLOW = IS_MOBILE_HERO ? '' : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+  const HERO_GLOW = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
   let renderer;
   try {
@@ -445,7 +442,7 @@ function initHero3DModel() {
 
   renderer.setSize(dim.width, dim.height);
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, IS_MOBILE_HERO ? 1.5 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
@@ -595,13 +592,12 @@ function initHero3DModel() {
       loader.setDRACOLoader(dracoLoader);
     }
 
-    // 3D Model: poligonal-30-08-26.glb (escritorio, 1.56M triángulos)
-    // En responsive se usa poligonal-mobile.glb: misma forma simplificada a ~12k triángulos con normales y Draco (~64 KB)
-    const modelUrl = IS_MOBILE_HERO ? './poligonal-mobile.glb?v=3.0.362' : './poligonal-30-08-26.glb';
+    // Mismo modelo en escritorio y responsive: poligonal-mini-faces.glb (~2k triangulos, Draco ~11 KB)
+    const modelUrl = './poligonal-mini-faces.glb?v=3.0.364';
     loader.load(
       modelUrl,
       (gltf) => {
-        console.log("¡Modelo 3D (poligonal-30-08-26.glb) cargado con éxito!", gltf);
+        console.log("¡Modelo 3D (poligonal-mini-faces.glb) cargado con éxito!", gltf);
         const model = gltf.scene;
 
         const box = new THREE.Box3().setFromObject(model);
@@ -716,7 +712,7 @@ function initHero3DModel() {
         }
       },
       (err) => {
-        console.error("Error cargando poligonal-30-08-26.glb:", err);
+        console.error("Error cargando poligonal-mini-faces.glb:", err);
         window.__viLoad.modelDone = true;
       }
     );
@@ -1416,7 +1412,6 @@ function initHero3DModel() {
   }
 
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
-  let heroRenderTick = false;
   function animate() {
     requestAnimationFrame(animate);
 
@@ -2498,14 +2493,7 @@ function initHero3DModel() {
 
     // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
     const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
-    // En responsive el dibujado WebGL se hace cada 2 cuadros (~30 fps): es lo mas pesado y no se nota.
-    heroRenderTick = !heroRenderTick;
-    if (IS_MOBILE_HERO && heroGlowEl) {
-      const op = canvas.style.opacity === '' ? 1 : (parseFloat(canvas.style.opacity) || 0);
-      heroGlowEl.style.opacity = isHero3DModelLoaded ? (op * 0.9).toFixed(3) : '0';
-    }
     if (is3DActive) {
-      if (IS_MOBILE_HERO && !heroRenderTick) return;
       try {
         renderer.render(scene, camera);
       } catch (err) {
