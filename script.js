@@ -429,37 +429,34 @@ function initHero3DModel() {
   // Equipos sin aceleración gráfica (WebGL por software: SwiftShader, llvmpipe...). Ahí cada cuadro
   // del lobo cuesta cientos de ms de CPU, así que se dibuja a 1x, sin antialias y solo cuando hay
   // scroll / toque / cambio de tamaño. Con GPU real (celulares y computadoras normales) no cambia nada.
-  const SOFTWARE_GL = (() => {
-    try {
-      const probe = document.createElement('canvas').getContext('webgl');
-      if (!probe) return false;
-      const ext = probe.getExtension('WEBGL_debug_renderer_info');
-      const name = String(probe.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : probe.RENDERER) || '');
-      const lose = probe.getExtension('WEBGL_lose_context');
-      if (lose) lose.loseContext();
-      return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
-    } catch (e) { return false; }
-  })();
+  let SOFTWARE_GL = false; // se decide con el WebGL real del lobo (sin crear un contexto extra de prueba)
   let swFrames = 3;
   let swLastScroll = -1;
-  if (SOFTWARE_GL) {
-    const wake = () => { swFrames = Math.max(swFrames, 20); };
-    ['scroll', 'wheel', 'touchmove', 'pointermove', 'keydown', 'resize'].forEach(ev =>
-      window.addEventListener(ev, wake, { passive: true }));
-  }
 
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
-      antialias: !SOFTWARE_GL,
+      antialias: true,
       powerPreference: 'high-performance',
       failIfMajorPerformanceCaveat: false
     });
   } catch (e) {
     console.warn('Fallback WebGLRenderer initialization:', e);
     renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+  }
+
+  try {
+    const gl = renderer.getContext();
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const gname = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || '');
+    SOFTWARE_GL = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(gname);
+  } catch (e) { SOFTWARE_GL = false; }
+  if (SOFTWARE_GL) {
+    const wake = () => { swFrames = Math.max(swFrames, 20); };
+    ['scroll', 'wheel', 'touchmove', 'pointermove', 'keydown', 'resize'].forEach(ev =>
+      window.addEventListener(ev, wake, { passive: true }));
   }
 
   renderer.setSize(dim.width, dim.height);
@@ -616,9 +613,10 @@ function initHero3DModel() {
 
     // Mismo modelo en escritorio y responsive: poligonal-mini-faces.glb (~2k triangulos, Draco ~11 KB)
     const modelUrl = './poligonal-mini-faces.glb?v=3.0.364';
-    loader.load(
-      modelUrl,
-      (gltf) => {
+    let heroGltfDone = false;
+    const onHeroGltf = (gltf) => {
+        if (heroGltfDone) return;
+        heroGltfDone = true;
         console.log("¡Modelo 3D (poligonal-mini-faces.glb) cargado con éxito!", gltf);
         const model = gltf.scene;
 
@@ -729,30 +727,41 @@ function initHero3DModel() {
         window.__viLoad.model = 1;
         // Espera un cuadro para que el primer render del lobo ya este pintado
         requestAnimationFrame(() => requestAnimationFrame(() => { window.__viLoad.modelDone = true; }));
-      },
-      (xhr) => {
-        if (xhr.total > 0) {
-          window.__viLoad.model = Math.min(0.95, xhr.loaded / xhr.total);
-        }
-      },
-      (err) => {
-        console.error("Error cargando poligonal-mini-faces.glb:", err);
-        window.__viLoad.modelDone = true;
+    };
+    const onHeroProgress = (xhr) => {
+      if (xhr.total > 0) {
+        window.__viLoad.model = Math.min(0.95, xhr.loaded / xhr.total);
       }
-    );
+    };
+    // Si el decodificador Draco falla o se queda colgado en algun celular, se usa la copia sin comprimir (~97 KB)
+    let plainStarted = false;
+    const loadPlainHero = (why) => {
+      if (plainStarted || heroGltfDone) return;
+      plainStarted = true;
+      console.warn('Lobo: usando copia sin Draco (' + why + ')');
+      new THREE.GLTFLoader().load('./poligonal-mini-faces-plain.glb?v=1', onHeroGltf, onHeroProgress, (err2) => {
+        console.error('Error cargando poligonal-mini-faces-plain.glb:', err2);
+        window.__viLoad.modelDone = true;
+      });
+    };
+    loader.load(modelUrl, onHeroGltf, onHeroProgress, (err) => {
+      console.error('Error cargando poligonal-mini-faces.glb (Draco):', err);
+      loadPlainHero('error');
+    });
+    setTimeout(() => loadPlainHero('tiempo de espera'), 5000);
 
     // 3D Model 2: smartphone2.glb (Section 3)
     // --- Live video texture for the smartphone screen ---
     const screenVideo = document.createElement('video');
     // Responsive: versión 360x640 (~0.65 MB) — la pantalla del teléfono se ve pequeña en celular
     // y subir un video 1080x1920 a la GPU en cada cuadro era lo que trababa la sección.
-    screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile.mp4' : 'Abstract_animation_marketing_web_1080p.mp4?v=3.0.341';
+    screenVideo.src = IS_MOBILE_HERO ? 'Abstract_animation_marketing_web_mobile_lite.mp4?v=1' : 'Abstract_animation_marketing_web_1080p.mp4?v=3.0.341';
     window.__phoneScreenVideo = screenVideo;
     // Si el video principal falla, reintenta UNA vez con la versión ligera (antes bajaba un archivo de 6.5 MB).
     screenVideo.onerror = () => {
       if (screenVideo.dataset.fallback) return;
       screenVideo.dataset.fallback = '1';
-      screenVideo.src = 'Abstract_animation_marketing_web_mobile.mp4';
+      screenVideo.src = 'Abstract_animation_marketing_web_mobile_lite.mp4?v=1';
     };
     screenVideo.loop = true;
     screenVideo.muted = true;
@@ -4413,6 +4422,16 @@ function initExecutionInternalScrollListener() {
       const scrollY = container.scrollTop;
       saveInnerScroll(scrollY);
       const trackTop = track.offsetTop;
+      // Con las fichas de Evidencia a pantalla completa (y al pasar a Metodologia) no debe verse el video
+      // de particulas del fondo: solo negro. Se oculta cuando la galeria cubre la vista.
+      if (!window.__sec3MediaEl) window.__sec3MediaEl = document.getElementById('scroll-expand-media-wrapper');
+      if (window.__sec3MediaEl) {
+        const hideMedia = scrollY >= trackTop - 8;
+        if (window.__sec3MediaHidden !== hideMedia) {
+          window.__sec3MediaHidden = hideMedia;
+          window.__sec3MediaEl.style.visibility = hideMedia ? 'hidden' : 'visible';
+        }
+      }
       const scrollableDistance = track.offsetHeight - container.clientHeight;
       const persistentArrow = document.getElementById('persistent-scroll-indicator');
 
