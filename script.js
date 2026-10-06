@@ -426,12 +426,34 @@ function initHero3DModel() {
   const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
   const HERO_GLOW = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
+  // Equipos sin aceleración gráfica (WebGL por software: SwiftShader, llvmpipe...). Ahí cada cuadro
+  // del lobo cuesta cientos de ms de CPU, así que se dibuja a 1x, sin antialias y solo cuando hay
+  // scroll / toque / cambio de tamaño. Con GPU real (celulares y computadoras normales) no cambia nada.
+  const SOFTWARE_GL = (() => {
+    try {
+      const probe = document.createElement('canvas').getContext('webgl');
+      if (!probe) return false;
+      const ext = probe.getExtension('WEBGL_debug_renderer_info');
+      const name = String(probe.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : probe.RENDERER) || '');
+      const lose = probe.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+      return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
+    } catch (e) { return false; }
+  })();
+  let swFrames = 3;
+  let swLastScroll = -1;
+  if (SOFTWARE_GL) {
+    const wake = () => { swFrames = Math.max(swFrames, 20); };
+    ['scroll', 'wheel', 'touchmove', 'pointermove', 'keydown', 'resize'].forEach(ev =>
+      window.addEventListener(ev, wake, { passive: true }));
+  }
+
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
-      antialias: true,
+      antialias: !SOFTWARE_GL,
       powerPreference: 'high-performance',
       failIfMajorPerformanceCaveat: false
     });
@@ -442,7 +464,7 @@ function initHero3DModel() {
 
   renderer.setSize(dim.width, dim.height);
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(SOFTWARE_GL ? 1 : Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
@@ -453,7 +475,7 @@ function initHero3DModel() {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     new THREE.EXRLoader().load(
-      './studio.exr',
+      './studio.exr?v=3.0.365',
       (hdrTexture) => {
         const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
         scene.environment = envMap;
@@ -700,6 +722,8 @@ function initHero3DModel() {
         console.log("--> PRECISE RHOMBUS EYE SOCKET TARGET:", targetEyePos);
 
         syncSize();
+        swFrames = Math.max(swFrames, 3);
+        if (SOFTWARE_GL) [1500, 3500].forEach(t => setTimeout(() => { swFrames = Math.max(swFrames, 1); }, t));
         isHero3DModelLoaded = true;
         triggerHero3DReveal();
         window.__viLoad.model = 1;
@@ -738,7 +762,8 @@ function initHero3DModel() {
     screenVideo.setAttribute('muted', '');
     screenVideo.setAttribute('playsinline', '');
     screenVideo.setAttribute('webkit-playsinline', '');
-    screenVideo.preload = 'auto';
+    // Se descarga cuando el usuario empieza a navegar (ver _startScrubLoads), no en el arranque.
+    screenVideo.preload = 'none';
     screenVideo.style.cssText = 'position:fixed;left:0;top:0;width:32px;height:32px;opacity:0.01;pointer-events:none;z-index:-9999;';
     document.body.appendChild(screenVideo);
 
@@ -1234,6 +1259,9 @@ function initHero3DModel() {
     _scrubStarted = true;
     _SCRUB_EVENTS.forEach(ev => window.removeEventListener(ev, _startScrubLoads));
     _scrubQueue.forEach(item => _loadScrubVideo(item.vid, item.delay));
+    // Video de la pantalla del smartphone: empieza a descargarse junto con los videos de scroll
+    const sv = window.__phoneScreenVideo;
+    if (sv && sv.preload === 'none') { sv.preload = 'auto'; if (sv.readyState === 0) sv.load(); }
   }
   function lazyLoadScrubVideo(vid, delay) {
     if (!vid) return;
@@ -2450,9 +2478,10 @@ function initHero3DModel() {
       // - 01 // Manifiesto (0.08 <= currentScrollLerp < T_PHONE_ZOOM_START)
       // - 02 // Ecosistema (0.785 <= currentScrollLerp < 0.885)
       // - 05 // Metodología (When curtain is revealed)
-      const isWhiteHeaderPhase = (currentScrollLerp >= T_REVEAL_START && currentScrollLerp < T_PHONE_ZOOM_START) ||
-        (currentScrollLerp >= 0.785 && currentScrollLerp < 0.885) ||
-        isMetodologiaRevealed;
+      // Metodología ya no es blanca (fondo Micro Slats oscuro): ahí el header usa el cristal oscuro
+      const isWhiteHeaderPhase = !isMetodologiaRevealed && (
+        (currentScrollLerp >= T_REVEAL_START && currentScrollLerp < T_PHONE_ZOOM_START) ||
+        (currentScrollLerp >= 0.785 && currentScrollLerp < 0.885));
 
       // Transparent Floating Header during Smartphone Zoom & 360 Spin
       const isSmartphoneSpinPhase = currentScrollLerp >= T_PHONE_ZOOM_START && currentScrollLerp < 0.785;
@@ -2494,6 +2523,12 @@ function initHero3DModel() {
     // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
     const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
     if (is3DActive) {
+      if (SOFTWARE_GL) {
+        const scrollMoved = Math.abs(currentScrollLerp - swLastScroll) > 0.0001;
+        if (!scrollMoved && swFrames <= 0) return;
+        swLastScroll = currentScrollLerp;
+        if (swFrames > 0) swFrames--;
+      }
       try {
         renderer.render(scene, camera);
       } catch (err) {
@@ -4038,7 +4073,7 @@ const matrizData = [
     id: 2,
     code: 'BLK-02',
     category: 'operativo',
-    file: 'imagotipo valor Green sin fondo.png',
+    file: 'imagotipo valor Green sin fondo-600.webp',
     title: 'Valor Máximo',
     desc: 'Plataforma de match inmobiliario y conexión estratégica de espacios comerciales con empresarios y emprendedores.',
     link: 'www.valor-maximo.com',
@@ -4067,7 +4102,7 @@ const matrizData = [
     id: 4,
     code: 'BLK-04',
     category: 'operativo',
-    file: 'Imagotipo2.ai.png',
+    file: 'Imagotipo2.ai-600.webp',
     title: 'Lealtix',
     desc: 'Plataforma de lealtad digital y retención de clientes para la industria HORECA mediante pases en Apple & Google Wallet sin necesidad de apps.',
     link: 'www.lealtix.com.mx',
@@ -4083,7 +4118,7 @@ const matrizData = [
     id: 5,
     code: 'BLK-05',
     category: 'cognitivo',
-    file: 'IntegritUS imagotipo COLOR.png',
+    file: 'IntegritUS imagotipo COLOR-600.webp',
     title: 'IntegritUS',
     desc: 'Plataforma inteligente de cumplimiento normativo y blindaje fiscal que detecta alertas SAT, monitorea actividades vulnerables PLD y dictamina actas con IA.',
     link: 'www.integritusmx.com',
@@ -4247,7 +4282,7 @@ function scrollToMetodologia(e) {
     window._isDiagnosticoActive = false;
     if (metodologiaWrapper) {
       metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
-      metodologiaWrapper.style.backgroundColor = '#ffffff';
+      metodologiaWrapper.style.backgroundColor = '#120f17';
       metodologiaWrapper.style.pointerEvents = 'auto';
     }
     const stage = document.getElementById('sec-metodologia-stage');
@@ -4256,7 +4291,7 @@ function scrollToMetodologia(e) {
       stage.style.transform = 'none';
       stage.style.pointerEvents = 'auto';
     }
-    const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+    const videoBg = document.getElementById('metodologia-slats');
     if (videoBg && videoBg.parentElement) videoBg.parentElement.style.opacity = '1';
     const diagSec = document.getElementById('sec-06-diagnostico');
     if (diagSec) { diagSec.style.opacity = '0'; diagSec.style.pointerEvents = 'none'; }
@@ -4265,8 +4300,8 @@ function scrollToMetodologia(e) {
     const diagLine = document.getElementById('diag-reveal-line');
     if (diagLine) diagLine.style.opacity = '0';
     if (globalHeader) {
-      globalHeader.classList.add('glass-nav-white-liquid');
-      globalHeader.classList.remove('glass-nav-dark', 'glass-nav-transparent', 'glass-nav-transparent-section05');
+      globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-transparent', 'glass-nav-hero-transparent', 'glass-nav-transparent-section05');
+      globalHeader.classList.add('glass-nav-dark');
     }
     updateActiveDockItem(3); // 04 // Metodología
   };
@@ -4342,10 +4377,9 @@ function initExecutionInternalScrollListener() {
   const sec3Wrapper = document.getElementById('sec-matriz-25-wrapper');
   const metodologiaWrapper = document.getElementById('sec-metodologia-wrapper');
   const stage = document.getElementById('sec-metodologia-stage');
-  const videoBg = document.getElementById('ejecucion-liquid-flow-video');
-  if (videoBg) {
-    videoBg.play().catch(() => {});
-  }
+  const videoBg = document.getElementById('metodologia-slats');
+  // Fondo animado Micro Slats (MicroSlats.js): crea el WebGL solo cuando la sección entra en pantalla
+  if (videoBg && typeof window.initMicroSlats === 'function') window.initMicroSlats(videoBg);
   const videoWrapper = videoBg ? videoBg.parentElement : null;
   const diagSec = document.getElementById('sec-06-diagnostico');
   const diagDot = document.getElementById('diag-reveal-dot');
@@ -4458,7 +4492,7 @@ function initExecutionInternalScrollListener() {
           const yPct = (1.0 - pCurtain) * 100;
           metodologiaWrapper.style.transform = `translate3d(0, ${yPct.toFixed(2)}%, 0)`;
           metodologiaWrapper.style.pointerEvents = pCurtain > 0.6 ? 'auto' : 'none';
-          metodologiaWrapper.style.backgroundColor = '#ffffff';
+          metodologiaWrapper.style.backgroundColor = '#120f17';
 
           // Desvanecimiento suave y desplazamiento cinemático de Sección 03
           const sec3Fade = Math.max(0, 1.0 - pCurtain);
@@ -4480,13 +4514,9 @@ function initExecutionInternalScrollListener() {
           if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
             globalHeader.classList.remove('glass-nav-transparent-section05');
-            if (pCurtain > 0.5) {
-              globalHeader.classList.add('glass-nav-white-liquid');
-              globalHeader.classList.remove('glass-nav-dark');
-            } else {
-              globalHeader.classList.remove('glass-nav-white-liquid');
-              globalHeader.classList.add('glass-nav-dark');
-            }
+            // Metodología ahora es oscura (Micro Slats): el header usa el cristal oscuro en toda la transición
+            globalHeader.classList.remove('glass-nav-white-liquid');
+            globalHeader.classList.add('glass-nav-dark');
           }
           updateActiveDockItem(pCurtain > 0.4 ? 3 : 2);
         } else if (pTrack < 0.36) {
@@ -4498,7 +4528,7 @@ function initExecutionInternalScrollListener() {
           }
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
-          metodologiaWrapper.style.backgroundColor = '#ffffff';
+          metodologiaWrapper.style.backgroundColor = '#120f17';
           if (stage) {
             stage.style.opacity = '1';
             stage.style.transform = 'none';
@@ -4511,7 +4541,7 @@ function initExecutionInternalScrollListener() {
           if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
             globalHeader.classList.remove('glass-nav-transparent-section05', 'glass-nav-dark');
-            globalHeader.classList.add('glass-nav-white-liquid');
+            globalHeader.classList.add('glass-nav-dark');
           }
           updateActiveDockItem(3); // 04 // Metodología
         } else if (pTrack < 0.44) {
@@ -4524,8 +4554,8 @@ function initExecutionInternalScrollListener() {
           const pFade = (pTrack - 0.36) / (0.44 - 0.36);
           metodologiaWrapper.style.transform = 'translate3d(0, 0%, 0)';
           metodologiaWrapper.style.pointerEvents = 'auto';
-          const bgVal = Math.round(255 - pFade * (255 - 8));
-          metodologiaWrapper.style.backgroundColor = `rgb(${bgVal}, ${bgVal}, ${bgVal})`;
+          // De #120f17 (fondo Micro Slats) a #080808
+          metodologiaWrapper.style.backgroundColor = `rgb(${Math.round(18 - pFade * 10)}, ${Math.round(15 - pFade * 7)}, ${Math.round(23 - pFade * 15)})`;
           if (stage) {
             stage.style.opacity = (1.0 - pFade).toFixed(3);
             stage.style.transform = `translateY(${(-20 * pFade).toFixed(1)}px)`;
@@ -4538,10 +4568,10 @@ function initExecutionInternalScrollListener() {
           if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
           if (globalHeader) {
             if (pFade > 0.5) {
-              globalHeader.classList.remove('glass-nav-white-liquid');
+              globalHeader.classList.remove('glass-nav-white-liquid', 'glass-nav-dark');
               globalHeader.classList.add('glass-nav-transparent-section05');
             } else {
-              globalHeader.classList.add('glass-nav-white-liquid');
+              globalHeader.classList.add('glass-nav-dark');
               globalHeader.classList.remove('glass-nav-transparent-section05');
             }
           }
@@ -4936,7 +4966,7 @@ function scrollToDiagnostico(e) {
       stage.style.opacity = '0';
       stage.style.pointerEvents = 'none';
     }
-    const videoBg = document.getElementById('ejecucion-liquid-flow-video');
+    const videoBg = document.getElementById('metodologia-slats');
     if (videoBg && videoBg.parentElement) videoBg.parentElement.style.opacity = '0';
     const diagSec = document.getElementById('sec-06-diagnostico');
     if (diagSec) {
