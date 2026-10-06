@@ -35,3 +35,11 @@
 
 AddType model/gltf-binary .glb
 AddType video/mp4 .mp4
+
+# Prototipos antiguos del sitio (eliminados): cualquier enlace viejo cae en la pagina real
+<IfModule mod_alias.c>
+  Redirect 301 /stitch_home.html /
+  Redirect 301 /stitch_elite_vanguard.html /
+  # Rutas de la estructura antigua de varias paginas: ahora todo vive en la pagina principal
+  RedirectMatch 301 ^/(diagnostico|manifiesto|metodologia|evidencia|ecosistema)(/(index\.html)?)?$ /
+</IfModule>

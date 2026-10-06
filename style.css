@@ -461,12 +461,10 @@ body {
   0%, 100% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 10px var(--vector-lime);
   }
   50% {
     transform: scale(1.4);
     opacity: 0.6;
-    box-shadow: 0 0 20px var(--vector-lime);
   }
 }
 
@@ -2500,4 +2498,41 @@ fieldset.sfm-step .sfm-options { clear: both; }
   #hero-curtain-right {
     bottom: calc(120px + var(--vi-bar, 0px)) !important;
   }
+}
+
+/* ==================== INTRO: BARRA DE PROGRESO REAL ==================== */
+#intro-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 6.5rem;
+  transform: translateX(-50%);
+  width: min(70vw, 360px);
+  z-index: 10;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+@media (min-width: 640px) {
+  #intro-progress { bottom: 3rem; }
+}
+#intro-progress .intro-progress-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--vector-lime, #c3f400);
+}
+#intro-progress .intro-progress-track {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+#intro-progress #intro-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--vector-lime, #c3f400);
+  box-shadow: 0 0 10px var(--vector-lime, #c3f400);
+  transform: scaleX(0);
+  transform-origin: left center;
 }

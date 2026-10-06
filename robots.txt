@@ -2,8 +2,4 @@
 User-agent: *
 Allow: /
 
-# Prototipos anteriores del sitio (no forman parte del sitio público)
-Disallow: /stitch_home.html
-Disallow: /stitch_elite_vanguard.html
-
 Sitemap: https://vectorinside.com/sitemap.xml

@@ -2,6 +2,9 @@
  * Vector Inside 3.0 - High-Performance Interactive Logic
  */
 
+// Estado de carga compartido con la pantalla de intro (barra de progreso real)
+window.__viLoad = window.__viLoad || { model: 0, modelDone: false };
+
 // Preserve scroll position across page refreshes (manual restoration via sessionStorage)
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
@@ -151,23 +154,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // 0. Initialize Fullscreen Video Intro (INTRO.mp4)
   initPageVideoIntro();
 
-  // 1. Initialize 3D Wolf Head Model & Native Hardware-Accelerated 3D Topography
-  initHero3DModel();
-
-  // 2. Initialize React Bits RippleDistortion on Hero Stage
-  initHeroRippleDistortion();
+  // 1. Initialize 3D Wolf Head Model
+  // Se arranca despues del primer pintado y en un momento libre del navegador, para no
+  // bloquear el hilo principal mientras se muestra el intro / el primer contenido.
+  (function startHero3D() {
+    let started = false;
+    const go = () => {
+      if (started) return;
+      started = true;
+      try { initHero3DModel(); } catch (e) { console.error('initHero3DModel falló:', e); window.__viLoad.modelDone = true; }
+      if (typeof THREE === 'undefined' || !document.getElementById('hero-3d-canvas')) window.__viLoad.modelDone = true;
+    };
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 600 });
+      else setTimeout(go, 150);
+    }));
+    setTimeout(go, 1200); // red de seguridad
+  })();
 
   // 3. Setup Intersection Observer for Scroll Animations
   initScrollAnimations();
 
-  // 4. Diagnostic Modal Logic
-  initDiagnosticModal();
-
   // 5. Evidence Tab Switcher
   initEvidenceTabs();
-
-  // 6. Mobile Menu Toggle
-  initMobileMenu();
 
   // 7. Lazy-load below-the-fold background videos (fetch + play only when visible)
   initLazyVideos();
@@ -213,7 +222,8 @@ function initPageVideoIntro() {
   // Si el controlador inline ya está activo, verificar si el video ya terminó
   if (typeof window.dismissIntroScreen === 'function') {
     if (video.ended || (video.duration && video.currentTime >= video.duration - 0.25)) {
-      window.dismissIntroScreen();
+      // cierre "suave": el intro espera a que el hero este listo
+      (window.requestIntroDismiss || window.dismissIntroScreen)();
     }
     return;
   }
@@ -291,549 +301,6 @@ function initPageVideoIntro() {
 }
 
 /**
- * Interactive 3D Topographical Terrain Shader (Aerial Forward Flight + Mouse Warp)
- * Based on high-altitude contour elevation models (Isolines / Curvas de Nivel)
- */
-/**
- * High-Performance 3D Topographical Terrain Shader (Pure Aerial Forward Flight, No Cursor Reaction)
- * Based on high-altitude contour elevation models (Isolines / Curvas de Nivel)
- */
-function initTopographicalTerrainShader() {
-  const canvas = document.getElementById('hero-topo-canvas');
-  if (!canvas) return;
-
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  if (!gl) return;
-
-  function syncSize() {
-    const parent = canvas.parentElement;
-    if (!parent) return;
-    const rect = parent.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
-    const w = Math.max(1, Math.floor(rect.width * dpr));
-    const h = Math.max(1, Math.floor(rect.height * dpr));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-      gl.viewport(0, 0, w, h);
-    }
-  }
-
-  window.addEventListener('resize', syncSize);
-  syncSize();
-
-  const isWebGL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
-
-  const vsSource = isWebGL2 ? `#version 300 es
-    in vec2 position;
-    void main() {
-      gl_Position = vec4(position, 0.0, 1.0);
-    }
-  ` : `
-    attribute vec2 position;
-    void main() {
-      gl_Position = vec4(position, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = isWebGL2 ? `#version 300 es
-    precision highp float;
-    out vec4 fragColor;
-
-    uniform vec2 u_resolution;
-    uniform float u_time;
-
-    vec2 hash2(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(dot(hash2(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
-            dot(hash2(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
-        mix(dot(hash2(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
-            dot(hash2(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
-        u.y
-      );
-    }
-
-    float fbm(vec2 p) {
-      float total = 0.0;
-      mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
-      total += 0.55 * noise(p);
-      p = m * p + vec2(12.5, 3.7);
-      total += 0.28 * noise(p);
-      p = m * p + vec2(8.3, 1.9);
-      total += 0.14 * noise(p);
-      return total;
-    }
-
-    float terrain(vec2 p) {
-      float h = fbm(p * 0.16) * 2.1 + fbm(p * 0.38) * 0.6;
-      return pow(max(0.0, h + 0.5), 1.35) * 1.2;
-    }
-
-    void main() {
-      vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
-
-      // Fast, fluid forward flight
-      float flightSpeed = 1.85;
-      float flightZ = u_time * flightSpeed;
-      vec3 ro = vec3(0.0, 3.6, flightZ);
-      vec3 rd = normalize(vec3(uv.x * 1.3, uv.y - 0.42, 1.45));
-
-      float t = 1.0;
-      float maxDist = 30.0;
-      vec3 p = ro;
-      bool hit = false;
-
-      for (int i = 0; i < 38; i++) {
-        p = ro + rd * t;
-        float h = terrain(p.xz);
-        float diff = p.y - h;
-        if (diff < 0.018) {
-          hit = true;
-          break;
-        }
-        t += max(0.09, diff * 0.45);
-        if (t > maxDist) break;
-      }
-
-      if (!hit) {
-        fragColor = vec4(0.04, 0.04, 0.05, 1.0);
-        return;
-      }
-
-      vec2 eps = vec2(0.04, 0.0);
-      float hCenter = terrain(p.xz);
-      vec3 nor = normalize(vec3(
-        terrain(p.xz - eps.xy) - terrain(p.xz + eps.xy),
-        2.0 * eps.x,
-        terrain(p.xz - eps.yx) - terrain(p.xz + eps.yx)
-      ));
-
-      vec3 lightDir = normalize(vec3(-0.6, 1.4, -0.4));
-      float diff = max(0.0, dot(nor, lightDir));
-      float amb = 0.65 + 0.35 * nor.y;
-
-      // Topographical Contour Isolines
-      float contourFrequency = 8.5;
-      float elevation = hCenter * contourFrequency;
-      float contourFract = fract(elevation);
-      
-      float lineDist = min(contourFract, 1.0 - contourFract);
-      float fw = fwidth(elevation) * 1.2 + 0.03;
-      float isLine = smoothstep(fw, 0.0, lineDist);
-
-      float majorElevation = elevation / 5.0;
-      float majorFract = fract(majorElevation);
-      float majorDist = min(majorFract, 1.0 - majorFract);
-      float majorFw = fwidth(majorElevation) * 1.5 + 0.02;
-      float isMajorLine = smoothstep(majorFw, 0.0, majorDist);
-
-      // Bright Ivory / Bone Titanium Palette matching reference image
-      vec3 baseTone = vec3(0.92, 0.90, 0.87); // Luminous white-ivory plaster
-      vec3 shadowTone = vec3(0.68, 0.66, 0.63); // Soft warm relief shadow
-      vec3 terrainColor = mix(shadowTone, baseTone, diff * 0.65 + amb * 0.35);
-
-      vec3 contourColor = vec3(0.12, 0.12, 0.14); // Crisp dark contour ink lines
-      vec3 finalTerrain = mix(terrainColor, contourColor, isLine * 0.75 + isMajorLine * 0.25);
-
-      float fog = smoothstep(10.0, maxDist - 1.0, t);
-      vec3 bgColor = vec3(0.85, 0.83, 0.80);
-      vec3 finalColor = mix(finalTerrain, bgColor, fog);
-
-      fragColor = vec4(finalColor, 1.0);
-    }
-  ` : `
-    precision highp float;
-    uniform vec2 u_resolution;
-    uniform float u_time;
-
-    vec2 hash2(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(dot(hash2(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
-            dot(hash2(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
-        mix(dot(hash2(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
-            dot(hash2(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
-        u.y
-      );
-    }
-
-    float fbm(vec2 p) {
-      float total = 0.0;
-      mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
-      total += 0.55 * noise(p);
-      p = m * p + vec2(12.5, 3.7);
-      total += 0.28 * noise(p);
-      p = m * p + vec2(8.3, 1.9);
-      total += 0.14 * noise(p);
-      return total;
-    }
-
-    float terrain(vec2 p) {
-      float h = fbm(p * 0.16) * 2.1 + fbm(p * 0.38) * 0.6;
-      return pow(max(0.0, h + 0.5), 1.35) * 1.2;
-    }
-
-    void main() {
-      vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
-      float flightSpeed = 1.85;
-      float flightZ = u_time * flightSpeed;
-      vec3 ro = vec3(0.0, 3.6, flightZ);
-      vec3 rd = normalize(vec3(uv.x * 1.3, uv.y - 0.42, 1.45));
-
-      float t = 1.0;
-      float maxDist = 30.0;
-      vec3 p = ro;
-      bool hit = false;
-
-      for (int i = 0; i < 38; i++) {
-        p = ro + rd * t;
-        float h = terrain(p.xz);
-        float diff = p.y - h;
-        if (diff < 0.018) {
-          hit = true;
-          break;
-        }
-        t += max(0.09, diff * 0.45);
-        if (t > maxDist) break;
-      }
-
-      if (!hit) {
-        gl_FragColor = vec4(0.85, 0.83, 0.80, 1.0);
-        return;
-      }
-
-      vec2 eps = vec2(0.04, 0.0);
-      float hCenter = terrain(p.xz);
-      vec3 nor = normalize(vec3(
-        terrain(p.xz - eps.xy) - terrain(p.xz + eps.xy),
-        2.0 * eps.x,
-        terrain(p.xz - eps.yx) - terrain(p.xz + eps.yx)
-      ));
-
-      vec3 lightDir = normalize(vec3(-0.6, 1.4, -0.4));
-      float diff = max(0.0, dot(nor, lightDir));
-      float amb = 0.65 + 0.35 * nor.y;
-
-      float contourFrequency = 8.5;
-      float elevation = hCenter * contourFrequency;
-      float contourFract = fract(elevation);
-      float lineDist = min(contourFract, 1.0 - contourFract);
-      float isLine = smoothstep(0.08, 0.0, lineDist);
-
-      vec3 baseTone = vec3(0.92, 0.90, 0.87);
-      vec3 shadowTone = vec3(0.68, 0.66, 0.63);
-      vec3 terrainColor = mix(shadowTone, baseTone, diff * 0.65 + amb * 0.35);
-      vec3 contourColor = vec3(0.12, 0.12, 0.14);
-      vec3 finalTerrain = mix(terrainColor, contourColor, isLine * 0.85);
-
-      float fog = smoothstep(10.0, maxDist - 1.0, t);
-      vec3 bgColor = vec3(0.85, 0.83, 0.80);
-      vec3 finalColor = mix(finalTerrain, bgColor, fog);
-
-      gl_FragColor = vec4(finalColor, 1.0);
-    }
-  `;
-
-  function compileShader(src, type) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error("Topo Shader Error:", gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
-    }
-    return shader;
-  }
-
-  const vs = compileShader(vsSource, gl.VERTEX_SHADER);
-  const fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
-  if (!vs || !fs) return;
-
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error("Topo Program Link Error:", gl.getProgramInfoLog(program));
-    return;
-  }
-
-  const uResolution = gl.getUniformLocation(program, "u_resolution");
-  const uTime = gl.getUniformLocation(program, "u_time");
-  const posAttr = gl.getAttribLocation(program, "position");
-
-  const quad = new Float32Array([
-    -1.0, -1.0,
-    1.0, -1.0,
-    -1.0, 1.0,
-    -1.0, 1.0,
-    1.0, -1.0,
-    1.0, 1.0,
-  ]);
-
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-
-  let startTime = performance.now();
-
-  function render() {
-    syncSize();
-
-    const elapsed = (performance.now() - startTime) * 0.001;
-
-    gl.useProgram(program);
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.enableVertexAttribArray(posAttr);
-    gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
-
-    gl.uniform2f(uResolution, canvas.width, canvas.height);
-    gl.uniform1f(uTime, elapsed);
-
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    requestAnimationFrame(render);
-  }
-
-  requestAnimationFrame(render);
-}
-
-/**
- * Official ReactBits GradientWaves WebGL 2.0 Engine
- */
-function initGradientWavesShader() {
-  const canvas = document.getElementById('gradient-waves-canvas');
-  if (!canvas) return;
-
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  if (!gl) return;
-
-  function syncSize() {
-    const parent = canvas.parentElement;
-    if (!parent) return;
-    const rect = parent.getBoundingClientRect();
-    const w = Math.max(1, Math.floor(rect.width));
-    const h = Math.max(1, Math.floor(rect.height));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    }
-  }
-
-  window.addEventListener('resize', syncSize);
-  syncSize();
-
-  const vsSource = `#version 300 es
-    in vec2 position;
-    void main() {
-      gl_Position = vec4(position, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = `#version 300 es
-    precision highp float;
-    uniform vec2 iResolution;
-    uniform float iTime;
-    uniform float uSpeed;
-    uniform float uAmplitude;
-    uniform float uWaveScale;
-    uniform float uWaveRatio;
-    uniform float uSwell;
-    uniform float uTurbulence;
-    uniform float uTilt;
-    uniform float uZoom;
-    uniform float uHeight;
-    uniform float uFogDepth;
-    uniform float uSteps;
-    uniform float uBrightness;
-    uniform float uOpacity;
-    uniform vec3 uHorizonColor;
-    uniform vec3 uWaveColor;
-    uniform vec3 uCrestColor;
-    uniform vec2 uMouse;
-    out vec4 fragColor;
-
-    const float MAX_DIST = 20000.0;
-
-    float plasma(vec3 r, vec2 freq, vec4 tc) {
-      float mx = r.x + tc.x;
-      mx += uSwell * sin((r.y + mx) / 20.0 + tc.y);
-      float my = r.y - tc.z;
-      my += uTurbulence * cos(r.x / 23.0 + tc.w);
-
-      // Dynamic cursor wave deformation & ripple
-      vec2 mUV = (uMouse - 0.5) * vec2(35.0, 20.0);
-      float mDist = length(r.xy - mUV);
-      float ripple = sin(mDist * 0.45 - tc.x * 2.5) * exp(-mDist * 0.1) * 7.5;
-
-      return r.z - (sin(mx * freq.x) * uAmplitude + sin(my * freq.y) * uAmplitude + uHeight + ripple);
-    }
-
-    float raymarch(vec3 pos, vec3 dir, vec2 freq, vec4 tc) {
-      float dist = 0.0;
-      for (int i = 0; i < 128; i++) {
-        if (float(i) >= uSteps) break;
-        float dscene = plasma(pos + dist * dir, freq, tc);
-        if (abs(dscene) < 0.1) break;
-        dist += 0.9 * dscene;
-        if (!(abs(dist) < MAX_DIST)) return MAX_DIST;
-      }
-      return dist;
-    }
-
-    void main() {
-      float T = iTime * uSpeed;
-      vec2 freq = vec2(uWaveScale / 7.0, (uWaveScale * uWaveRatio) / 3.0);
-      vec4 tc = vec4(T / 0.130, T / 0.810, T / 0.200, T / 0.710);
-      float c, s;
-      float vfov = (3.14159 / 2.3) / max(uZoom, 0.05);
-      vec3 cam = vec3(0.0, 0.0, 30.0);
-      vec2 uv = (gl_FragCoord.xy / iResolution.xy) - 0.5;
-      uv.x *= iResolution.x / iResolution.y;
-      uv.y *= -1.0;
-
-      vec3 dir = vec3(0.0, 0.0, -1.0);
-      float ulen = length(uv);
-      float xrot = vfov * ulen;
-      c = cos(xrot); s = sin(xrot);
-      dir = mat3(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c) * dir;
-      vec2 nuv = ulen > 1e-5 ? uv / ulen : vec2(1.0, 0.0);
-      c = nuv.x; s = nuv.y;
-      dir = mat3(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0) * dir;
-      c = cos(uTilt); s = sin(uTilt);
-      dir = mat3(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c) * dir;
-
-      float dist = raymarch(cam, dir, freq, tc);
-      vec3 pos = cam + dist * dir;
-
-      float t = clamp(uFogDepth / max(dist, 0.001), 0.0, 1.0);
-      vec3 body = mix(uWaveColor, uCrestColor, clamp(pos.z * 0.08 + 0.5, 0.0, 1.0));
-      vec3 col = mix(uHorizonColor, body, t);
-      col *= uBrightness;
-      col = clamp(col, 0.0, 1.0);
-
-      float alpha = clamp(t, 0.0, 1.0) * uOpacity;
-      fragColor = vec4(col * alpha, alpha);
-    }
-  `;
-
-  function createShader(gl, type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
-    }
-    return shader;
-  }
-
-  const vertShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
-  const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
-  if (!vertShader || !fragShader) return;
-
-  const program = gl.createProgram();
-  gl.attachShader(program, vertShader);
-  gl.attachShader(program, fragShader);
-  gl.linkProgram(program);
-
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-
-  const posLoc = gl.getAttribLocation(program, 'position');
-  gl.enableVertexAttribArray(posLoc);
-  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-  const uniforms = {
-    iTime: gl.getUniformLocation(program, 'iTime'),
-    iResolution: gl.getUniformLocation(program, 'iResolution'),
-    uSpeed: gl.getUniformLocation(program, 'uSpeed'),
-    uAmplitude: gl.getUniformLocation(program, 'uAmplitude'),
-    uWaveScale: gl.getUniformLocation(program, 'uWaveScale'),
-    uWaveRatio: gl.getUniformLocation(program, 'uWaveRatio'),
-    uSwell: gl.getUniformLocation(program, 'uSwell'),
-    uTurbulence: gl.getUniformLocation(program, 'uTurbulence'),
-    uTilt: gl.getUniformLocation(program, 'uTilt'),
-    uZoom: gl.getUniformLocation(program, 'uZoom'),
-    uHeight: gl.getUniformLocation(program, 'uHeight'),
-    uFogDepth: gl.getUniformLocation(program, 'uFogDepth'),
-    uSteps: gl.getUniformLocation(program, 'uSteps'),
-    uBrightness: gl.getUniformLocation(program, 'uBrightness'),
-    uOpacity: gl.getUniformLocation(program, 'uOpacity'),
-    uHorizonColor: gl.getUniformLocation(program, 'uHorizonColor'),
-    uWaveColor: gl.getUniformLocation(program, 'uWaveColor'),
-    uCrestColor: gl.getUniformLocation(program, 'uCrestColor'),
-    uMouse: gl.getUniformLocation(program, 'uMouse')
-  };
-
-  gl.useProgram(program);
-  gl.uniform1f(uniforms.uSpeed, 0.4);
-  gl.uniform1f(uniforms.uAmplitude, 3.6);
-  gl.uniform1f(uniforms.uWaveScale, 1.0);
-  gl.uniform1f(uniforms.uWaveRatio, 0.9);
-  gl.uniform1f(uniforms.uSwell, 35.0);
-  gl.uniform1f(uniforms.uTurbulence, 29.5);
-  gl.uniform1f(uniforms.uTilt, 1.01);
-  gl.uniform1f(uniforms.uZoom, 1.0);
-  gl.uniform1f(uniforms.uHeight, 5.5);
-  gl.uniform1f(uniforms.uFogDepth, 15.0);
-  gl.uniform1f(uniforms.uSteps, 70.0);
-  gl.uniform1f(uniforms.uBrightness, 1.0);
-  gl.uniform1f(uniforms.uOpacity, 1.0);
-  gl.uniform3f(uniforms.uHorizonColor, 0.3215, 0.1529, 1.0); // #5227FF
-  gl.uniform3f(uniforms.uWaveColor, 1.0, 0.6235, 0.9882);    // #FF9FFC
-  gl.uniform3f(uniforms.uCrestColor, 1.0, 1.0, 1.0);         // #FFFFFF
-  gl.uniform2f(uniforms.uMouse, 0.5, 0.5);
-
-  let currentMouse = { x: 0.5, y: 0.5 };
-  let targetMouse = { x: 0.5, y: 0.5 };
-
-  window.addEventListener('mousemove', (e) => {
-    targetMouse.x = e.clientX / window.innerWidth;
-    targetMouse.y = 1.0 - (e.clientY / window.innerHeight);
-  });
-
-  let startTime = performance.now();
-
-  function animate() {
-    requestAnimationFrame(animate);
-    syncSize();
-
-    currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
-    currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
-
-    gl.useProgram(program);
-    gl.uniform1f(uniforms.iTime, (performance.now() - startTime) * 0.001);
-    gl.uniform2f(uniforms.iResolution, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(uniforms.uMouse, currentMouse.x, currentMouse.y);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
-
-  requestAnimationFrame(animate);
-}
-
-
-
-/**
  * Lazy-load below-the-fold background videos.
  * These carry `data-lazy-src` (on the <video> or a child <source>) instead of `src`,
  * so the browser never fetches them until they actually scroll into view — and we
@@ -894,62 +361,6 @@ function initScrollAnimations() {
 }
 
 /**
- * Diagnostic Assessment Modal logic
- */
-function initDiagnosticModal() {
-  const modalBackdrop = document.getElementById('diagnostic-modal');
-  const openBtns = document.querySelectorAll('.trigger-diagnostic-modal');
-  const closeBtn = document.getElementById('close-modal-btn');
-  const form = document.getElementById('diagnostic-form');
-  const successState = document.getElementById('modal-success-state');
-
-  if (!modalBackdrop) return;
-
-  openBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      modalBackdrop.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  function closeModal() {
-    modalBackdrop.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeModal);
-  }
-
-  modalBackdrop.addEventListener('click', (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      form.style.display = 'none';
-      if (successState) successState.style.display = 'block';
-      setTimeout(() => {
-        closeModal();
-        setTimeout(() => {
-          form.reset();
-          form.style.display = 'block';
-          if (successState) successState.style.display = 'none';
-        }, 400);
-      }, 2800);
-    });
-  }
-}
-
-/**
  * Evidence Tabs Switcher
  */
 function initEvidenceTabs() {
@@ -981,134 +392,6 @@ function initEvidenceTabs() {
       });
     });
   });
-}
-
-/**
- * Mobile Menu Toggle
- */
-function initMobileMenu() {
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const mobileNav = document.getElementById('mobile-nav');
-
-  if (!menuBtn || !mobileNav) return;
-
-  menuBtn.addEventListener('click', () => {
-    mobileNav.classList.toggle('hidden');
-  });
-
-  mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileNav.classList.add('hidden');
-    });
-  });
-}
-
-/**
- * High-Resolution Section 3 Live Mobile Screen CanvasTexture Generator (1024x2048)
- */
-function createSection3ScreenTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 2048;
-  const ctx = canvas.getContext('2d');
-
-  // Dark cybernetic brutalist background
-  ctx.fillStyle = '#08080a';
-  ctx.fillRect(0, 0, 1024, 2048);
-
-  // Neon gradient ambient header glow
-  const grad = ctx.createRadialGradient(512, 450, 40, 512, 450, 600);
-  grad.addColorStop(0, 'rgba(195, 244, 0, 0.28)');
-  grad.addColorStop(0.5, 'rgba(157, 78, 221, 0.16)');
-  grad.addColorStop(1, 'rgba(8, 8, 10, 0)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 1024, 1100);
-
-  // Status Bar
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 34px "JetBrains Mono", monospace';
-  ctx.fillText('09:41', 70, 95);
-  ctx.textAlign = 'right';
-  ctx.fillText('VECTOR 5G  100%', 954, 95);
-  ctx.textAlign = 'left';
-
-  // Top Section Badge
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.fillRect(70, 150, 884, 90);
-  ctx.strokeStyle = '#c3f400';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(70, 150, 884, 90);
-
-  ctx.fillStyle = '#c3f400';
-  ctx.font = 'bold 36px "JetBrains Mono", monospace';
-  ctx.fillText('SYS_V3.0 // 02 ECOSISTEMA NÚCLEO', 100, 208);
-
-  // Main Screen Title
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 64px "Montserrat", sans-serif';
-  ctx.fillText('ARQUITECTURA DE', 70, 340);
-  ctx.fillStyle = '#c3f400';
-  ctx.fillText('CONVERSIÓN TOTAL', 70, 420);
-
-  // Metric Card 1: Pipeline Conversion
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-  ctx.fillRect(70, 500, 884, 370);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(70, 500, 884, 370);
-
-  ctx.fillStyle = '#9d4edd';
-  ctx.font = 'bold 28px "JetBrains Mono", monospace';
-  ctx.fillText('FLUIDEZ ESTRUCTURAL // ACTIVO', 100, 560);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 88px "Montserrat", sans-serif';
-  ctx.fillText('+340%', 100, 670);
-  ctx.font = '28px "Inter", sans-serif';
-  ctx.fillStyle = '#c4c9ac';
-  ctx.fillText('Aceleración de conversión validada', 100, 740);
-
-  // Metric Card 2: Neural Response Matrix
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-  ctx.fillRect(70, 910, 884, 370);
-  ctx.strokeStyle = 'rgba(195, 244, 0, 0.4)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(70, 910, 884, 370);
-
-  ctx.fillStyle = '#c3f400';
-  ctx.font = 'bold 28px "JetBrains Mono", monospace';
-  ctx.fillText('LATENCIA EN RESPUESTA // CERO', 100, 970);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 88px "Montserrat", sans-serif';
-  ctx.fillText('0.02s', 100, 1080);
-  ctx.font = '28px "Inter", sans-serif';
-  ctx.fillStyle = '#c4c9ac';
-  ctx.fillText('Sincronización WhatsApp + CRM en tiempo real', 100, 1150);
-
-  // Cybernetic Waveform Graph
-  ctx.strokeStyle = '#c3f400';
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  for (let x = 70; x <= 954; x += 10) {
-    const y = 1450 + Math.sin(x * 0.02) * 50 + Math.cos(x * 0.05) * 25;
-    if (x === 70) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  // Bottom Action Button
-  ctx.fillStyle = '#c3f400';
-  ctx.fillRect(70, 1650, 884, 140);
-  ctx.fillStyle = '#08080a';
-  ctx.font = 'bold 44px "Montserrat", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('EXPLORAR ECOSISTEMA →', 512, 1738);
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  return tex;
 }
 
 /**
@@ -1227,110 +510,8 @@ function initHero3DModel() {
 
   // Smartphone screen state (declared at function scope so the render loop can read them)
   let phoneScreenMesh = null;
-  let defaultScreenMap = null;
   let section3ScreenTexture = null;
 
-  // ==================== 3D TOPOGRAPHICAL TERRAIN (HARDWARE ACCELERATED 60-120 FPS) ====================
-  const topoGeo = new THREE.PlaneGeometry(80, 80, 110, 110);
-
-  const topoVertexShader = `
-    uniform float u_time;
-    varying float vElevation;
-    varying vec2 vUv;
-
-    vec2 hash2(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(dot(hash2(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
-            dot(hash2(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
-        mix(dot(hash2(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
-            dot(hash2(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
-        u.y
-      );
-    }
-
-    float fbm(vec2 p) {
-      float total = 0.0;
-      mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
-      total += 0.55 * noise(p);
-      p = m * p + vec2(12.5, 3.7);
-      total += 0.28 * noise(p);
-      p = m * p + vec2(8.3, 1.9);
-      total += 0.14 * noise(p);
-      return total;
-    }
-
-    void main() {
-      vUv = uv;
-      vec3 pos = position;
-
-      // Dynamic forward flight travel along Y:
-      vec2 sampleCoord = uv * 5.5 + vec2(0.0, u_time * 0.35);
-      float h = fbm(sampleCoord) * 3.2;
-      h = pow(max(0.0, h + 0.5), 1.35) * 2.4;
-      
-      pos.z += h;
-      vElevation = h;
-
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-    }
-  `;
-
-  const topoFragmentShader = `
-    uniform float u_opacity;
-    varying float vElevation;
-    varying vec2 vUv;
-
-    void main() {
-      // Contour Isolines matching reference image
-      float contourFreq = 5.0;
-      float elev = vElevation * contourFreq;
-      float c = fract(elev);
-      float lineDist = min(c, 1.0 - c);
-      float fw = fwidth(elev) * 1.2 + 0.035;
-      float isLine = smoothstep(fw, 0.0, lineDist);
-
-      float majorElev = elev / 5.0;
-      float majorC = fract(majorElev);
-      float majorDist = min(majorC, 1.0 - majorC);
-      float majorFw = fwidth(majorElev) * 1.5 + 0.025;
-      float isMajorLine = smoothstep(majorFw, 0.0, majorDist);
-
-      // Bright Bone / Ivory Plaster surface (#EAE6DE)
-      vec3 baseTone = vec3(0.92, 0.90, 0.87);
-      vec3 shadowTone = vec3(0.68, 0.66, 0.63);
-      vec3 contourColor = vec3(0.12, 0.12, 0.14);
-
-      vec3 terrainColor = mix(shadowTone, baseTone, clamp(vElevation * 0.35 + 0.25, 0.0, 1.0));
-      vec3 finalTerrain = mix(terrainColor, contourColor, isLine * 0.75 + isMajorLine * 0.25);
-
-      // Edge fade
-      float edgeFade = smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.82, vUv.y) * smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x);
-
-      gl_FragColor = vec4(finalTerrain, edgeFade * u_opacity);
-    }
-  `;
-
-  const topoMaterial = new THREE.ShaderMaterial({
-    vertexShader: topoVertexShader,
-    fragmentShader: topoFragmentShader,
-    uniforms: {
-      u_time: { value: 0 },
-      u_opacity: { value: 0.72 }
-    },
-    transparent: true,
-    depthWrite: false
-  });
-
-  const topoMesh = new THREE.Mesh(topoGeo, topoMaterial);
-  topoMesh.visible = false;
 
   let targetRotY = 0;
   let targetRotX = 0;
@@ -1409,7 +590,7 @@ function initHero3DModel() {
 
     if (typeof THREE.DRACOLoader !== 'undefined') {
       const dracoLoader = new THREE.DRACOLoader();
-      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+      dracoLoader.setDecoderPath('vendor/draco/');
       loader.setDRACOLoader(dracoLoader);
     }
 
@@ -1524,15 +705,18 @@ function initHero3DModel() {
         syncSize();
         isHero3DModelLoaded = true;
         triggerHero3DReveal();
+        window.__viLoad.model = 1;
+        // Espera un cuadro para que el primer render del lobo ya este pintado
+        requestAnimationFrame(() => requestAnimationFrame(() => { window.__viLoad.modelDone = true; }));
       },
       (xhr) => {
         if (xhr.total > 0) {
-          const porcentaje = (xhr.loaded / xhr.total) * 100;
-          console.log(`Progreso de descarga del modelo 3D: ${porcentaje.toFixed(2)}%`);
+          window.__viLoad.model = Math.min(0.95, xhr.loaded / xhr.total);
         }
       },
       (err) => {
         console.error("Error cargando poligonal-30-08-26.glb:", err);
+        window.__viLoad.modelDone = true;
       }
     );
 
@@ -1975,7 +1159,6 @@ function initHero3DModel() {
   }
 
   // ==================== BIDIRECTIONAL SCROLL CONTROLLER FOR SCROLL-EXPAND (03 EJECUCIÓN) ====================
-  const scrollExpandWrapperElem = document.getElementById('sec-scroll-expand-wrapper');
   const secEjecucionScrollContainer = document.getElementById('sec-ejecucion-scroll-container');
   let isSec3BodyRevealed = false;
 
@@ -2040,7 +1223,14 @@ function initHero3DModel() {
   let _scrubStarted = false;
   const _SCRUB_EVENTS = ['scroll', 'touchstart', 'wheel', 'keydown', 'pointerdown'];
   function _loadScrubVideo(vid, delay) {
-    setTimeout(() => { try { vid.preload = 'auto'; vid.load(); } catch (e) {} }, delay || 0);
+    setTimeout(() => {
+      try {
+        // Responsive: version 480p del video (la mitad de peso). Se decide justo antes de descargar.
+        const ms = vid.dataset && vid.dataset.mobileSrc;
+        if (ms && window.matchMedia('(max-width:1023px)').matches) vid.src = ms;
+        vid.preload = 'auto'; vid.load();
+      } catch (e) {}
+    }, delay || 0);
   }
   function _startScrubLoads() {
     if (_scrubStarted) return;
@@ -2140,7 +1330,6 @@ function initHero3DModel() {
     });
   }
 
-  let _vidTargetTime = 0;  // Target time calculated from scroll position
 
   // Video scrubbing state & queue for Section 03 Evidencia (Glowing_particles_floating_in_space_720.mp4)
   const sec3Vid = document.getElementById('scroll-expand-video');
@@ -2226,6 +1415,7 @@ function initHero3DModel() {
   }
 
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
+  let heroRenderTick = false;
   function animate() {
     requestAnimationFrame(animate);
 
@@ -3307,7 +2497,10 @@ function initHero3DModel() {
 
     // GPU Optimization: Only render 3D WebGL scene when either 3D Wolf Head or Smartphone are active & in view
     const is3DActive = (modelGroup && modelGroup.visible) || (smartphoneGroup && smartphoneGroup.visible);
+    // En responsive el dibujado WebGL se hace cada 2 cuadros (~30 fps): es lo mas pesado y no se nota.
+    heroRenderTick = !heroRenderTick;
     if (is3DActive) {
+      if (IS_MOBILE_HERO && !heroRenderTick) return;
       try {
         renderer.render(scene, camera);
       } catch (err) {
@@ -4829,62 +4022,6 @@ function scrollToSectionEjecucion(e) {
 }
 window.scrollToSectionEjecucion = scrollToSectionEjecucion;
 
-// ==================== INITIALIZE HERO RIPPLE DISTORTION (REACT BITS) ====================
-function initHeroRippleDistortion() {
-  const container = document.getElementById('hero-ripple-distortion');
-  if (!container || typeof window.RippleDistortion === 'undefined') return;
-
-  window.heroRippleInstance = new window.RippleDistortion(container, {
-    src: null,
-    brushSize: 70,
-    strength: 0.2,
-    swirl: 1,
-    rings: 4,
-    spread: 2,
-    fade: 3,
-    spacing: 15,
-    dispersion: 0,
-    glint: 0,
-    tint: '#a855f7',
-    tintAmount: 0.1,
-    grayscale: true,
-    highlightColor: '#ffffff',
-    trigger: 'hover',
-    clickStrength: 2,
-    quality: 'low',
-    enabled: true
-  });
-}
-window.initHeroRippleDistortion = initHeroRippleDistortion;
-
-// ==================== INITIALIZE SECTION 3 TOPOGRAPHY (REACT BITS) ====================
-function initSec3Topography() {
-  const container = document.getElementById('sec3-topography-bg');
-  if (!container || typeof window.Topography === 'undefined') return;
-
-  window.sec3TopographyInstance = new window.Topography(container, {
-    lowColor: '#5227FF',
-    midColor: '#FF9FFC',
-    highColor: '#FFFFFF',
-    speed: 0.2,
-    morphAmount: 2.4,
-    morphSpeed: 0.04,
-    bands: 7,
-    thickness: 0.22,
-    scale: 2,
-    pixelSize: 1,
-    glow: 0.5,
-    colorMode: 'elevation',
-    contrast: 3,
-    brightness: 1,
-    fillBands: false,
-    opacity: 1,
-    grain: true,
-    grainIntensity: 0.05
-  });
-}
-window.initSec3Topography = initSec3Topography;
-
 // ==================== MATRIZ MODAL (25 BLOQUES) LOGIC CON FOTOS Y DEGRADADO ARMÓNICO ====================
 const matrizData = [
   // ==================== 01 SYBORX ====================
@@ -5063,8 +4200,6 @@ function scrollToGaleriaFlotante() {
   }
 }
 window.scrollToGaleriaFlotante = scrollToGaleriaFlotante;
-window.scrollToEjecucionMatriz = scrollToGaleriaFlotante;
-window.triggerLaserEvidenciaTransition = scrollToGaleriaFlotante;
 
 // ==================== JUMP TO 05 // METODOLOGÍA ====================
 // The 05 curtain is a sticky element inside the internal scroll of
@@ -5202,7 +4337,6 @@ function scrollToMetodologia(e) {
   return false;
 }
 window.scrollToMetodologia = scrollToMetodologia;
-window.triggerLaserMetodologiaTransition = scrollToMetodologia;
 
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología)
 // Synchronize Bottom Dock & Sticky Curtain Reveal (Gallery -> 05 Metodología) + Isotipo 3D Zoom
