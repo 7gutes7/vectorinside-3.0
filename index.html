@@ -157,14 +157,18 @@
   <!-- Google Fonts & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap"
-    rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-    rel="stylesheet" />
+  <!-- Fuentes sin bloquear el primer pintado (se aplican al terminar de descargar).
+       Material Symbols: solo los 7 iconos que usa el sitio (icon_names, en orden alfabetico).
+       Si agregas un icono nuevo, sumalo a icon_names o no se vera. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=arrow_forward,bolt,chat,check_circle,close,mail,send&display=block" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=arrow_forward,bolt,chat,check_circle,close,mail,send&display=block">
+  </noscript>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.364" />
+  <link rel="stylesheet" href="style.css?v=3.0.365" />
   <!-- AccordionGallery React Bits CSS -->
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
@@ -703,7 +707,7 @@
       <!-- ==================== LAYER 38: SECTION 3 BACKGROUND (FONDO ECOSISTEMA) ==================== -->
       <div id="sec3-bg-wrapper"
         class="absolute inset-0 w-full h-full pointer-events-none z-[38] overflow-hidden opacity-0 transition-none will-change-[filter,opacity]">
-        <img src="fondo%20ecosistema.webp?v=3.0.341" alt="Fondo Ecosistema" width="2752" height="1536" loading="lazy" decoding="async"
+        <img src="fondo%20ecosistema.webp?v=3.0.341" srcset="fondo%20ecosistema-1600.webp 1600w, fondo%20ecosistema.webp?v=3.0.341 2752w" sizes="(max-width: 1023px) 100vh, 100vw" alt="Fondo Ecosistema" width="2752" height="1536" loading="lazy" decoding="async"
           class="w-full h-full object-cover object-center select-none" />
         <!-- Dark gradient overlay for contrast with text and cards -->
         <div class="absolute inset-0 bg-black/45 pointer-events-none"></div>
@@ -714,14 +718,14 @@
         <!-- Left Flank: poligonal02.png (Entra de izquierda a derecha, 50% visible) -->
         <div id="sec3-flank-left"
           class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
-          <img src="poligonal02.webp?v=3.0.360" alt="Poligonal 02" width="900" height="1184" loading="lazy" decoding="async"
+          <img src="poligonal02.webp?v=3.0.360" srcset="poligonal02-360.webp 360w, poligonal02.webp?v=3.0.360 900w" sizes="(max-width: 1023px) 34vw, 460px" alt="Poligonal 02" width="900" height="1184" loading="lazy" decoding="async"
             class="w-full h-auto object-contain select-none" />
         </div>
 
         <!-- Right Flank: liquid01.png (Entra de derecha a izquierda, 50% visible) -->
         <div id="sec3-flank-right"
           class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-[34vw] max-w-[460px] pointer-events-none opacity-0 will-change-transform">
-          <img src="liquid01.webp?v=3.0.360" alt="Liquid 01" width="900" height="1225" loading="lazy" decoding="async"
+          <img src="liquid01.webp?v=3.0.360" srcset="liquid01-360.webp 360w, liquid01.webp?v=3.0.360 900w" sizes="(max-width: 1023px) 34vw, 460px" alt="Liquid 01" width="900" height="1225" loading="lazy" decoding="async"
             class="w-full h-auto object-contain select-none" />
         </div>
       </div>
@@ -997,40 +1001,34 @@
 
               <!-- Layer 2 (Front / Revealing Curtain): 04 // METODOLOGÍA (White Liquid Glass Curtain) -->
               <div id="sec-metodologia-wrapper"
-                class="sticky top-0 z-20 w-full h-screen bg-white border-t border-black/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-hidden pointer-events-none will-change-transform flex flex-col justify-center"
-                style="transform: translate3d(0, 100%, 0); will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;">
+                class="sticky top-0 z-20 w-full h-screen border-t border-white/10 shadow-[0_-30px_100px_rgba(0,0,0,0.15)] overflow-hidden pointer-events-none will-change-transform flex flex-col justify-center"
+                style="background-color: #120f17; transform: translate3d(0, 100%, 0); will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;">
 
-                <!-- Background Abstract Liquid Flow Motion Video -->
+                <!-- Fondo animado Micro Slats (MicroSlats.js, WebGL2): reemplaza al video Abstract_liquid_flow -->
                 <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden" style="transform: translateZ(0);">
-                  <video id="ejecucion-liquid-flow-video" src="Abstract_liquid_flow_motion_480.mp4" autoplay loop muted
-                    playsinline preload="auto" class="w-full h-full object-cover opacity-90 will-change-transform transform-gpu pointer-events-none">
-                  </video>
-                  <!-- White Liquid Frosted Glass Overlay (Optimized without compositor thrashing) -->
-                  <div
-                    class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/45 to-white/65 pointer-events-none">
-                  </div>
+                  <div id="metodologia-slats" class="w-full h-full" style="background-color: #120f17;" aria-hidden="true"></div>
                 </div>
 
                 <!-- Main Stage 05 // Metodología -->
                 <div id="sec-metodologia-stage"
                   class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 pt-24 pb-6 sm:pt-28 sm:pb-8 flex flex-col justify-center transition-all duration-300">
                   <!-- Section Header -->
-                  <div class="flex flex-wrap items-end justify-between gap-4 border-b border-black/15 pb-4 mb-6">
+                  <div class="flex flex-wrap items-end justify-between gap-4 border-b border-white/15 pb-4 mb-6">
                     <div class="max-w-2xl">
                       <div class="flex items-center gap-3 mb-1.5">
                         <span
                           class="font-display text-xs font-black text-vector-lime bg-[#0b0b0d] px-3 py-1 uppercase tracking-[0.20em] shadow-sm">
                           04 // METODOLOGÍA
                         </span>
-                        <span class="text-neutral-700 font-display text-xs font-black uppercase tracking-[0.20em]">// EL
+                        <span class="text-neutral-300 font-display text-xs font-black uppercase tracking-[0.20em]">// EL
                           PIPELINE VECTOR // 4
                           FASES</span>
                       </div>
                       <h2
-                        class="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-[#0b0b0d] mb-2">
+                        class="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-white mb-2">
                         RUTA DE IMPLEMENTACIÓN
                       </h2>
-                      <p class="font-mono text-xs text-neutral-700 max-w-xl font-medium">
+                      <p class="font-mono text-xs text-neutral-300 max-w-xl font-medium">
 
                       </p>
                     </div>
@@ -1165,6 +1163,8 @@
                   <!-- Background Image (Vector Monolith in Desert) -->
                   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
                     <img src="Translating_prompt_into_English_2K_20260921035114.webp"
+                      srcset="Translating_prompt_into_English_2K_20260921035114-1600.webp 1600w, Translating_prompt_into_English_2K_20260921035114.webp 2752w"
+                      sizes="(max-width: 1023px) 100vh, 100vw"
                       alt="Vector Monolith Desert Background" width="2752" height="1536" loading="lazy" decoding="async" class="w-full h-full object-cover object-center" />
                     <!-- Subtle bottom gradient at 30% only -->
                     <div
@@ -1615,7 +1615,8 @@
     </div>
   </div>
 
-  <script defer src="script.js?v=3.0.364"></script>
+  <script defer src="MicroSlats.js?v=1"></script>
+  <script defer src="script.js?v=3.0.365"></script>
 </body>
 
 </html>
