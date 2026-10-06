@@ -152,7 +152,26 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
   <!-- Tailwind static build (compilado con build-tailwind.sh) -->
-  <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
+  <!-- CSS critico de la intro (se pinta de inmediato). Las hojas grandes se cargan justo despues del
+       div#intro-screen (en el body): bloquean lo que viene despues pero NO el primer pintado de la intro. -->
+  <style>
+    html{background:#080808}
+    body{margin:0;background:#080808;color:#fff}
+    #intro-screen{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center}
+    #intro-video{width:100%;height:100%;max-width:90vw;max-height:85vh;object-fit:contain;object-position:center;margin:0 auto;border-radius:.75rem}
+    #intro-loader{position:absolute;top:2rem;left:2rem;z-index:10;display:flex;align-items:center;gap:.75rem;padding:.625rem 1.25rem;border-radius:9999px;border:1px solid rgba(195,244,0,.3);background:rgba(255,255,255,.04)}
+    #intro-loader span.font-mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.75rem;line-height:1rem;color:#c3f400;letter-spacing:.1em;text-transform:uppercase}
+    #intro-loader .pulse-dot{width:8px;height:8px;background:#c3f400;border-radius:50%;display:inline-block;box-shadow:0 0 10px #c3f400}
+    #intro-screen>div.absolute.bottom-8{position:absolute;bottom:2rem;right:2rem;z-index:10;display:flex;align-items:center;gap:1rem}
+    #skip-intro-btn{background:#c3f400;color:#080808;border:2px solid #c3f400;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.5rem;font:800 .75rem 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+    #intro-progress{position:absolute;left:50%;bottom:6.5rem;transform:translateX(-50%);width:min(70vw,360px);z-index:10;pointer-events:none;font-family:'JetBrains Mono',ui-monospace,monospace}
+    @media (min-width:640px){#intro-progress{bottom:3rem}}
+    #intro-progress .intro-progress-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:10px;letter-spacing:.18em;color:#c3f400}
+    #intro-progress .intro-progress-track{height:3px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+    #intro-progress #intro-progress-fill{height:100%;width:100%;background:#c3f400;box-shadow:0 0 10px #c3f400;transform:scaleX(0);transform-origin:left center}
+    /* Mientras la intro tapa la pagina, el contenido de abajo no se pinta (el usuario no lo ve de todos modos) */
+    html.vi-intro body>*:not(#intro-screen):not(script):not(link):not(style),html.vi-intro body>*:not(#intro-screen):not(script):not(link):not(style) *{visibility:hidden!important}
+  </style>
 
   <!-- Google Fonts & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,10 +186,6 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=arrow_forward,bolt,chat,check_circle,close,mail,send&display=block">
   </noscript>
 
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.366" />
-  <!-- AccordionGallery React Bits CSS -->
-  <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
 
   <!-- Three.js, loaders, GSAP & ScrollTrigger: autoalojados (carpeta vendor/), con defer y en este orden.
        Todos los scripts de la pagina usan defer para conservar el orden de ejecucion. -->
@@ -237,6 +252,28 @@
       </button>
     </div>
   </div>
+
+  <!-- Hojas de estilo del sitio: van aqui (despues de la intro) para que la intro pinte sin esperarlas.
+       Los scripts defer siguen esperando a que estas hojas carguen, asi que el orden de ejecucion no cambia. -->
+  <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
+  <link rel="stylesheet" href="style.css?v=3.0.366" />
+  <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
+  <script>
+    (function () {
+      var root = document.documentElement, intro = document.getElementById('intro-screen');
+      function release() { root.classList.remove('vi-intro'); if (mo) mo.disconnect(); }
+      function check() {
+        if (!intro || intro.style.display === 'none' || intro.style.opacity === '0' ||
+            (window.scrollY || 0) > 80) release();
+      }
+      var mo = null;
+      if (intro && (window.scrollY || 0) <= 80) {
+        root.classList.add('vi-intro');
+        if (window.MutationObserver) { mo = new MutationObserver(check); mo.observe(intro, { attributes: true, attributeFilter: ['style', 'class'] }); }
+        setTimeout(release, 13000); // seguro: nunca dejar la pagina oculta
+      }
+    })();
+  </script>
 
   <!-- Inline Instant Video Intro Controller (Zero-delay, No dependency on DOMContentLoaded) -->
   <script>
@@ -503,11 +540,11 @@
                   </text>
                   <!-- Fill layer for both words with inverted split clip -->
                   <text class="stroke-fill-path font-display font-black" font-size="95" font-weight="900"
-                    letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
+                    letter-spacing="-3.5" fill="none" clip-path="url(#stroke-text-clip)">
                     <tspan id="hero-word-impacto-fill" x="0" y="75" text-anchor="start">DISEÑO</tspan>
                   </text>
                   <text class="stroke-fill-path stroke-line-2 font-display font-black" font-size="95" font-weight="900"
-                    letter-spacing="-3.5" fill="#FFFFFF" clip-path="url(#stroke-text-clip)">
+                    letter-spacing="-3.5" fill="none" clip-path="url(#stroke-text-clip)">
                     <tspan x="530" y="155" text-anchor="end">DE MARCA</tspan>
                   </text>
                   <!-- Chromatic glitch clones for DISEÑO -->
