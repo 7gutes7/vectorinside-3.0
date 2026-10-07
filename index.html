@@ -1587,6 +1587,8 @@
 
   <!-- ==================== VENTANA EMERGENTE: FORMULARIO DE SOLICITUD (AUDITORÍA) ==================== -->
   <!-- Mismas preguntas que el chatbot; envía al mismo Google Apps Script con origen "formulario". -->
+  <!-- Se monta al abrirse por primera vez (openSolicitudModal): mientras tanto no ocupa nodos en la pagina -->
+  <template id="solicitud-modal-tpl">
   <div id="solicitud-modal" class="svm svm--form" role="dialog" aria-modal="true" aria-labelledby="sfm-title" aria-hidden="true">
     <div class="svm-backdrop" data-sfm-close></div>
     <div class="svm-panel" role="document">
@@ -1676,9 +1678,10 @@
       </footer>
     </div>
   </div>
+  </template>
 
   <script defer src="MicroSlats.js?v=1"></script>
-  <script defer src="script.js?v=3.0.368"></script>
+  <script defer src="script.js?v=3.0.369"></script>
 </body>
 
 </html>

@@ -5394,9 +5394,23 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
     return { score: total + ' / 120', level, answers };
   }
 
+  // El formulario vive en <template id="solicitud-modal-tpl"> y se monta la primera vez que se abre
+  // (asi no ocupa ~74 nodos invisibles en la pagina mientras nadie lo usa).
+  function ensureSolicitudModal() {
+    let modal = $('solicitud-modal');
+    if (modal) return modal;
+    const tpl = $('solicitud-modal-tpl');
+    if (!tpl || !tpl.content) return null;
+    document.body.appendChild(tpl.content.cloneNode(true));
+    modal = $('solicitud-modal');
+    init();
+    if (modal) void modal.offsetWidth; // estado inicial calculado: la animacion de apertura se ve igual
+    return modal;
+  }
+
   function openSolicitudModal(e, opts) {
     if (e && e.preventDefault) e.preventDefault();
-    const modal = $('solicitud-modal');
+    const modal = ensureSolicitudModal();
     if (!modal) return;
     if (typeof window.closeServiciosModal === 'function') window.closeServiciosModal();
     lastFocus = document.activeElement;
@@ -5458,10 +5472,12 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
   window.openSolicitudModal = openSolicitudModal;
   window.closeSolicitudModal = closeSolicitudModal;
 
+  let initDone = false;
   function init() {
     const modal = $('solicitud-modal');
     const form = $('solicitud-form');
-    if (!modal || !form) return;
+    if (!modal || !form || initDone) return;
+    initDone = true;
 
     modal.querySelectorAll('[data-sfm-close]').forEach((el) => el.addEventListener('click', closeSolicitudModal));
     ['wheel', 'touchmove'].forEach((evt) => modal.addEventListener(evt, (ev) => ev.stopPropagation(), { passive: true }));
