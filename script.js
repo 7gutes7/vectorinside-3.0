@@ -427,6 +427,41 @@ function initEvidenceTabs() {
   });
 }
 
+// Apaga el render de las capas fijas/absolutas/sticky que estan totalmente invisibles.
+// Solo actua sobre elementos position fixed/absolute/sticky (su tamaño no depende del contenido),
+// asi content-visibility no cambia ninguna medida ni el scroll.
+const VI_GATE_IDS = [
+  'hero-bg-video-wrapper',       // absolute inset-0: video de fondo del Hero; se oculta al salir del Hero (opacity 0 / visibility hidden)
+  'hero-ui-content',            // relative h-full dentro de sticky h-screen: textos principales del Hero; se ocultan al salir del Hero
+  'hero-curtain-right',         // absolute: flanco derecho con frase CTA del Hero; arranca en opacity-0 y se oculta con el scroll
+  'seccion-portal-revelada',    // absolute inset-0: contenedor de 01 // Identidad; se abre y cierra en el scroll (opacity 0 / 1)
+  'kinetic-text-bg',            // absolute inset-0: retícula 'Vector Inside /'; solo visible durante rotación del teléfono
+  'sec3-bg-wrapper',            // absolute inset-0: fondo de 02 // Plataforma; se oculta con blur y opacity 0
+  'sec3-flank-left',            // absolute: elemento decorativo izquierdo de 02 // Plataforma; se oculta fuera de su tramo
+  'sec3-flank-right',           // absolute: elemento decorativo derecho de 02 // Plataforma; se oculta fuera de su tramo
+  'seccion-3-ecosistema',       // absolute inset-0: tarjetas de arquitectura de conversión; solo visible en 0.77 - 0.865
+  'sec-scroll-expand-wrapper',  // absolute inset-0: marco de transición hacia 03 // Evidencia; opacity 0 fuera de su tramo
+  'scroll-expand-media-wrapper',// absolute inset-0: fondo de video/partículas de Evidencia; visibility hidden en galería
+  'sec-matriz-25-wrapper'       // sticky h-screen: contenedor de la galería flotante 25 tarjetas; invisible fuera de Evidencia
+];
+let __viGateEls = null;
+function viGateLayers() {
+  if (!__viGateEls) {
+    __viGateEls = VI_GATE_IDS.map(id => document.getElementById(id)).filter(el => {
+      if (!el) return false;
+      const pos = getComputedStyle(el).position;
+      return pos === 'fixed' || pos === 'absolute' || pos === 'sticky' || (pos === 'relative' && (el.classList.contains('h-full') || el.id === 'hero-ui-content'));
+    });
+  }
+  for (const el of __viGateEls) {
+    const st = el.style;
+    const off = st.opacity === '0' || st.visibility === 'hidden' || st.display === 'none' ||
+      (st.opacity === '' && el.classList.contains('opacity-0'));
+    if (off !== el.classList.contains('vi-off')) el.classList.toggle('vi-off', off);
+  }
+}
+window.viGateLayers = viGateLayers;
+
 /**
  * Interactive 3D Model Loader for poligonalFINAL.glb
  */
@@ -547,7 +582,7 @@ function initHero3DModel() {
   window.__syncLiteGlow = () => {
     if (!liteGlow) return;
     const op = canvas.style.opacity === '' ? (isHero3DModelLoaded ? '1' : '0') : canvas.style.opacity;
-    const vis = canvas.style.visibility === 'hidden' ? '0' : op;
+    const vis = (canvas.style.visibility === 'hidden' || window.__viNoLiteGlow) ? '0' : op;
     if (vis !== liteGlowOp) { liteGlowOp = vis; liteGlow.style.opacity = vis; }
     const clip = canvas.style.clipPath || '';
     if (clip !== liteGlowClip) { liteGlowClip = clip; liteGlow.style.clipPath = clip; }
@@ -1078,7 +1113,23 @@ function initHero3DModel() {
         });
         const logoMesh = new THREE.Mesh(logoGeo, logoMat);
         // Centrado exacto horizontal (X) y vertical (Y) anclado en la tapa trasera (-Z)
-        logoMesh.position.set(groupCenter.x, groupCenter.y, backZ - 0.003);
+        // La caja envolvente llega hasta lo mas saliente de la tapa (camara, relieves): el logo quedaba flotando.
+        // Se lanza un rayo desde atras sobre el centro del logo para hallar la superficie real de la carcasa.
+        let logoZ = backZ - 0.003;
+        try {
+          smartphoneGroup.updateMatrixWorld(true);
+          const rcOrigin = smartphoneGroup.localToWorld(new THREE.Vector3(groupCenter.x, groupCenter.y, backZ - 2));
+          const rcDir = smartphoneGroup.localToWorld(new THREE.Vector3(groupCenter.x, groupCenter.y, backZ - 1)).sub(rcOrigin).normalize();
+          const rc = new THREE.Raycaster(rcOrigin, rcDir);
+          const hits = rc.intersectObject(phone, true);
+          if (hits.length) {
+            const localHit = smartphoneGroup.worldToLocal(hits[0].point.clone());
+            const gap = localHit.z - backZ;
+            if (gap >= 0 && gap < 0.6) logoZ = localHit.z - 0.002;
+            console.log('Logo trasero: gap bbox/superficie =', gap.toFixed(4));
+          }
+        } catch (e) { console.warn('Logo trasero: raycast fallido', e); }
+        logoMesh.position.set(groupCenter.x, groupCenter.y, logoZ);
         logoMesh.rotation.set(0, Math.PI, 0);
         logoMesh.renderOrder = 2;
         smartphoneGroup.add(logoMesh);
@@ -1497,7 +1548,10 @@ function initHero3DModel() {
     sec3Vid.setAttribute('playsinline', '');
     sec3Vid.setAttribute('webkit-playsinline', '');
     try { sec3Vid.pause(); } catch (e) {}
-    lazyLoadScrubVideo(sec3Vid, 1500);
+    // Responsive + WebGPU: el fondo de Evidencia es AeroShards (animacion ligada al scroll) y NO se descarga el video.
+    // Sin WebGPU o si falla la animacion, se usa el video de siempre.
+    window.__viAero = { wanted: !!navigator.gpu && window.matchMedia('(max-width: 1023px)').matches, state: 'idle', inst: null };
+    if (!window.__viAero.wanted) lazyLoadScrubVideo(sec3Vid, 1500);
 
     sec3Vid.addEventListener('seeked', () => {
       _sec3VidSeeking = false;
@@ -1518,6 +1572,65 @@ function initHero3DModel() {
       }
     });
   }
+  // ==================== EVIDENCIA (responsive): AeroShards ligado al scroll ====================
+  const AERO_TRAVEL = 3.2; // recorrido de la corriente de fragmentos durante todo el tramo del video
+  function viAeroFallbackToVideo() {
+    const A = window.__viAero;
+    if (!A || A.state === 'failed') return;
+    A.state = 'failed';
+    try { if (A.inst) A.inst.dispose(); } catch (e) {}
+    A.inst = null;
+    const host = document.getElementById('aero-shards-bg');
+    if (host) host.remove();
+    if (sec3Vid) { sec3Vid.style.display = ''; lazyLoadScrubVideo(sec3Vid, 0); }
+  }
+  function viAeroEnsure() {
+    const A = window.__viAero;
+    if (!A || !A.wanted || A.state !== 'idle') return;
+    A.state = 'loading';
+    const mediaWrap = document.getElementById('scroll-expand-media-wrapper');
+    if (!mediaWrap) { viAeroFallbackToVideo(); return; }
+    const sc = document.createElement('script');
+    sc.src = 'AeroShards.bundle.js?v=1';
+    sc.async = true;
+    sc.onerror = viAeroFallbackToVideo;
+    sc.onload = () => {
+      try {
+        if (typeof window.__createAeroShards !== 'function') throw new Error('AeroShards no disponible');
+        const host = document.createElement('div');
+        host.id = 'aero-shards-bg';
+        host.setAttribute('aria-hidden', 'true');
+        // Tamano fijo de pantalla completa y centrado: el marco que se expande solo recorta, sin redimensionar el lienzo
+        host.style.cssText = 'position:absolute;left:50%;top:50%;width:100vw;height:100vh;transform:translate(-50%,-50%);pointer-events:none;z-index:0;background:#120F17;';
+        const cv = document.createElement('canvas');
+        cv.style.cssText = 'display:block;width:100%;height:100%;';
+        host.appendChild(cv);
+        mediaWrap.insertBefore(host, mediaWrap.firstChild);
+        A.inst = window.__createAeroShards(host, cv, {
+          backgroundColor: '#120F17', shardColor: '#896ABD', accentColor: '#A855F7',
+          placement: 'full', flow: 'stream', material: 'pearl', detail: 'balanced', effect: 'none',
+          scale: 1.05, spread: 0.7, depth: 1.25, speed: 0.55, spin: 0.65, interaction: 'repel',
+          density: 1.5, shardSize: 0.95, stretch: 1, turbulence: 1, glow: 1, edgeSoftness: 2, bloom: 0.5,
+          grain: 0.0525, chromaticAberration: 0.0075, transitionDuration: 1, interactionRadius: 1.1,
+          interactionStrength: 0.5, rippleIntensity: 1, holdToGather: true,
+          paused: true // el tiempo lo manda el scroll (setScroll), no el reloj
+        }, {
+          onReady: () => { if (A.state === 'loading') { A.state = 'on'; if (sec3Vid) sec3Vid.style.display = 'none'; } },
+          onError: (err) => { console.warn('AeroShards (WebGPU) fallo, se usa el video:', err && err.message ? err.message : err); viAeroFallbackToVideo(); }
+        });
+        A.dist = A.dist || 0;
+        A.inst.setScroll(A.dist);
+      } catch (e) { console.warn('AeroShards:', e); viAeroFallbackToVideo(); }
+    };
+    document.head.appendChild(sc);
+  }
+  function viAeroProgress(p) {
+    const A = window.__viAero;
+    if (!A) return;
+    A.dist = Math.max(0, Math.min(1, p)) * AERO_TRAVEL;
+    if (A.inst && A.state !== 'failed') A.inst.setScroll(A.dist);
+  }
+
   const targetEyePos = new THREE.Vector3(0.85, 0.40, 1.05); // Calibrated exact target for poligonal-30-08-26.glb
 
   // Bottom dock items helper
@@ -1678,6 +1791,7 @@ function initHero3DModel() {
       });
       modelGroup.visible = (headOpacity > 0.001 || eyeOpacity > 0.001);
       smartphoneGroup.visible = false;
+      window.__viNoLiteGlow = false;
 
       // Full Iconic Hero Lighting for Wolf Head (Vibrant Cyber-Lavender + Lime & Purple Specular Highlights)
       // NOTA: intensidades reducidas vs. el original — con metalness bajo (material tipo plástico)
@@ -2010,6 +2124,7 @@ function initHero3DModel() {
       }
       modelGroup.visible = false;
       smartphoneGroup.visible = true;
+      window.__viNoLiteGlow = true; // sin halo en la seccion del smartphone
 
       // Elevate 3D Canvas Layer: frente al fondo cinético (z-32) y capas de Ecosistema (z-38 a z-40)
       const hero3dContainer = document.getElementById('hero-3d-container');
@@ -2031,7 +2146,7 @@ function initHero3DModel() {
         hero3dCanvas.style.webkitClipPath = 'none';
         hero3dCanvas.style.opacity = pPhoneEntryEased.toFixed(3);
         // En celular sin blur animado (era otro filtro pesado sobre todo el lienzo)
-        const glowPart = HERO_GLOW === 'none' ? '' : HERO_GLOW;
+        const glowPart = ''; // sin halo morado en la seccion del smartphone
         hero3dCanvas.style.filter = (!COARSE_PTR && phoneBlur > 0.2)
           ? `blur(${phoneBlur}px) ${glowPart}`.trim()
           : (glowPart || 'none');
@@ -2131,7 +2246,7 @@ function initHero3DModel() {
       } else if (currentScrollLerp < T_SPIN_END) {
         // B.2 360° Horizontal Spin with Scroll (0.60 -> 0.80)
         if (portalDot) portalDot.style.opacity = '0';
-        if (hero3dCanvas) hero3dCanvas.style.filter = HERO_GLOW || 'none';
+        if (hero3dCanvas) hero3dCanvas.style.filter = 'none';
 
         camera.position.set(0, 0, 8.5);
         camera.lookAt(0, 0, 0);
@@ -2144,7 +2259,7 @@ function initHero3DModel() {
       } else {
         // B.3 Desplazamiento hacia arriba con scroll y desvanecimiento en blur del fondo (0.65 -> 0.70)
         if (portalDot) portalDot.style.opacity = '0';
-        if (hero3dCanvas) hero3dCanvas.style.filter = HERO_GLOW || 'none';
+        if (hero3dCanvas) hero3dCanvas.style.filter = 'none';
 
         const pUp = Math.min(1.0, (currentScrollLerp - T_SPIN_END) / 0.04);
         const pUpEased = Math.sin((pUp * Math.PI) / 2);
@@ -2297,7 +2412,7 @@ function initHero3DModel() {
         const pBlurOut = (currentScrollLerp - 0.865) / 0.02;
         const pBlurOutEased = Math.sin((pBlurOut * Math.PI) / 2);
         sec3Container.style.opacity = Math.max(0, 1.0 - pBlurOutEased).toFixed(3);
-        sec3Container.style.filter = `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
+        sec3Container.style.filter = COARSE_PTR ? 'none' : `blur(${(pBlurOutEased * 20).toFixed(1)}px)`;
         sec3Container.style.pointerEvents = pBlurOutEased > 0.4 ? 'none' : 'auto';
 
         if (sec3ScrollContainer && !isUserInteractingSec3) {
@@ -2308,7 +2423,7 @@ function initHero3DModel() {
         }
       } else if (currentScrollLerp >= 0.885) {
         sec3Container.style.opacity = '0';
-        sec3Container.style.filter = 'blur(20px)';
+        sec3Container.style.filter = COARSE_PTR ? 'none' : 'blur(20px)';
         sec3Container.style.pointerEvents = 'none';
       } else {
         sec3Container.style.opacity = '0';
@@ -2361,14 +2476,28 @@ function initHero3DModel() {
         try { expandVideo.pause(); } catch(e) {}
       }
 
-      const deltaVid3 = Math.abs(sec3VidTarget - expandVideo.currentTime);
-      if (deltaVid3 > 0.025) {
-        seekSec3Video(sec3VidTarget);
+      const aeroA = window.__viAero;
+      if (aeroA && aeroA.wanted && aeroA.state !== 'failed') {
+        // Responsive con WebGPU: la animacion AeroShards sustituye al video
+        if (currentScrollLerp > 0.80) viAeroEnsure();
+        viAeroProgress(vid3Dur > 0 ? sec3VidTarget / vid3Dur : 0);
+      } else {
+        const deltaVid3 = Math.abs(sec3VidTarget - expandVideo.currentTime);
+        if (deltaVid3 > 0.025) {
+          seekSec3Video(sec3VidTarget);
+        }
       }
 
+      // Celular: la entrada de Evidencia es una cortina (clip-path) en vez de blur (el blur de pantalla completa traba la GPU)
+      const setExpandCurtain = (hiddenPct) => {
+        const v = hiddenPct > 0 ? `inset(0% 0% ${hiddenPct.toFixed(2)}% 0%)` : 'none';
+        expandWrapper.style.clipPath = v;
+        expandWrapper.style.webkitClipPath = v;
+      };
       if (currentScrollLerp < 0.865) {
         expandWrapper.style.opacity = '0';
-        expandWrapper.style.filter = 'blur(20px)';
+        expandWrapper.style.filter = COARSE_PTR ? 'none' : 'blur(20px)';
+        if (COARSE_PTR) setExpandCurtain(100); else setExpandCurtain(0);
         expandWrapper.style.pointerEvents = 'none';
         expandFrame.style.width = '44vw';
         expandFrame.style.height = '58vh';
@@ -2388,8 +2517,15 @@ function initHero3DModel() {
         // Aparición con efecto blur después de la última tarjeta
         const pEntry = (currentScrollLerp - 0.865) / 0.02;
         const pEntryEased = Math.sin((pEntry * Math.PI) / 2);
-        expandWrapper.style.opacity = pEntryEased.toFixed(3);
-        expandWrapper.style.filter = `blur(${((1.0 - pEntryEased) * 20).toFixed(1)}px)`;
+        if (COARSE_PTR) {
+          expandWrapper.style.opacity = '1';
+          expandWrapper.style.filter = 'none';
+          setExpandCurtain((1.0 - pEntryEased) * 100);
+        } else {
+          expandWrapper.style.opacity = pEntryEased.toFixed(3);
+          expandWrapper.style.filter = `blur(${((1.0 - pEntryEased) * 20).toFixed(1)}px)`;
+          setExpandCurtain(0);
+        }
         expandWrapper.style.pointerEvents = 'none';
         expandFrame.style.width = '44vw';
         expandFrame.style.height = '58vh';
@@ -2409,6 +2545,7 @@ function initHero3DModel() {
         // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x)
         expandWrapper.style.opacity = '1';
         expandWrapper.style.filter = 'none';
+        setExpandCurtain(0);
 
         const pExp = Math.min(1.0, (currentScrollLerp - 0.885) / 0.055);
         const pExpEased = Math.sin((pExp * Math.PI) / 2);
@@ -2629,7 +2766,10 @@ function initHero3DModel() {
     if (is3DActive) {
       if (SOFTWARE_GL) {
         const scrollMoved = Math.abs(currentScrollLerp - swLastScroll) > 0.0001;
-        if (!scrollMoved && swFrames <= 0) return;
+        if (!scrollMoved && swFrames <= 0) {
+          viGateLayers();
+          return;
+        }
         swLastScroll = currentScrollLerp;
         if (swFrames > 0) swFrames--;
       }
@@ -2639,9 +2779,25 @@ function initHero3DModel() {
       } catch (err) {
         console.error('WebGL render error:', err);
       }
-    } else {
+      window.__viClearedIdle = false;
+    } else if (!window.__viClearedIdle) {
       renderer.clear();
+      window.__viClearedIdle = true;
     }
+
+    // Libera el contexto WebGPU de AeroShards al alejarse de Evidencia (se recrea al volver)
+    {
+      const aeroR = window.__viAero;
+      if (aeroR && aeroR.state === 'on' && aeroR.inst && currentScrollLerp < 0.70) {
+        try { aeroR.inst.dispose(); } catch (e) {}
+        aeroR.inst = null;
+        const hostR = document.getElementById('aero-shards-bg');
+        if (hostR) hostR.remove();
+        aeroR.state = 'idle';
+      }
+    }
+
+    viGateLayers();
   }
 
   requestAnimationFrame(animate);
@@ -2664,13 +2820,17 @@ function initHero3DModel() {
  * strokeColor="#A78BFA", fillColor="#F8FAFC", drawDuration=0.85s, fillDelay=0.1s, fillMode="wipe", ease="power2.out"
  */
 function alignHeroDigitalText() {
-  const strokePath = document.querySelector('.stroke-draw-path');
-  if (!strokePath) return;
-  const firstTspan = document.getElementById('hero-word-impacto-stroke');
-  const lastTspan = document.querySelector('.stroke-draw-path.stroke-line-2 tspan');
-  if (!firstTspan) return;
+  const heroUi = document.getElementById('hero-ui-content');
+  const wasOff = heroUi && heroUi.classList.contains('vi-off');
+  if (wasOff) heroUi.classList.remove('vi-off');
 
   try {
+    const strokePath = document.querySelector('.stroke-draw-path');
+    if (!strokePath) return;
+    const firstTspan = document.getElementById('hero-word-impacto-stroke');
+    const lastTspan = document.querySelector('.stroke-draw-path.stroke-line-2 tspan');
+    if (!firstTspan) return;
+
     const w1 = firstTspan.getComputedTextLength();
     const w2 = lastTspan ? lastTspan.getComputedTextLength() : 0;
     const maxW = Math.max(w1, w2, 450);
@@ -2683,7 +2843,10 @@ function alignHeroDigitalText() {
     if (svg) {
       svg.setAttribute('viewBox', `0 0 ${Math.ceil(maxW + 15)} 180`);
     }
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    if (wasOff && heroUi) heroUi.classList.add('vi-off');
+  }
 }
 
 /**
@@ -2806,11 +2969,14 @@ function stopImpactoGlitch() {
 function alignHeroRightText() {
   const rightEl = document.getElementById('hero-curtain-right');
   if (!rightEl) return;
-  const svg = rightEl.querySelector('svg');
-  const textEl = rightEl.querySelector('text');
-  if (!svg || !textEl) return;
+  const wasOff = rightEl.classList.contains('vi-off');
+  if (wasOff) rightEl.classList.remove('vi-off');
 
   try {
+    const svg = rightEl.querySelector('svg');
+    const textEl = rightEl.querySelector('text');
+    if (!svg || !textEl) return;
+
     const tspanLine1 = document.getElementById('hero-word-instinto');
     const tspanLine2 = document.getElementById('hero-word-dominar') || textEl.querySelectorAll('tspan')[1];
     const tspanLine3 = document.getElementById('hero-line-mercado') || textEl.querySelectorAll('tspan')[2];
@@ -2851,7 +3017,10 @@ function alignHeroRightText() {
       tspanLine3.setAttribute('x', `${anchorX}`);
       tspanLine3.setAttribute('text-anchor', 'end');
     }
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    if (wasOff && rightEl) rightEl.classList.add('vi-off');
+  }
 }
 
 if (document.fonts && document.fonts.ready) {
@@ -4953,6 +5122,7 @@ function initExecutionInternalScrollListener() {
         if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
         if (globalHeader) globalHeader.classList.remove('glass-nav-transparent-section05');
       }
+      viGateLayers();
     };
 
     let isTicking = false;
@@ -5564,3 +5734,26 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+// ==================== METODOLOGIA: centrar el contenido entre el header y el indice inferior ====================
+(function viSyncMetodologiaBand() {
+  function sync() {
+    const root = document.documentElement;
+    const hdr = document.getElementById('main-global-header');
+    const dock = document.getElementById('bottom-dock-nav');
+    const GAP = 10;
+    if (hdr) root.style.setProperty('--vi-band-top', (hdr.offsetHeight + GAP) + 'px');
+    if (dock) {
+      const bottom = parseFloat(getComputedStyle(dock).bottom) || 0;
+      root.style.setProperty('--vi-band-bottom', (bottom + dock.offsetHeight + GAP) + 'px');
+    }
+  }
+  let t = 0;
+  const later = () => { clearTimeout(t); t = setTimeout(sync, 120); };
+  window.addEventListener('resize', later, { passive: true });
+  window.addEventListener('orientationchange', later, { passive: true });
+  window.addEventListener('load', sync);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+  if (document.readyState !== 'loading') sync(); else document.addEventListener('DOMContentLoaded', sync);
+})();
+

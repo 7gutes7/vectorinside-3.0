@@ -24,6 +24,12 @@
     introDuration: 1.5
   };
 
+  // Isotipo de Vector Inside (la V) como forma de cada celda; viewBox 345.68 x 494.65
+  const LOGO_PATH = "M288.16,247.33L345.68,0h-104.05l-44.02,191.85h18.56v21.49h-18.88v68.37h-12.98v68.09h-30.91v-46.52h-11.15v-89.94h-38.01v-21.49h43.83L104.05,0H0l102.41,440.35h36.89v21.49h-31.89l7.63,32.82h125.76v-85.31h40.18v-48.98h-22.25v-21.49h29.43v-91.55M169.02,191.85h-26.78v21.49h26.78v-21.49Z";
+  const LOGO_VB = [345.68, 494.65];
+  const LOGO_TEX = [256, 368, 8]; // ancho, alto y margen transparente (px) de la textura
+  const LOGO_ALTERNATE = true;    // celdas vecinas alternan: normal / girado 180 grados
+
   const FLUID_SIZE = 96;
   const PRESSURE_STEPS = 16;
   const SPLAT_FORCE = 6900;
@@ -161,13 +167,10 @@ void main() {
 
   const slatFragment = `#version 300 es
 precision highp float;
-uniform sampler2D tField; uniform vec2 uSize; uniform float uDpr; uniform vec4 uGrid; uniform vec2 uOrigin;
-uniform vec2 uSlat; uniform float uRound; uniform vec3 uColor; uniform vec3 uGlintColor; uniform vec4 uBackground;
+uniform sampler2D tField; uniform sampler2D tLogo; uniform vec2 uSize; uniform float uDpr; uniform vec4 uGrid; uniform vec2 uOrigin;
+uniform vec2 uSlat; uniform vec3 uColor; uniform vec3 uGlintColor; uniform vec4 uBackground;
+uniform float uLogoAspect; uniform vec2 uLogoPad; uniform float uLogoTex; uniform float uAlternate;
 out vec4 fragColor;
-float pill(vec2 p, vec2 b, float r) {
-  vec2 q = abs(p) - b + r;
-  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
-}
 void main() {
   vec2 p = vec2(gl_FragCoord.x, uSize.y * uDpr - gl_FragCoord.y) / uDpr;
   vec2 local = p - uOrigin;
@@ -177,9 +180,15 @@ void main() {
   if (cell.x >= 0.0 && cell.y >= 0.0 && cell.x < uGrid.x && cell.y < uGrid.y) {
     vec4 field = texelFetch(tField, ivec2(int(cell.x), int(uGrid.y - 1.0 - cell.y)), 0);
     vec2 offset = local - cell * uGrid.zw - uSlat * 0.5;
-    vec2 halfSize = vec2(uSlat.x * 0.5, uSlat.y * 0.5 * field.g);
-    float radius = uRound * min(halfSize.x, halfSize.y);
-    float alpha = clamp(0.5 - pill(offset, halfSize, radius) * uDpr, 0.0, 1.0) * field.r;
+    // El isotipo cabe en el rectangulo de la celda (mismo ancho x alto que antes) y respira con la ola (field.g)
+    float logoH = min(uSlat.y * field.g, uSlat.x / uLogoAspect);
+    vec2 logoSize = vec2(logoH * uLogoAspect, logoH);
+    vec2 uv = offset / (logoSize * uLogoPad) + 0.5;
+    if (uAlternate > 0.5 && mod(cell.x + cell.y, 2.0) > 0.5) uv = 1.0 - uv; // giro de 180 grados
+    float lod = max(0.0, log2(uLogoTex / max(logoSize.x * uLogoPad.x * uDpr, 1.0)));
+    // Fuera de la textura = transparente (sin esto el borde estirado dejaba franjas grises)
+    float inside = step(0.0, min(uv.x, uv.y)) * step(max(uv.x, uv.y), 1.0);
+    float alpha = textureLod(tLogo, uv, max(lod - 0.5, 0.0)).a * field.r * inside;
     slat = vec4(mix(uColor, uGlintColor, field.b) * alpha, alpha);
   }
   fragColor = slat + background * (1.0 - slat.a);
@@ -294,6 +303,31 @@ void main() {
     const blank = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, blank);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+
+    // --- textura del isotipo (alfa), con mipmaps para que se vea nitido a 10 px
+    const logoTex = gl.createTexture();
+    let logoAspect = LOGO_VB[0] / LOGO_VB[1], logoPad = [1, 1];
+    {
+      const [tw, th, mg] = LOGO_TEX;
+      const lc = document.createElement('canvas');
+      lc.width = tw; lc.height = th;
+      const lx = lc.getContext('2d');
+      const sc = Math.min((tw - 2 * mg) / LOGO_VB[0], (th - 2 * mg) / LOGO_VB[1]);
+      const dw = LOGO_VB[0] * sc, dh = LOGO_VB[1] * sc;
+      lx.translate((tw - dw) / 2, (th - dh) / 2);
+      lx.scale(sc, sc);
+      lx.fillStyle = '#fff';
+      lx.fill(new Path2D(LOGO_PATH), 'evenodd');
+      logoAspect = dw / dh;
+      logoPad = [tw / dw, th / dh];
+      gl.bindTexture(gl.TEXTURE_2D, logoTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, lc);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
 
     const fieldProg = program(passVertex, fieldFragment);
     const slatProg = program(passVertex, slatFragment);
@@ -432,9 +466,10 @@ void main() {
         uFluidTexel: fluidTexel, uInk: s.cursorStrength, uLean: s.lean
       }, true);
       draw(slatProg, null, {
-        tField: fieldTarget.tex, uSize: [width, height], uDpr: dpr, uGrid: L.grid, uOrigin: L.origin,
-        uSlat: [s.slatWidth, s.slatHeight], uRound: s.roundness, uColor: s.color, uGlintColor: s.glintColor,
-        uBackground: bg
+        tField: fieldTarget.tex, tLogo: logoTex, uSize: [width, height], uDpr: dpr, uGrid: L.grid, uOrigin: L.origin,
+        uSlat: [s.slatWidth, s.slatHeight], uColor: s.color, uGlintColor: s.glintColor,
+        uBackground: bg, uLogoAspect: logoAspect, uLogoPad: logoPad, uLogoTex: LOGO_TEX[0],
+        uAlternate: LOGO_ALTERNATE ? 1 : 0
       }, true);
 
       if (!STATIC || fluidActive || fluidDirty) raf = requestAnimationFrame(frame);
@@ -479,7 +514,8 @@ void main() {
     }
 
     document.addEventListener('visibilitychange', () => { if (!document.hidden) start(); });
-    new ResizeObserver(resize).observe(container);
+    const ro = new ResizeObserver(resize);
+    ro.observe(container);
     resize();
 
     return {
@@ -487,6 +523,14 @@ void main() {
         if (v === visible) return;
         visible = v;
         if (v) start();
+      },
+      // Libera el contexto WebGL (la GPU del movil solo mantiene un contexto pesado a la vez)
+      release() {
+        visible = false;
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        ro.disconnect();
+        try { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) {}
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
       }
     };
   }
@@ -495,11 +539,17 @@ void main() {
   window.initMicroSlats = function (container) {
     if (!container || container.__microSlats) return;
     container.__microSlats = true;
-    let inst = null;
+    let inst = null, relT = 0;
+    const COARSE = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     const io = new IntersectionObserver(entries => {
       const on = entries.some(en => en.isIntersecting);
+      clearTimeout(relT);
       if (on && !inst) inst = create(container) || { setVisible() {} };
       if (inst) inst.setVisible(on);
+      // Movil: al salir de Metodologia se destruye el contexto tras 2.5 s (se recrea al volver)
+      if (!on && inst && COARSE && inst.release) {
+        relT = setTimeout(() => { if (inst && inst.release) { inst.release(); inst = null; } }, 2500);
+      }
     });
     io.observe(container);
   };
