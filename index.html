@@ -275,6 +275,12 @@
     })();
   </script>
 
+  <script>
+    /* Prueba de rendimiento: /?novid quita el video de fondo del hero para comparar fluidez */
+    if (/[?&]novid\b/.test(location.search)) document.addEventListener('DOMContentLoaded', function () {
+      var v = document.getElementById('hero-bg-video'); if (v) { try { v.pause(); } catch (e) {} v.remove(); }
+    });
+  </script>
   <!-- Diagnostico: abrir el sitio con ?debug muestra errores y estado del lobo 3D en pantalla (para celulares) -->
   <script>
     if (/[?&]debug\b/.test(location.search)) {
@@ -290,6 +296,8 @@
         setTimeout(function () {
           var c = document.getElementById('hero-3d-canvas'), gl, r = '?';
           try { gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl'); var x = gl && gl.getExtension('WEBGL_debug_renderer_info'); r = gl ? gl.getParameter(x ? x.UNMASKED_RENDERER_WEBGL : gl.RENDERER) : 'sin WebGL'; } catch (e) {}
+          var fr = 0, t0 = performance.now(), worst = 0, last = t0;
+          (function tick(now) { fr++; worst = Math.max(worst, now - last); last = now; if (now - t0 < 4000) requestAnimationFrame(tick); else line('FPS(4s)=' + (fr / ((now - t0) / 1000)).toFixed(1) + ' peorCuadro=' + worst.toFixed(0) + 'ms (haz scroll durante la prueba)'); })(t0);
           line('GPU=' + r + ' | load=' + JSON.stringify(window.__viLoad) + ' | canvas=' + (c ? c.width + 'x' + c.height : 'no') + ' | scrollH=' + document.documentElement.scrollHeight + ' | cls=' + document.documentElement.className);
         }, 9000);
       })();
@@ -540,7 +548,7 @@
                   <defs>
                     <clipPath id="stroke-text-clip">
                       <!-- DISEÑO: Relleno al 70% superior (y: 0 a 56) -->
-                      <rect id="stroke-wipe-rect" class="stroke-wipe-anim" x="0" y="0" width="0%" height="56" />
+                      <rect id="stroke-wipe-rect" class="stroke-wipe-anim" x="0" y="0" width="0%" height="180" />
                       <!-- DE MARCA: Relleno al 65% inferior, dejando la parte superior sin relleno (y: 114 a 180) -->
                       <rect id="stroke-wipe-rect-2" class="stroke-wipe-anim" x="0" y="114" width="0%" height="66" />
                     </clipPath>

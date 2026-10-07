@@ -62,7 +62,7 @@ function ensureHeroUiVisible(force = false) {
   const wipeRect = document.getElementById('stroke-wipe-rect');
   if (wipeRect) {
     wipeRect.setAttribute('width', '100%');
-    wipeRect.setAttribute('height', '56');
+    wipeRect.setAttribute('height', '180');
     wipeRect.style.width = '100%';
   }
   const wipeRect2 = document.getElementById('stroke-wipe-rect-2');
@@ -108,7 +108,7 @@ function ensureHeroUiVisible(force = false) {
 
   // Background Video
   const heroBgVideo = document.getElementById('hero-bg-video');
-  if (heroBgVideo && heroBgVideo.paused) {
+  if (heroBgVideo && heroBgVideo.paused && !/[?&]novid\b/.test(location.search)) {
     heroBgVideo.play().catch(() => {});
   }
 
@@ -424,7 +424,10 @@ function initHero3DModel() {
   // Responsive (≤ 1023px): solo cambia el video de pantalla y la pausa del video de fondo;
   // el lobo, su resplandor y la resolución son los mismos que en escritorio.
   const IS_MOBILE_HERO = window.matchMedia('(max-width: 1023px)').matches;
-  const HERO_GLOW = 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+  // Banderas de prueba de rendimiento en el celular (solo para diagnosticar): ?nofx quita el resplandor,
+  // ?dpr=1 baja la resolucion del lobo, ?novid pausa el video de fondo. Se pueden combinar: /?debug&nofx&dpr=1
+  const PERF_Q = new URLSearchParams(location.search);
+  const HERO_GLOW = PERF_Q.has('nofx') ? 'none' : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
   // Equipos sin aceleración gráfica (WebGL por software: SwiftShader, llvmpipe...). Ahí cada cuadro
   // del lobo cuesta cientos de ms de CPU, así que se dibuja a 1x, sin antialias y solo cuando hay
@@ -461,7 +464,11 @@ function initHero3DModel() {
 
   renderer.setSize(dim.width, dim.height);
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(SOFTWARE_GL ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+  // En celulares (pantalla tactil) tope de 1.5x: casi no se nota y baja ~45% los pixeles que pinta la GPU por cuadro
+  const COARSE_PTR = window.matchMedia('(pointer: coarse)').matches;
+  const dprFlag = parseFloat(PERF_Q.get('dpr'));
+  const dprCap = dprFlag > 0 ? dprFlag : (COARSE_PTR ? 1.5 : 2);
+  renderer.setPixelRatio(SOFTWARE_GL ? 1 : Math.min(window.devicePixelRatio || 1, dprCap));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
@@ -2814,7 +2821,7 @@ function triggerStrokeTextEffect() {
     sp.style.stroke = '#FFFFFF';
   });
   wipeRect.setAttribute('width', '0%');
-  wipeRect.setAttribute('height', '56');
+  wipeRect.setAttribute('height', '180');
   if (wipeRect2) {
     wipeRect2.setAttribute('width', '0%');
     wipeRect2.setAttribute('height', '66');
