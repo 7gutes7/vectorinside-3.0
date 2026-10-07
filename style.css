@@ -124,8 +124,8 @@ body {
 /* White Liquid Glass Header Theme (For White / Brutalist Contrast Sections) */
 .glass-nav-white-liquid {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 245, 250, 0.80) 50%, rgba(235, 235, 245, 0.70) 100%) !important;
-  backdrop-filter: blur(36px) saturate(200%) brightness(1.05) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(200%) brightness(1.05) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
   box-shadow: 
     0 10px 35px rgba(0, 0, 0, 0.08),
@@ -367,7 +367,6 @@ body {
   text-transform: uppercase;
   border: 1px solid var(--border-glass-bright);
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
 }
 
 .btn-vector-outline:hover {
@@ -1482,11 +1481,6 @@ body {
    arriba. Se compacta y las 4 fases pasan a rejilla 2x2 para que quepa todo.
    ========================================================================== */
 @media (max-width: 767px) {
-  #sec-metodologia-stage {
-    padding-top: 76px !important;
-    /* deja libre la franja del dock inferior */
-    padding-bottom: 104px !important;
-  }
 
   /* Encabezado más compacto */
   #sec-metodologia-stage > div:first-child {
@@ -2574,4 +2568,29 @@ fieldset.sfm-step .sfm-options { clear: both; }
 /* Capa invisible de la línea de scroll: el navegador salta su contenido (mismo tamaño de caja) */
 .vi-off { content-visibility: hidden; }
 
+/* Android / pantallas tactiles: sin backdrop-filter (cada cuadro re-desenfoca lo que hay detras del canvas WebGL).
+   Se compensa con fondos mas opacos para que se lea igual. */
+@media (pointer: coarse) {
+  [class*="backdrop-blur"], .glass-panel, .glass-nav, .glass-nav-dark, .glass-nav-white-liquid,
+  .liquid-glass-item, .liquid-glass-item.active, .btn-vector-outline, .modal-backdrop, .svm-backdrop {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .glass-panel { background: rgba(14, 14, 16, 0.88); }
+  .glass-nav { background: rgba(8, 8, 8, 0.92); }
+  .glass-nav-dark { background: rgba(8, 8, 8, 0.94) !important; }
+  .glass-nav-white-liquid {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 245, 250, 0.95) 50%, rgba(235, 235, 245, 0.93) 100%) !important;
+  }
+  .liquid-glass-item.active { background: rgba(10, 10, 14, 0.92) !important; }
+  .modal-backdrop { background: rgba(4, 4, 4, 0.94); }
+  .svm-backdrop { background: rgba(8, 8, 8, 0.9); }
+  .scroll-arrow-btn { background: rgba(8, 8, 8, 0.92) !important; }
+}
 
+/* 04 // METODOLOGIA — contenido centrado en la franja libre entre el header y el indice inferior (dock).
+   --vi-band-top / --vi-band-bottom los mide script.js (viSyncMetodologiaBand); el valor de respaldo es aproximado. */
+#sec-metodologia-stage {
+  padding-top: var(--vi-band-top, 5.5rem) !important;
+  padding-bottom: var(--vi-band-bottom, 5rem) !important;
+}
