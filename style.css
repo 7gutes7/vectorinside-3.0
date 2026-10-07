@@ -438,6 +438,11 @@ body {
   opacity: 1;
 }
 
+/* Celular / tablet: sin drop-shadow sobre el lienzo WebGL (tumbaba la GPU); el halo lo pone #hero-3d-lite-glow */
+@media (pointer: coarse) {
+  #hero-3d-canvas { filter: none; }
+}
+
 .hero-overlay-gradient {
   position: absolute;
   inset: 0;

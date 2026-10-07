@@ -256,7 +256,7 @@
   <!-- Hojas de estilo del sitio: van aqui (despues de la intro) para que la intro pinte sin esperarlas.
        Los scripts defer siguen esperando a que estas hojas carguen, asi que el orden de ejecucion no cambia. -->
   <link rel="stylesheet" href="tailwind-build.css?v=3.0.265" />
-  <link rel="stylesheet" href="style.css?v=3.0.366" />
+  <link rel="stylesheet" href="style.css?v=3.0.368" />
   <link rel="stylesheet" href="AccordionGallery.css?v=3.0.11" />
   <script>
     (function () {
@@ -294,11 +294,8 @@
         window.addEventListener('unhandledrejection', function (e) { line('REJ ' + (e.reason && e.reason.message || e.reason)); });
         ['error', 'warn'].forEach(function (k) { var o = console[k]; console[k] = function () { try { line(k.toUpperCase() + ' ' + Array.prototype.slice.call(arguments).map(function (a) { return (a && a.message) || String(a); }).join(' ').slice(0, 240)); } catch (e) {} return o.apply(console, arguments); }; });
         setTimeout(function () {
-          var c = document.getElementById('hero-3d-canvas'), gl, r = '?';
-          try { gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl'); var x = gl && gl.getExtension('WEBGL_debug_renderer_info'); r = gl ? gl.getParameter(x ? x.UNMASKED_RENDERER_WEBGL : gl.RENDERER) : 'sin WebGL'; } catch (e) {}
-          var fr = 0, t0 = performance.now(), worst = 0, last = t0;
-          (function tick(now) { fr++; worst = Math.max(worst, now - last); last = now; if (now - t0 < 4000) requestAnimationFrame(tick); else line('FPS(4s)=' + (fr / ((now - t0) / 1000)).toFixed(1) + ' peorCuadro=' + worst.toFixed(0) + 'ms (haz scroll durante la prueba)'); })(t0);
-          line('GPU=' + r + ' | load=' + JSON.stringify(window.__viLoad) + ' | canvas=' + (c ? c.width + 'x' + c.height : 'no') + ' | scrollH=' + document.documentElement.scrollHeight + ' | cls=' + document.documentElement.className);
+          var c = document.getElementById('hero-3d-canvas'), r = window.__viGPU || 'sin WebGL';
+          line('GPU=' + r + ' | contextoPerdido=' + (window.__viGLLost || 0) + ' | load=' + JSON.stringify(window.__viLoad) + ' | canvas=' + (c ? c.width + 'x' + c.height : 'no') + ' | scrollH=' + document.documentElement.scrollHeight + ' | cls=' + document.documentElement.className);
         }, 9000);
       })();
     }
@@ -1681,7 +1678,7 @@
   </div>
 
   <script defer src="MicroSlats.js?v=1"></script>
-  <script defer src="script.js?v=3.0.367"></script>
+  <script defer src="script.js?v=3.0.368"></script>
 </body>
 
 </html>
