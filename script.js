@@ -157,13 +157,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize 3D Wolf Head Model
   // Se arranca despues del primer pintado y en un momento libre del navegador, para no
   // bloquear el hilo principal mientras se muestra el intro / el primer contenido.
+  // Respaldo sin WebGL: si el navegador no puede crear o pierde el 3D (p. ej. Chrome bloqueo WebGL en el
+  // celular), se muestra una imagen fija del lobo (hero-wolf-fallback.webp, 20 KB) que se desvanece igual que el hero.
+  function showHeroWolfFallback() {
+    if (window.__heroWolfFallback) return;
+    const container = document.getElementById('hero-3d-container');
+    if (!container) return;
+    const canvas = document.getElementById('hero-3d-canvas');
+    if (canvas) canvas.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = 'hero-wolf-fallback.webp?v=1';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.decoding = 'async';
+    img.style.cssText = 'position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);' +
+      'width:min(72vw,calc(58vh * 0.777),520px);height:auto;pointer-events:none;z-index:1;' +
+      'filter:drop-shadow(0 0 40px rgba(82,39,255,0.45));transition:opacity .2s linear;';
+    container.appendChild(img);
+    window.__heroWolfFallback = img;
+    const ui = document.getElementById('hero-ui-content');
+    let ticking = false;
+    const sync = () => {
+      ticking = false;
+      if (!ui) return;
+      const hidden = ui.style.visibility === 'hidden' || ui.style.display === 'none';
+      img.style.opacity = hidden ? '0' : (ui.style.opacity === '' ? '1' : ui.style.opacity);
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(sync); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    setInterval(sync, 400);
+    sync();
+  }
+  window.showHeroWolfFallback = showHeroWolfFallback;
+
   (function startHero3D() {
     let started = false;
     const go = () => {
       if (started) return;
       started = true;
-      try { initHero3DModel(); } catch (e) { console.error('initHero3DModel falló:', e); window.__viLoad.modelDone = true; }
-      if (typeof THREE === 'undefined' || !document.getElementById('hero-3d-canvas')) window.__viLoad.modelDone = true;
+      try { initHero3DModel(); } catch (e) { console.error('initHero3DModel falló:', e); window.__viLoad.modelDone = true; showHeroWolfFallback(); }
+      if (typeof THREE === 'undefined' || !document.getElementById('hero-3d-canvas')) { window.__viLoad.modelDone = true; showHeroWolfFallback(); }
     };
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 600 });
@@ -427,7 +460,10 @@ function initHero3DModel() {
   // Banderas de prueba de rendimiento en el celular (solo para diagnosticar): ?nofx quita el resplandor,
   // ?dpr=1 baja la resolucion del lobo, ?novid pausa el video de fondo. Se pueden combinar: /?debug&nofx&dpr=1
   const PERF_Q = new URLSearchParams(location.search);
-  const HERO_GLOW = PERF_Q.has('nofx') ? 'none' : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
+  // Celulares / tablets (pantalla tactil): su GPU se caia ("WebGL Context Lost") con el filtro drop-shadow
+  // sobre el lienzo y con el mapa de entorno EXR. Ahi el resplandor es un halo estatico (mismo color) y no se usa EXR.
+  const COARSE_PTR = window.matchMedia('(pointer: coarse)').matches && !PERF_Q.has('fullfx');
+  const HERO_GLOW = (PERF_Q.has('nofx') || COARSE_PTR) ? 'none' : 'drop-shadow(0 0 60px rgba(82,39,255,0.45))';
 
   // Equipos sin aceleración gráfica (WebGL por software: SwiftShader, llvmpipe...). Ahí cada cuadro
   // del lobo cuesta cientos de ms de CPU, así que se dibuja a 1x, sin antialias y solo cuando hay
@@ -437,6 +473,7 @@ function initHero3DModel() {
   let swLastScroll = -1;
 
   let renderer;
+  let NO_GL = false;
   try {
     renderer = new THREE.WebGLRenderer({
       canvas: canvas,
@@ -447,7 +484,18 @@ function initHero3DModel() {
     });
   } catch (e) {
     console.warn('Fallback WebGLRenderer initialization:', e);
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+    } catch (e2) {
+      // Sin WebGL (bloqueado o no soportado): renderer vacio para que el resto de la pagina
+      // (todas las transiciones por scroll viven en animate()) siga funcionando; el lobo se ve como imagen.
+      console.warn('Sin WebGL: se usa la imagen fija del lobo.', e2);
+      NO_GL = true;
+      const noop = () => {};
+      renderer = { getContext: () => null, setSize: noop, setPixelRatio: noop, setClearColor: noop, render: noop, clear: noop };
+      if (typeof showHeroWolfFallback === 'function') showHeroWolfFallback();
+      else if (window.showHeroWolfFallback) window.showHeroWolfFallback();
+    }
   }
 
   try {
@@ -465,17 +513,54 @@ function initHero3DModel() {
   renderer.setSize(dim.width, dim.height);
   renderer.setClearColor(0x000000, 0);
   // En celulares (pantalla tactil) tope de 1.5x: casi no se nota y baja ~45% los pixeles que pinta la GPU por cuadro
-  const COARSE_PTR = window.matchMedia('(pointer: coarse)').matches;
   const dprFlag = parseFloat(PERF_Q.get('dpr'));
   const dprCap = dprFlag > 0 ? dprFlag : (COARSE_PTR ? 1.5 : 2);
   renderer.setPixelRatio(SOFTWARE_GL ? 1 : Math.min(window.devicePixelRatio || 1, dprCap));
+  try {
+    const gl0 = renderer.getContext();
+    const ext0 = gl0.getExtension('WEBGL_debug_renderer_info');
+    window.__viGPU = String(gl0.getParameter(ext0 ? ext0.UNMASKED_RENDERER_WEBGL : gl0.RENDERER) || '');
+  } catch (e) {}
+  // Si la GPU del equipo pierde el contexto, que nunca deje la intro colgada ni el lienzo en blanco encima
+  canvas.addEventListener('webglcontextlost', (ev) => {
+    ev.preventDefault();
+    window.__viGLLost = (window.__viGLLost || 0) + 1;
+    console.warn('WebGL del lobo perdido (' + window.__viGLLost + ')');
+    window.__viLoad.modelDone = true;
+    clearTimeout(window.__viGLLostTimer);
+    window.__viGLLostTimer = setTimeout(() => { if (window.showHeroWolfFallback) window.showHeroWolfFallback(); }, 2500);
+  }, false);
+  canvas.addEventListener('webglcontextrestored', () => { clearTimeout(window.__viGLLostTimer); console.warn('WebGL del lobo restaurado'); }, false);
+  // Halo estatico para celular (en lugar del drop-shadow animado): sigue la opacidad y el recorte del lienzo
+  let liteGlow = null, liteGlowOp = '', liteGlowClip = '';
+  if (COARSE_PTR && !NO_GL && !PERF_Q.has('nofx')) {
+    liteGlow = document.createElement('div');
+    liteGlow.id = 'hero-3d-lite-glow';
+    liteGlow.setAttribute('aria-hidden', 'true');
+    liteGlow.style.cssText = 'position:absolute;left:50%;top:50%;width:min(92vw,92vh);height:min(92vw,92vh);' +
+      'transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;z-index:0;opacity:0;' +
+      'background:radial-gradient(closest-side,rgba(82,39,255,0.42),rgba(82,39,255,0.16) 55%,rgba(82,39,255,0) 78%);';
+    container.insertBefore(liteGlow, canvas);
+    if (getComputedStyle(canvas).position === 'static') canvas.style.position = 'relative';
+    canvas.style.zIndex = canvas.style.zIndex || '1';
+  }
+  window.__syncLiteGlow = () => {
+    if (!liteGlow) return;
+    const op = canvas.style.opacity === '' ? (isHero3DModelLoaded ? '1' : '0') : canvas.style.opacity;
+    const vis = canvas.style.visibility === 'hidden' ? '0' : op;
+    if (vis !== liteGlowOp) { liteGlowOp = vis; liteGlow.style.opacity = vis; }
+    const clip = canvas.style.clipPath || '';
+    if (clip !== liteGlowClip) { liteGlowClip = clip; liteGlow.style.clipPath = clip; }
+  };
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.4;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
 
   // ==================== ENVIRONMENT MAP (IBL) — reflejos reales sobre el material del hero ====================
   // Archivo studio.exr en la raíz del proyecto (junto a index.html)
-  if (typeof THREE.EXRLoader !== 'undefined') {
+  if (COARSE_PTR || NO_GL) {
+    // Sin EXR en celular: el envMapIntensity es bajo (0.22) y el PMREM era lo que tumbaba la GPU
+  } else if (typeof THREE.EXRLoader !== 'undefined') {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     new THREE.EXRLoader().load(
@@ -749,6 +834,7 @@ function initHero3DModel() {
       new THREE.GLTFLoader().load('./poligonal-mini-faces-plain.glb?v=1', onHeroGltf, onHeroProgress, (err2) => {
         console.error('Error cargando poligonal-mini-faces-plain.glb:', err2);
         window.__viLoad.modelDone = true;
+        if (window.showHeroWolfFallback) window.showHeroWolfFallback();
       });
     };
     loader.load(modelUrl, onHeroGltf, onHeroProgress, (err) => {
@@ -1944,9 +2030,11 @@ function initHero3DModel() {
         hero3dCanvas.style.clipPath = 'none';
         hero3dCanvas.style.webkitClipPath = 'none';
         hero3dCanvas.style.opacity = pPhoneEntryEased.toFixed(3);
-        hero3dCanvas.style.filter = phoneBlur > 0.2
-          ? `blur(${phoneBlur}px) ${HERO_GLOW}`.trim()
-          : (HERO_GLOW || 'none');
+        // En celular sin blur animado (era otro filtro pesado sobre todo el lienzo)
+        const glowPart = HERO_GLOW === 'none' ? '' : HERO_GLOW;
+        hero3dCanvas.style.filter = (!COARSE_PTR && phoneBlur > 0.2)
+          ? `blur(${phoneBlur}px) ${glowPart}`.trim()
+          : (glowPart || 'none');
         hero3dCanvas.style.pointerEvents = pPhoneEntryEased > 0.1 ? 'auto' : 'none';
       }
 
@@ -2547,6 +2635,7 @@ function initHero3DModel() {
       }
       try {
         renderer.render(scene, camera);
+        if (window.__syncLiteGlow) window.__syncLiteGlow();
       } catch (err) {
         console.error('WebGL render error:', err);
       }
