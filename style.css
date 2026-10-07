@@ -2571,4 +2571,7 @@ fieldset.sfm-step .sfm-options { clear: both; }
   transform-origin: left center;
 }
 
+/* Capa invisible de la línea de scroll: el navegador salta su contenido (mismo tamaño de caja) */
+.vi-off { content-visibility: hidden; }
+
 

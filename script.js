@@ -427,6 +427,41 @@ function initEvidenceTabs() {
   });
 }
 
+// Apaga el render de las capas fijas/absolutas/sticky que estan totalmente invisibles.
+// Solo actua sobre elementos position fixed/absolute/sticky (su tamaño no depende del contenido),
+// asi content-visibility no cambia ninguna medida ni el scroll.
+const VI_GATE_IDS = [
+  'hero-bg-video-wrapper',       // absolute inset-0: video de fondo del Hero; se oculta al salir del Hero (opacity 0 / visibility hidden)
+  'hero-ui-content',            // relative h-full dentro de sticky h-screen: textos principales del Hero; se ocultan al salir del Hero
+  'hero-curtain-right',         // absolute: flanco derecho con frase CTA del Hero; arranca en opacity-0 y se oculta con el scroll
+  'seccion-portal-revelada',    // absolute inset-0: contenedor de 01 // Identidad; se abre y cierra en el scroll (opacity 0 / 1)
+  'kinetic-text-bg',            // absolute inset-0: retícula 'Vector Inside /'; solo visible durante rotación del teléfono
+  'sec3-bg-wrapper',            // absolute inset-0: fondo de 02 // Plataforma; se oculta con blur y opacity 0
+  'sec3-flank-left',            // absolute: elemento decorativo izquierdo de 02 // Plataforma; se oculta fuera de su tramo
+  'sec3-flank-right',           // absolute: elemento decorativo derecho de 02 // Plataforma; se oculta fuera de su tramo
+  'seccion-3-ecosistema',       // absolute inset-0: tarjetas de arquitectura de conversión; solo visible en 0.77 - 0.865
+  'sec-scroll-expand-wrapper',  // absolute inset-0: marco de transición hacia 03 // Evidencia; opacity 0 fuera de su tramo
+  'scroll-expand-media-wrapper',// absolute inset-0: fondo de video/partículas de Evidencia; visibility hidden en galería
+  'sec-matriz-25-wrapper'       // sticky h-screen: contenedor de la galería flotante 25 tarjetas; invisible fuera de Evidencia
+];
+let __viGateEls = null;
+function viGateLayers() {
+  if (!__viGateEls) {
+    __viGateEls = VI_GATE_IDS.map(id => document.getElementById(id)).filter(el => {
+      if (!el) return false;
+      const pos = getComputedStyle(el).position;
+      return pos === 'fixed' || pos === 'absolute' || pos === 'sticky' || (pos === 'relative' && (el.classList.contains('h-full') || el.id === 'hero-ui-content'));
+    });
+  }
+  for (const el of __viGateEls) {
+    const st = el.style;
+    const off = st.opacity === '0' || st.visibility === 'hidden' || st.display === 'none' ||
+      (st.opacity === '' && el.classList.contains('opacity-0'));
+    if (off !== el.classList.contains('vi-off')) el.classList.toggle('vi-off', off);
+  }
+}
+window.viGateLayers = viGateLayers;
+
 /**
  * Interactive 3D Model Loader for poligonalFINAL.glb
  */
@@ -2629,7 +2664,10 @@ function initHero3DModel() {
     if (is3DActive) {
       if (SOFTWARE_GL) {
         const scrollMoved = Math.abs(currentScrollLerp - swLastScroll) > 0.0001;
-        if (!scrollMoved && swFrames <= 0) return;
+        if (!scrollMoved && swFrames <= 0) {
+          viGateLayers();
+          return;
+        }
         swLastScroll = currentScrollLerp;
         if (swFrames > 0) swFrames--;
       }
@@ -2642,6 +2680,8 @@ function initHero3DModel() {
     } else {
       renderer.clear();
     }
+
+    viGateLayers();
   }
 
   requestAnimationFrame(animate);
@@ -2664,13 +2704,17 @@ function initHero3DModel() {
  * strokeColor="#A78BFA", fillColor="#F8FAFC", drawDuration=0.85s, fillDelay=0.1s, fillMode="wipe", ease="power2.out"
  */
 function alignHeroDigitalText() {
-  const strokePath = document.querySelector('.stroke-draw-path');
-  if (!strokePath) return;
-  const firstTspan = document.getElementById('hero-word-impacto-stroke');
-  const lastTspan = document.querySelector('.stroke-draw-path.stroke-line-2 tspan');
-  if (!firstTspan) return;
+  const heroUi = document.getElementById('hero-ui-content');
+  const wasOff = heroUi && heroUi.classList.contains('vi-off');
+  if (wasOff) heroUi.classList.remove('vi-off');
 
   try {
+    const strokePath = document.querySelector('.stroke-draw-path');
+    if (!strokePath) return;
+    const firstTspan = document.getElementById('hero-word-impacto-stroke');
+    const lastTspan = document.querySelector('.stroke-draw-path.stroke-line-2 tspan');
+    if (!firstTspan) return;
+
     const w1 = firstTspan.getComputedTextLength();
     const w2 = lastTspan ? lastTspan.getComputedTextLength() : 0;
     const maxW = Math.max(w1, w2, 450);
@@ -2683,7 +2727,10 @@ function alignHeroDigitalText() {
     if (svg) {
       svg.setAttribute('viewBox', `0 0 ${Math.ceil(maxW + 15)} 180`);
     }
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    if (wasOff && heroUi) heroUi.classList.add('vi-off');
+  }
 }
 
 /**
@@ -2806,11 +2853,14 @@ function stopImpactoGlitch() {
 function alignHeroRightText() {
   const rightEl = document.getElementById('hero-curtain-right');
   if (!rightEl) return;
-  const svg = rightEl.querySelector('svg');
-  const textEl = rightEl.querySelector('text');
-  if (!svg || !textEl) return;
+  const wasOff = rightEl.classList.contains('vi-off');
+  if (wasOff) rightEl.classList.remove('vi-off');
 
   try {
+    const svg = rightEl.querySelector('svg');
+    const textEl = rightEl.querySelector('text');
+    if (!svg || !textEl) return;
+
     const tspanLine1 = document.getElementById('hero-word-instinto');
     const tspanLine2 = document.getElementById('hero-word-dominar') || textEl.querySelectorAll('tspan')[1];
     const tspanLine3 = document.getElementById('hero-line-mercado') || textEl.querySelectorAll('tspan')[2];
@@ -2851,7 +2901,10 @@ function alignHeroRightText() {
       tspanLine3.setAttribute('x', `${anchorX}`);
       tspanLine3.setAttribute('text-anchor', 'end');
     }
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    if (wasOff && rightEl) rightEl.classList.add('vi-off');
+  }
 }
 
 if (document.fonts && document.fonts.ready) {
@@ -4953,6 +5006,7 @@ function initExecutionInternalScrollListener() {
         if (cierreSec) { cierreSec.style.opacity = '0'; cierreSec.style.pointerEvents = 'none'; }
         if (globalHeader) globalHeader.classList.remove('glass-nav-transparent-section05');
       }
+      viGateLayers();
     };
 
     let isTicking = false;
