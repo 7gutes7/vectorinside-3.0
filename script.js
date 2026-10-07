@@ -1654,6 +1654,18 @@ function initHero3DModel() {
     }
   }
 
+  // Escribir scrollTop fuerza un recalculo de layout; dentro del loop solo se escribe si el valor cambia
+  function viSetScrollTop(el, v) {
+    if (!el) return;
+    if (!el.__viST) {
+      el.__viST = { v: -1 };
+      el.addEventListener('scroll', () => { el.__viST.v = el.scrollTop; }, { passive: true });
+    }
+    if (Math.abs(el.__viST.v - v) < 0.5) return;
+    el.__viST.v = v;
+    el.scrollTop = v;
+  }
+
   // Render loop: Unified deterministic timeline for Section 1, Section 2 and Section 3 Smartphone
   function animate() {
     requestAnimationFrame(animate);
@@ -1997,7 +2009,7 @@ function initHero3DModel() {
         } else if (currentScrollLerp < T_REVEAL_END) {
           // -------------------- ENTRANCE: PUNTO -> LÍNEA -> PLANO --------------------
           const pReveal = (currentScrollLerp - T_REVEAL_START) / (T_REVEAL_END - T_REVEAL_START);
-          secPortal.scrollTop = 0;
+          viSetScrollTop(secPortal, 0);
 
           if (pReveal < 0.18) {
             // ETAPA 1: PRIMERO EL PUNTO (Center laser dot appears & pulses alone)
@@ -2083,7 +2095,7 @@ function initHero3DModel() {
           const pContent = (currentScrollLerp - T_REVEAL_END) / (T_CONTENT_SCROLL_END - T_REVEAL_END);
           const maxScroll = secPortal.scrollHeight - secPortal.clientHeight;
           if (maxScroll > 0) {
-            secPortal.scrollTop = pContent * maxScroll;
+            viSetScrollTop(secPortal, pContent * maxScroll);
           }
 
         } else {
@@ -2400,10 +2412,10 @@ function initHero3DModel() {
           const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
           if (maxInternalScroll > 0) {
             if (currentScrollLerp <= 0.815) {
-              sec3ScrollContainer.scrollTop = 0;
+              viSetScrollTop(sec3ScrollContainer, 0);
             } else {
               const pScrollCards = Math.min(1.0, Math.max(0, (currentScrollLerp - 0.815) / (0.865 - 0.815)));
-              sec3ScrollContainer.scrollTop = pScrollCards * maxInternalScroll;
+              viSetScrollTop(sec3ScrollContainer, pScrollCards * maxInternalScroll);
             }
           }
         }
@@ -2418,7 +2430,7 @@ function initHero3DModel() {
         if (sec3ScrollContainer && !isUserInteractingSec3) {
           const maxInternalScroll = sec3ScrollContainer.scrollHeight - sec3ScrollContainer.clientHeight;
           if (maxInternalScroll > 0) {
-            sec3ScrollContainer.scrollTop = maxInternalScroll;
+            viSetScrollTop(sec3ScrollContainer, maxInternalScroll);
           }
         }
       } else if (currentScrollLerp >= 0.885) {
@@ -2431,7 +2443,7 @@ function initHero3DModel() {
         sec3Container.style.pointerEvents = 'none';
 
         if (sec3ScrollContainer && !isUserInteractingSec3) {
-          sec3ScrollContainer.scrollTop = 0;
+          viSetScrollTop(sec3ScrollContainer, 0);
         }
 
         for (let k = 0; k < 6; k++) {
@@ -2512,7 +2524,7 @@ function initHero3DModel() {
           expandBody.style.transform = 'translateY(-20px)';
         }
         isSec3BodyRevealed = false;
-        if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
+        if (ejecucionScrollContainer) viSetScrollTop(ejecucionScrollContainer, 0);
       } else if (currentScrollLerp < 0.885) {
         // Aparición con efecto blur después de la última tarjeta
         const pEntry = (currentScrollLerp - 0.865) / 0.02;
@@ -2540,7 +2552,7 @@ function initHero3DModel() {
           expandBody.style.transform = 'translateY(-20px)';
         }
         isSec3BodyRevealed = false;
-        if (ejecucionScrollContainer) ejecucionScrollContainer.scrollTop = 0;
+        if (ejecucionScrollContainer) viSetScrollTop(ejecucionScrollContainer, 0);
       } else {
         // Expansión a pantalla completa (44vw->100vw, 58vh->100vh, 24px->0px, video 1.35x->1.0x)
         expandWrapper.style.opacity = '1';
@@ -2565,7 +2577,7 @@ function initHero3DModel() {
         if (pExpEased < 0.99) {
           // Fase 1: El video debe ocupar toda la ventana ANTES de que los textos aparezcan
           if (ejecucionScrollContainer) {
-            ejecucionScrollContainer.scrollTop = 0;
+            viSetScrollTop(ejecucionScrollContainer, 0);
           }
           if (isSec3BodyRevealed) {
             isSec3BodyRevealed = false;
@@ -5752,8 +5764,10 @@ window.initPersistentScrollIndicator = initPersistentScrollIndicator;
   const later = () => { clearTimeout(t); t = setTimeout(sync, 120); };
   window.addEventListener('resize', later, { passive: true });
   window.addEventListener('orientationchange', later, { passive: true });
-  window.addEventListener('load', sync);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
-  if (document.readyState !== 'loading') sync(); else document.addEventListener('DOMContentLoaded', sync);
+  // Un solo calculo agrupado y en reposo (evita forzar layout varias veces durante la carga)
+  const idleSync = () => { clearTimeout(t); t = setTimeout(() => { (window.requestIdleCallback || ((f) => setTimeout(f, 1)))(sync); }, 400); };
+  window.addEventListener('load', idleSync);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(idleSync);
+  idleSync();
 })();
 
