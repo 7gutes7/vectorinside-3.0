@@ -4383,33 +4383,30 @@ const matrizData = [
     tint: 'rgba(6, 182, 212, 0.45)'
   },
 
-  // ==================== 04 LEALTIX ====================
+  // ==================== 04 BUFETE JURÍDICO GUADARRAMA USA ====================
   {
     id: 4,
     code: 'BLK-04',
     category: 'operativo',
-    file: 'Imagotipo2.ai-600.webp',
-    title: 'Lealtix',
-    desc: 'Plataforma de lealtad digital y retención de clientes para la industria HORECA mediante pases en Apple & Google Wallet sin necesidad de apps.',
-    link: 'www.lealtix.com.mx',
-    kpi1: '+38.5% Recurrencia',
-    kpi2: 'Retención: +28.4%',
-    kpi3: 'Adopción: 72h',
-    color: '#006a61',
-    tint: 'rgba(0, 106, 97, 0.45)'
+    file: 'logo Juridico Guadarrama USA-600.webp',
+    title: 'Bufete Jurídico Guadarrama USA',
+    desc: 'Despacho jurídico para mexicanos en Estados Unidos: asesoría a distancia en patrimonio, familia y empresa, con el respaldo de "México sigue cerca".',
+    link: 'www.juridicoguadarrama.us',
+    color: '#c9a24a',
+    tint: 'rgba(201, 162, 74, 0.45)'
   },
 
-  // ==================== 05 INTEGRITUS ====================
+  // ==================== 05 RANCHO LA CONCEPCIÓN ====================
   {
     id: 5,
     code: 'BLK-05',
     category: 'cognitivo',
-    file: 'IntegritUS imagotipo COLOR-600.webp',
-    title: 'IntegritUS',
-    desc: 'Plataforma inteligente de cumplimiento normativo y blindaje fiscal que detecta alertas SAT, monitorea actividades vulnerables PLD y dictamina actas con IA.',
-    link: 'www.integritusmx.com',
-    color: '#0ea5e9',
-    tint: 'rgba(14, 165, 233, 0.45)'
+    file: 'logo Rancho La Concepcion-600.webp',
+    title: 'Rancho La Concepción',
+    desc: 'Rancho y espacio de eventos entre bosque de pinos en el Estado de México: bodas, XV años y reuniones corporativas, además de cabalgatas, camping y glamping.',
+    link: 'www.rancholaconcepcion.mx',
+    color: '#d4af37',
+    tint: 'rgba(212, 175, 55, 0.45)'
   },
 
   // ==================== OCULTAS TEMPORALMENTE ====================
