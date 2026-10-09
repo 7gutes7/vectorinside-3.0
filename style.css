@@ -2328,10 +2328,17 @@ body {
 @media (min-width: 1024px) {
   /* La zona de imagen es más ancha que la tarjeta abierta: margen lateral para que el
      logo horizontal (ahora sin fondo) no se corte a los lados */
-  #floating-gallery-root .ag-panel__media img[src*="valor"],
-  #floating-gallery-root .ag-panel__media img[src*="Guadarrama"],
-  #floating-gallery-root .ag-panel__media img[src*="Concepcion"] {
+  #floating-gallery-root .ag-panel__media img[src*="valor"] {
     padding: 70px 150px !important;
+  }
+  /* Logos con su propio fondo de marca (carbon / crema): el fondo llena todo el recuadro */
+  #floating-gallery-root .ag-panel__media img[src*="Guadarrama"] {
+    padding: 30px 90px !important;
+    background-color: #333333 !important;
+  }
+  #floating-gallery-root .ag-panel__media img[src*="Concepcion"] {
+    padding: 70px 90px !important;
+    background-color: #fcffd4 !important;
   }
 }
 @media (max-width: 520px) {
@@ -2596,3 +2603,7 @@ fieldset.sfm-step .sfm-options { clear: both; }
   padding-top: var(--vi-band-top, 5.5rem) !important;
   padding-bottom: var(--vi-band-bottom, 5rem) !important;
 }
+
+/* 03 // EVIDENCIA: fondos de marca de Guadarrama y La Concepcion tambien en las tarjetas cerradas / responsive */
+#floating-gallery-root .ag-panel__media img[src*="Guadarrama"] { background-color: #333333 !important; }
+#floating-gallery-root .ag-panel__media img[src*="Concepcion"] { background-color: #fcffd4 !important; }
