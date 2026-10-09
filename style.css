@@ -2328,7 +2328,9 @@ body {
 @media (min-width: 1024px) {
   /* La zona de imagen es más ancha que la tarjeta abierta: margen lateral para que el
      logo horizontal (ahora sin fondo) no se corte a los lados */
-  #floating-gallery-root .ag-panel__media img[src*="valor"] {
+  #floating-gallery-root .ag-panel__media img[src*="valor"],
+  #floating-gallery-root .ag-panel__media img[src*="Guadarrama"],
+  #floating-gallery-root .ag-panel__media img[src*="Concepcion"] {
     padding: 70px 150px !important;
   }
 }
