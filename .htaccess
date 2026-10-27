@@ -43,3 +43,12 @@ AddType video/mp4 .mp4
   # Rutas de la estructura antigua de varias paginas: ahora todo vive en la pagina principal
   RedirectMatch 301 ^/(diagnostico|manifiesto|metodologia|evidencia|ecosistema)(/(index\.html)?)?$ /
 </IfModule>
+
+# Version unica del dominio (SEO): http -> https y www -> sin www, en un solo salto 301.
+# Evita que Search Console reporte variantes como "Pagina alternativa con etiqueta canonica".
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://vectorinside.com%{REQUEST_URI} [L,R=301]
+</IfModule>
