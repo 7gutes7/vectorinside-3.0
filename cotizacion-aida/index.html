@@ -198,6 +198,18 @@ em{font-style:italic;color:var(--gold)}
 .total span{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 .total b{font:400 clamp(3rem,6vw,5.6rem)/1 var(--display);letter-spacing:-.03em}
 .incl{display:grid;gap:.7rem;margin-top:2rem}
+.sum{margin-top:3.4rem;border-top:1px solid var(--ink);max-width:1000px;font-variant-numeric:tabular-nums}
+.sum div{display:grid;grid-template-columns:3rem minmax(0,1fr) auto;gap:1rem;align-items:baseline;padding:1.4rem 0;border-bottom:1px solid var(--line)}
+.sum span{font-size:.7rem;letter-spacing:.16em;color:var(--blue)}
+.sum h3{font-size:clamp(1.4rem,2.4vw,2.2rem)}
+.sum b{font:400 clamp(1.5rem,2.4vw,2.2rem) var(--display);white-space:nowrap}
+.sum .t{border-bottom:0}
+.sum .sub h3,.sum .sub b{color:var(--muted)}
+.sum .gift{background:rgba(22,75,83,.08);padding-inline:1rem;margin-inline:-1rem}.sum .gift b,.sum .gift span{color:var(--blue)}
+.sum .why{display:block;font:400 .9rem/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-top:.3rem}
+.sum .t h3{font-size:.8rem;font-family:var(--body);letter-spacing:.22em;text-transform:uppercase}
+.sum .t b{font-size:clamp(3rem,6.5vw,6rem);letter-spacing:-.03em}
+.sum small{font:500 .8rem var(--body);letter-spacing:.14em;color:var(--blue)}
 .incl li{list-style:none;display:flex;gap:.8rem;font-size:.92rem;opacity:.85}
 .incl li:before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-top:.55em}
 .incl{padding:0}
@@ -232,7 +244,7 @@ em{font-style:italic;color:var(--gold)}
   .tl div{grid-template-columns:44px minmax(0,1fr) auto}.tl .grip,.tl p{display:none}
   .dots{display:none}
 }
-@media(max-width:520px){.mapgrid{grid-template-columns:1fr}.before-after div{grid-template-columns:1fr}.main{padding:16px}}
+@media(max-width:520px){.sum div{grid-template-columns:1fr;gap:.3rem}.sum span:empty{display:none}.mapgrid{grid-template-columns:1fr}.before-after div{grid-template-columns:1fr}.main{padding:16px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .slide [data-r]{opacity:1;transform:none;filter:none}.js .slide .win{clip-path:none}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -248,10 +260,10 @@ em{font-style:italic;color:var(--gold)}
   <div class="brandline"><span>Vector Inside × Aida Vásquez Yarull</span><span>Propuesta · Nov 2026</span></div>
   <div class="cover">
     <div>
-      <p class="eyebrow" data-r>Panel de autogestión · CMS</p>
+      <p class="eyebrow" data-r>Sitio web + panel de autogestión</p>
       <h1 data-r="2">Tu obra,<i>a tu ritmo.</i></h1>
       <p class="lead" data-r="3" style="margin-top:2rem">Un estudio privado detrás de aidavasquezyarull.com para actualizar cada texto, cada imagen y cada obra del sitio, en español e inglés, sin tocar una línea de código.</p>
-      <div class="meta" data-r="4"><div><b>Para</b>Aída Vásquez</div><div><b>De</b>Vector Inside</div><div><b>Fecha</b>2 de noviembre de 2026</div></div>
+      <div class="meta" data-r="4"><div><b>Para</b>Aida Vásquez</div><div><b>De</b>Vector Inside</div><div><b>Fecha</b>2 de noviembre de 2026</div></div>
     </div>
     <div class="disc" data-r="3"><img src="img/hybrid-disc.webp" alt="Detalle circular de la obra de Aida"><span class="dot"></span></div>
   </div>
@@ -470,11 +482,40 @@ em{font-style:italic;color:var(--gold)}
 </section>
 
 <!-- 11 Inversión -->
+<!-- Inversión: sitio web -->
+<section class="slide blue" id="sitio">
+  <span class="trace" style="width:min(26vw,340px);left:2vw;bottom:6vh;opacity:.25" aria-hidden="true"><i></i></span>
+  <div class="invest">
+    <div>
+      <p class="eyebrow" data-r>Inversión 01 · Sitio web</p>
+      <h2 class="mid" data-r="2" style="margin-top:1.4rem">Un universo a la medida, no una plantilla.</h2>
+      <p class="lead" data-r="3" style="margin-top:1.6rem">aidavasquezyarull.com se diseñó y programó desde cero a partir de la narrativa de la artista: cada sección, transición y trazo responde a su obra. Por eso no usa temas prefabricados ni constructores visuales, y por eso carga rápido, se ve igual en cualquier pantalla y está lista para crecer con el panel.</p>
+      <ul class="incl" data-r="4">
+        <li>12 secciones narrativas, de "Yo no pinto. Abro portales." al contacto profesional</li>
+        <li>Experiencia en escritorio, tablet y móvil</li>
+        <li>Animaciones que respetan la opción de movimiento reducido</li>
+      </ul>
+    </div>
+    <div data-r="3">
+      <table class="qt">
+        <tr><td>01</td><td><h3>Estrategia y narrativa</h3><p>Documento maestro de marca, arquitectura de secciones y textos curatoriales.</p></td><td>$200.00</td></tr>
+        <tr><td>02</td><td><h3>Diseño UI/UX editorial</h3><p>Diseño a medida de cada sección y su versión para móvil y tablet.</p></td><td>$300.00</td></tr>
+        <tr><td>03</td><td><h3>Desarrollo e interacciones</h3><p>Programación en Next.js: portal guiado por scroll, transiciones radiales, trazos con paralaje y apariciones.</p></td><td>$350.00</td></tr>
+        <tr><td>04</td><td><h3>Sitio bilingüe</h3><p>Contenido completo en español e inglés con cambio de idioma.</p></td><td>$120.00</td></tr>
+        <tr><td>05</td><td><h3>Curación de imágenes y video</h3><p>Optimización de obras, retratos y video de fondo para web sin perder calidad.</p></td><td>$130.00</td></tr>
+        <tr><td>06</td><td><h3>SEO y lanzamiento</h3><p>Dominio oficial, https, sitemap, Google Search Console, vista previa para redes y publicación en Hostinger.</p></td><td>$200.00</td></tr>
+      </table>
+      <div class="total"><span>Subtotal sitio web</span><b>$1,300.00</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- Inversión: panel -->
 <section class="slide dark" id="inversion">
   <div class="invest">
     <div>
-      <p class="eyebrow" data-r>Cotización e inversión</p>
-      <h2 class="mid" data-r="2" style="margin-top:1.4rem">Una sola inversión. Autonomía permanente.</h2>
+      <p class="eyebrow" data-r>Inversión 02 · Panel de autogestión</p>
+      <h2 class="mid" data-r="2" style="margin-top:1.4rem">Autonomía permanente sobre todo el sitio.</h2>
       <ul class="incl" data-r="3">
         <li>Edición de todas las secciones: textos e imágenes</li>
         <li>Contenido en español e inglés</li>
@@ -485,13 +526,27 @@ em{font-style:italic;color:var(--gold)}
     </div>
     <div data-r="3">
       <table class="qt">
-        <tr><td>01</td><td><h3>Diseño UI del panel</h3><p>Interfaz administrativa exclusiva con la identidad visual del sitio.</p></td><td>$250.00</td></tr>
-        <tr><td>02</td><td><h3>Desarrollo backend</h3><p>Base de datos segura para obras, series, textos, imágenes y currículum.</p></td><td>$350.00</td></tr>
-        <tr><td>03</td><td><h3>Integración frontend</h3><p>Conexión del panel con el diseño actual para mostrar la información en tiempo real.</p></td><td>$300.00</td></tr>
-        <tr><td>04</td><td><h3>Capacitación</h3><p>Sesión de entrega, guía de uso y credenciales de acceso.</p></td><td>$100.00</td></tr>
+        <tr><td>01</td><td><h3>Diseño UI del panel</h3><p>Interfaz administrativa exclusiva con la identidad visual del sitio.</p></td><td>$300.00</td></tr>
+        <tr><td>02</td><td><h3>Desarrollo backend</h3><p>Base de datos segura, acceso con roles, historial de versiones y biblioteca de imágenes.</p></td><td>$450.00</td></tr>
+        <tr><td>03</td><td><h3>Integración frontend</h3><p>Conexión de las 12 secciones bilingües con el panel, con vista previa antes de publicar.</p></td><td>$400.00</td></tr>
+        <tr><td>04</td><td><h3>Migración y capacitación</h3><p>Traslado del contenido actual al panel, sesión de entrega, guía de uso y credenciales.</p></td><td>$150.00</td></tr>
       </table>
-      <div class="total"><span>Inversión total</span><b>$1,000.00</b></div>
+      <div class="total"><span>Subtotal panel</span><b>$1,300.00</b></div>
     </div>
+  </div>
+</section>
+
+<!-- Resumen -->
+<section class="slide sand" id="resumen">
+  <span class="trace" style="width:min(32vw,420px);right:5vw;top:10vh;opacity:.35" aria-hidden="true"><i></i></span>
+  <p class="eyebrow" style="color:var(--blue)" data-r>Resumen de inversión</p>
+  <h2 class="mid" data-r="2" style="margin-top:1.4rem;max-width:20ch">El sitio que ya abre portales, y la llave para mantenerlo vivo.</h2>
+  <div class="sum" data-r="3">
+    <div><span>01</span><h3>Diseño y desarrollo del sitio web</h3><b>$1,300.00</b></div>
+    <div><span>02</span><h3>Panel de autogestión (CMS)</h3><b>$1,300.00</b></div>
+    <div class="sub"><span></span><h3>Valor total del proyecto</h3><b>$2,600.00</b></div>
+    <div class="gift"><span>✦</span><h3>Inversión de Vector Inside × SyborX<small class="why">Absorbemos el costo del sitio web como apuesta por la carrera de Aida.</small></h3><b>−$1,300.00</b></div>
+    <div class="t"><span></span><h3>Inversión de la artista</h3><b>$1,300.00 <small>USD</small></b></div>
   </div>
 </section>
 
