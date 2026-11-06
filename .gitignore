@@ -22,3 +22,9 @@ Copia de *
 .DS_Store
 Thumbs.db
 tailwindcss
+
+# Invitación K&A: datos reales de invitados y fotos (nunca van a GitHub)
+studios/invitacion-K&A/api/data/*.sqlite3
+studios/invitacion-K&A/api/data/*.sqlite3-*
+studios/invitacion-K&A/api/data/photos/*
+!studios/invitacion-K&A/api/data/photos/.gitkeep

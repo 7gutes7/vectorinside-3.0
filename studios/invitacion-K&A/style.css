@@ -18,3 +18,11 @@
 .brand-credit img{background:transparent;opacity:1;object-fit:contain}
 
 .dress .dress-detail{font:12px/1.8 Manrope,sans-serif;color:#53617a;margin-top:14px}.events .event-time{font-weight:600;color:#102642}
+/* Campos opcionales del formulario */
+#rsvp-form textarea{border:1px solid #d5c6a5;background:#fffdf8;color:#102642;padding:16px;font:14px Manrope,Arial,sans-serif;border-radius:0;width:100%;resize:vertical;min-height:84px}
+#rsvp-form textarea:focus{outline:2px solid #a88443;outline-offset:3px}
+.contact-options{border:0;border-top:1px solid #e3d9c2;padding:18px 0 0;margin:14px 0 0;min-width:0;display:grid;gap:4px}
+.contact-options legend{font:500 13px Manrope,sans-serif;padding:0 10px 0 0;color:#102642}
+.contact-options legend span{font-weight:400;color:#65738a}
+.privacy-note{margin:2px 0 0;text-align:left}
+.hp-field{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}

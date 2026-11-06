@@ -33,7 +33,6 @@ let currentPass=null;
 function readSavedPass(){try{return JSON.parse(localStorage.getItem('ka-guest-pass-v12'));}catch{return null;}}
 const savedPass=readSavedPass();
 if(savedPass&&typeof savedPass.name==='string')guestName.value=savedPass.name;
-function newReference(){const bytes=new Uint8Array(6);crypto.getRandomValues(bytes);return 'KA-'+Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();}
 function drawTextWrapped(ctx,text,x,y,maxWidth,lineHeight,font){
  ctx.font=font;const lines=[];let line='';
  for(const word of text.split(/\s+/)){const next=line?line+' '+word:word;if(ctx.measureText(next).width>maxWidth&&line){lines.push(line);line=word;}else line=next;}
@@ -76,16 +75,16 @@ document.querySelector('#rsvp-form').addEventListener('submit',async event=>{
  const button=document.querySelector('#rsvp-submit');button.disabled=true;feedback.textContent='Guardando tu respuesta…';
  try{
   let editToken=localStorage.getItem('ka-rsvp-edit-v12');if(!editToken){editToken=crypto.randomUUID()+crypto.randomUUID();localStorage.setItem('ka-rsvp-edit-v12',editToken);}
-  const response=await fetch('/api/rsvp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,attendance:choice.value,companions,editToken})});
+  const contact={email:document.querySelector('#guest-email').value.trim(),phone:document.querySelector('#guest-phone').value.trim(),notes:document.querySelector('#guest-notes').value.trim(),website:document.querySelector('#guest-website').value};
+  const response=await fetch('api/rsvp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,attendance:choice.value,companions,editToken,...contact})});
   const result=await response.json();if(!response.ok)throw new Error(result.error||'No se pudo guardar.');
-  if(choice.value==='no'){feedback.replaceChildren(document.createTextNode('Gracias por avisarnos. Tu respuesta quedó registrada. '));const link=document.createElement('a');link.href=buildRsvpUrl(name,'no');link.target='_blank';link.rel='noopener noreferrer';link.textContent='Avisar también por WhatsApp ↗';feedback.append(link);return;}
+  const mailNote={sent:' Te enviamos la confirmación a tu correo.',failed:' No pudimos enviar el correo, pero tu respuesta quedó guardada.',invalid:' No pudimos leer tu correo, pero tu respuesta quedó guardada.'}[result.emailStatus]||'';
+  if(choice.value==='no'){feedback.replaceChildren(document.createTextNode('Gracias por avisarnos. Tu respuesta quedó registrada.'+mailNote+' '));const link=document.createElement('a');link.href=buildRsvpUrl(name,'no');link.target='_blank';link.rel='noopener noreferrer';link.textContent='Avisar también por WhatsApp ↗';feedback.append(link);return;}
   feedback.textContent='Tu asistencia quedó registrada. Preparando tu pase…';
-  await createGuestPass(name,result.reference,result.companions);feedback.textContent='Tu asistencia y tus acompañantes quedaron registrados.';
+  await createGuestPass(name,result.reference,result.companions);feedback.textContent='Tu asistencia y tus acompañantes quedaron registrados.'+mailNote;
  }catch(error){
-  if(choice.value==='no'){feedback.replaceChildren(document.createTextNode('Gracias por avisarnos. Tu respuesta quedó registrada. '));const link=document.createElement('a');link.href=buildRsvpUrl(name,'no');link.target='_blank';link.rel='noopener noreferrer';link.textContent='Avisar también por WhatsApp ↗';feedback.append(link);return;}
-  const fallbackRef=newReference();
-  feedback.textContent='Tu asistencia quedó registrada. Preparando tu pase…';
-  await createGuestPass(name,fallbackRef,companions);feedback.textContent='Tu asistencia y tus acompañantes quedaron registrados.';
+  // Si el servidor no respondió, NO se afirma que quedó guardado ni se crea un pase.
+  feedback.replaceChildren(document.createTextNode('No pudimos guardar tu respuesta en este momento. Intenta de nuevo en unos minutos o avísales directamente por WhatsApp. '));const link=document.createElement('a');link.href=buildRsvpUrl(name,choice.value);link.target='_blank';link.rel='noopener noreferrer';link.textContent='Avisar por WhatsApp ↗';feedback.append(link);
  }finally{button.disabled=false;}
 
 });
