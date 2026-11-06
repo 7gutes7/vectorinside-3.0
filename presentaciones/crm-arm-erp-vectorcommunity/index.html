@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="CRM, ARM y ERP: qué hace cada sistema, sus fortalezas, debilidades y áreas de mejora, y por qué Vector Community es un ARM: gestión agéntica de relaciones.">
+<meta name="theme-color" content="#080808">
+<title>CRM, ARM y ERP · Vector Community · Vector Inside</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="CRM, ARM y ERP · Vector Community">
+<meta property="og:description" content="Del CRM pasivo a agentes de IA que gestionan cada relación.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@700;800;900&display=swap">
+<style>
+/* Presentación vertical por escenas a pantalla completa, con los tokens de color y tipografía de vectorinside.com */
+:root{
+  --black:#080808; --surface:#111113; --card:rgba(255,255,255,.035); --card-2:rgba(255,255,255,.06);
+  --lime:#c3f400; --lime-soft:rgba(195,244,0,.12); --lime-line:rgba(195,244,0,.35);
+  --purple:#9d4edd; --purple-soft:rgba(157,78,221,.14); --purple-line:rgba(157,78,221,.45);
+  --blue:#6f69e0; --blue-soft:rgba(67,61,174,.18); --blue-line:rgba(111,105,224,.45);
+  --white:#ffffff; --text:#e9ebe1; --muted:#a9ad98; --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.22);
+  --display:'Montserrat',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.7,.1,1);
+  --pad:clamp(16px,5vw,72px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;background:var(--black)}
+body{background:var(--black);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+img{max-width:100%;display:block}
+::selection{background:var(--lime);color:#000}
+
+/* Barra superior */
+.top{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px var(--pad);background:linear-gradient(#080808 30%,rgba(8,8,8,0));pointer-events:none}
+.top>*{pointer-events:auto}
+.top .brand img{height:26px;width:auto}
+.top .count{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.top .count b{color:var(--lime);font-weight:500}
+
+/* Puntos de navegación */
+.dots{position:fixed;right:clamp(10px,2vw,28px);top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:10px}
+.dots button{width:9px;height:9px;border-radius:50%;border:1px solid var(--line-2);background:transparent;cursor:pointer;padding:0;transition:all .3s var(--ease)}
+.dots button[aria-current="true"]{background:var(--lime);border-color:var(--lime);transform:scale(1.25)}
+.dots button:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+
+/* Escenas */
+.slide{position:relative;min-height:100vh;min-height:100svh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;
+  padding:88px calc(var(--pad) + 22px) 64px var(--pad);overflow:hidden}
+.slide+.slide{border-top:1px solid rgba(255,255,255,.05)}
+.wrap{width:100%;max-width:1180px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor}
+h1,h2,h3{font-family:var(--display);color:var(--white);letter-spacing:-.02em;line-height:1.05}
+h1{font-size:clamp(44px,8.4vw,112px);font-weight:900}
+h2{font-size:clamp(30px,4.6vw,58px);font-weight:800;max-width:20ch}
+h3{font-size:clamp(18px,1.6vw,22px);font-weight:800;line-height:1.2}
+.lead{font-size:clamp(17px,1.6vw,21px);color:var(--text);max-width:62ch;margin-top:18px}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin-top:22px;max-width:90ch}
+.lime{color:var(--lime)}
+
+/* Fondo de luz */
+.glow::after{content:"";position:absolute;width:70vmax;height:70vmax;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle,rgba(157,78,221,.20),rgba(157,78,221,0) 62%);right:-28vmax;top:-22vmax}
+.glow.lime-glow::after{background:radial-gradient(circle,rgba(195,244,0,.10),rgba(195,244,0,0) 60%);left:-30vmax;right:auto;top:auto;bottom:-34vmax}
+
+/* Portada */
+.cover h1 .arm{color:var(--lime)}
+.cover .meta{margin-top:40px;display:flex;flex-wrap:wrap;gap:10px 28px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.cover .meta span::before{content:"/ ";color:var(--lime)}
+.hint{position:absolute;bottom:22px;left:var(--pad);font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px;z-index:1}
+.hint i{display:inline-block;width:1px;height:28px;background:linear-gradient(var(--lime),transparent);animation:drip 1.8s var(--ease) infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* Tarjetas */
+.grid{display:grid;gap:16px;margin-top:40px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;position:relative}
+.card .tag{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.card .q{font-family:var(--display);font-weight:800;color:var(--white);font-size:clamp(20px,2vw,26px);line-height:1.15;margin:14px 0 10px}
+.card p{color:var(--text)}
+.card.is-crm{border-color:var(--blue-line);background:linear-gradient(160deg,var(--blue-soft),transparent 70%)}
+.card.is-arm{border-color:var(--lime-line);background:linear-gradient(160deg,var(--lime-soft),transparent 70%)}
+.card.is-erp{border-color:var(--purple-line);background:linear-gradient(160deg,var(--purple-soft),transparent 70%)}
+.card.is-crm .tag{color:var(--blue)} .card.is-arm .tag{color:var(--lime)} .card.is-erp .tag{color:var(--purple)}
+.badge{position:absolute;top:22px;right:22px;font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:99px;background:var(--lime);color:#000;font-weight:500}
+
+/* Listas de fortalezas y debilidades */
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:36px}
+.split.three{grid-template-columns:1.1fr 1fr 1fr}
+.col h3{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.col h3 .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-family:var(--body);font-weight:700}
+.pro h3{color:var(--lime)} .pro .ic{background:var(--lime);color:#000}
+.con h3{color:#ff8f7a} .con .ic{background:#ff8f7a;color:#000}
+.does h3{color:var(--white)} .does .ic{background:var(--white);color:#000}
+.col ul{list-style:none;display:grid;gap:10px}
+.col li{padding:13px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:15.5px;line-height:1.45}
+.col li b{color:var(--white);font-weight:600}
+
+/* Tabla comparativa */
+.table-wrap{margin-top:36px;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:16px 18px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+thead th{font-family:var(--display);font-weight:800;font-size:18px;color:var(--white);background:var(--surface)}
+thead th small{display:block;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+thead th:nth-child(2) small{color:var(--blue)} thead th:nth-child(3) small{color:var(--lime)} thead th:nth-child(4) small{color:var(--purple)}
+tbody th{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:19%}
+td.arm-col{background:rgba(195,244,0,.05);color:var(--white)}
+thead th.arm-col{background:#161a07;box-shadow:inset 0 3px 0 var(--lime)}
+
+/* Áreas de mejora */
+.improve .card ol{list-style:none;counter-reset:n;display:grid;gap:12px;margin-top:18px}
+.improve .card li{counter-increment:n;display:grid;grid-template-columns:28px 1fr;gap:8px;font-size:15.5px}
+.improve .card li::before{content:counter(n,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:3px}
+.improve .card h3{margin-top:12px}
+
+/* Flujo */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin-top:44px;position:relative}
+.step{position:relative;padding:0 10px}
+.step .node{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:500;font-size:14px;margin-bottom:16px;position:relative;z-index:1;border:1px solid var(--line-2);background:var(--black)}
+.step::before{content:"";position:absolute;top:23px;left:56px;right:-10px;height:1px;background:linear-gradient(90deg,var(--line-2),var(--lime-line))}
+.step:last-child::before{display:none}
+.step .sys{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.step h3{font-size:17px;margin-bottom:6px}
+.step p{font-size:14.5px;color:var(--muted)}
+.step.s-arm .node{border-color:var(--lime);color:var(--lime)} .step.s-arm .sys{color:var(--lime)}
+.step.s-hum .node{border-color:var(--white);color:var(--white)} .step.s-hum .sys{color:var(--white)}
+.step.s-crm .node{border-color:var(--blue);color:var(--blue)} .step.s-crm .sys{color:var(--blue)}
+.step.s-erp .node{border-color:var(--purple);color:var(--purple)} .step.s-erp .sys{color:var(--purple)}
+.step.s-in .sys{color:var(--muted)}
+.loop{margin-top:34px;display:flex;align-items:center;gap:16px;padding:18px 22px;border:1px dashed var(--lime-line);border-radius:14px;max-width:820px}
+.loop svg{flex:none}
+.loop p{font-size:15.5px}
+
+/* Vector Community */
+.vc .grid .card h3{margin:14px 0 8px}
+.vc .card .num{font-family:var(--mono);font-size:12px;color:var(--lime)}
+.vc .card p{font-size:15px;color:var(--muted)}
+.roadmap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:40px}
+.stage{border-radius:18px;padding:26px;border:1px solid var(--line);background:var(--card)}
+.stage .st{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:99px}
+.stage.done .st{background:var(--lime-soft);color:var(--lime);border:1px solid var(--lime-line)}
+.stage.next .st{background:var(--purple-soft);color:#c99af0;border:1px solid var(--purple-line)}
+.stage h3{margin:16px 0 12px;font-size:24px}
+.stage ul{list-style:none;display:grid;gap:8px}
+.stage li{font-size:15px;padding-left:18px;position:relative}
+.stage li::before{content:"";position:absolute;left:0;top:.65em;width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.stage.done li::before{background:var(--lime)}
+.stage.next li::before{background:var(--purple)}
+
+/* Cierre */
+.close h2{max-width:16ch}
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:99px;font-weight:600;text-decoration:none;font-size:16px;transition:transform .25s var(--ease),background .25s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:2px solid var(--white);outline-offset:3px}
+.btn.primary{background:var(--lime);color:#000}
+.btn.ghost{border:1px solid var(--line-2);color:var(--white)}
+.sources{margin-top:56px;font-size:12.5px;color:var(--muted);max-width:90ch}
+.sources a{color:var(--muted)}
+
+/* Aparición */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.js .in .rv{opacity:1;transform:none}
+.js .in .rv:nth-child(2){transition-delay:.08s}.js .in .rv:nth-child(3){transition-delay:.16s}
+.js .in .rv:nth-child(4){transition-delay:.24s}.js .in .rv:nth-child(5){transition-delay:.32s}.js .in .rv:nth-child(6){transition-delay:.4s}
+
+@media (max-width:980px){
+  .g3,.split.three,.roadmap{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr;gap:22px}
+  .step{display:grid;grid-template-columns:46px 1fr;gap:0 16px;padding:0}
+  .step .node{margin:0;grid-row:span 3}
+  .step::before{top:46px;bottom:-22px;left:23px;right:auto;width:1px;height:auto;background:linear-gradient(var(--line-2),var(--lime-line))}
+}
+@media (max-width:760px){
+  html{scroll-snap-type:y proximity}
+  .slide{padding:84px 16px 56px 16px;justify-content:flex-start}
+  .cover{justify-content:center}
+  .dots{display:none}
+  .g2,.split{grid-template-columns:1fr}
+  .card{padding:22px}
+  /* Tabla como tarjetas apiladas en celular */
+  .table-wrap{border:0;border-radius:0;overflow:visible}
+  table,thead,tbody,tr,th,td{display:block}
+  thead{display:none}
+  tbody tr{border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden}
+  tbody th{width:auto;background:var(--surface);border-bottom:1px solid var(--line)}
+  td{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:12px 16px}
+  td::before{content:attr(data-k);font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding-top:2px}
+  td:nth-of-type(1)::before{color:var(--blue)} td:nth-of-type(2)::before{color:var(--lime)} td:nth-of-type(3)::before{color:var(--purple)}
+  .top .brand img{height:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv{opacity:1;transform:none;transition:none}
+  .hint i{animation:none}
+  .btn{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="/" aria-label="Vector Inside, ir al inicio"><img src="/Vector%20Inside%20imagotipo.svg" alt="Vector Inside" width="92" height="26"></a>
+  <div class="count" aria-live="polite"><b id="cur">01</b> / <span id="tot">10</span></div>
+</header>
+<nav class="dots" id="dots" aria-label="Escenas de la presentación"></nav>
+
+<main>
+
+<!-- 1. Portada -->
+<section class="slide cover glow" id="inicio" aria-label="Portada">
+  <div class="wrap">
+    <p class="eyebrow rv">Vector Community · Presentación</p>
+    <h1 class="rv">CRM, <span class="arm">ARM</span><br>y ERP</h1>
+    <p class="lead rv">Qué hace cada sistema, dónde se queda corto y por qué los agentes de inteligencia artificial cambian la forma de convertir prospectos en clientes.</p>
+    <div class="meta rv"><span>Vector Inside</span><span>Noviembre 2026</span></div>
+  </div>
+  <div class="hint" aria-hidden="true"><i></i>Desliza o usa las flechas del teclado</div>
+</section>
+
+<!-- 2. Tres preguntas -->
+<section class="slide" id="preguntas" aria-label="Tres sistemas, tres preguntas">
+  <div class="wrap">
+    <p class="eyebrow rv">La idea en una frase</p>
+    <h2 class="rv">El CRM registra. El ARM entiende y actúa. El ERP opera.</h2>
+    <div class="grid g3">
+      <article class="card is-crm rv">
+        <span class="tag">CRM</span>
+        <p class="q">¿Quién es mi cliente?</p>
+        <p>Reúne prospectos, conversaciones y ventas en un solo lugar para que el equipo dé seguimiento.</p>
+      </article>
+      <article class="card is-arm rv">
+        <span class="tag">ARM</span>
+        <p class="q">¿Qué necesita este cliente y qué hago ahora?</p>
+        <p>Es la evolución del CRM: agentes de inteligencia artificial que leen cada conversación, califican al prospecto y ejecutan la siguiente acción.</p>
+      </article>
+      <article class="card is-erp rv">
+        <span class="tag">ERP</span>
+        <p class="q">¿Cómo opera mi negocio?</p>
+        <p>Administra lo que pasa después de la venta: facturación, cobranza, inventario y finanzas.</p>
+      </article>
+    </div>
+    <p class="note rv">ARM: <em>Agentic Relationship Management</em>, o gestión agéntica de relaciones. Es el siguiente paso del CRM: agentes de IA que operan de forma autónoma, bajo supervisión humana.</p>
+  </div>
+</section>
+
+<!-- 3. CRM -->
+<section class="slide" id="crm" aria-label="CRM">
+  <div class="wrap">
+    <p class="eyebrow rv" style="color:var(--blue)">CRM · Customer Relationship Management</p>
+    <h2 class="rv">La base: sin un registro ordenado de clientes no hay automatización posible.</h2>
+    <div class="split">
+      <div class="col pro rv">
+        <h3><span class="ic">+</span>Fortalezas</h3>
+        <ul>
+          <li>Centraliza contactos, historial y embudo de ventas.</li>
+          <li>Pone a todo el equipo comercial en el mismo proceso.</li>
+          <li>Da reportes de avance por etapa del embudo.</li>
+          <li>Se implementa más rápido que un ERP: de 3 a 6 meses como referencia.</li>
+        </ul>
+      </div>
+      <div class="col con rv">
+        <h3><span class="ic">−</span>Debilidades</h3>
+        <ul>
+          <li>Depende de que el equipo capture todo a mano; por eso abundan las fichas vacías o desactualizadas.</li>
+          <li>Es una base de datos pasiva: muestra lo que pasó, no actúa.</li>
+          <li>Responde a la velocidad del equipo, no a la del cliente.</li>
+          <li>No cubre facturación, cobranza ni inventario.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. ARM -->
+<section class="slide glow lime-glow" id="arm" aria-label="ARM, gestión agéntica de relaciones">
+  <div class="wrap">
+    <p class="eyebrow rv">ARM · Agentic Relationship Management</p>
+    <h2 class="rv">Del CRM que espera datos a agentes que actúan.</h2>
+    <p class="lead rv">Agentes de IA capturan la información, deciden y ejecutan sobre el sistema. Una persona aprueba lo importante.</p>
+    <div class="split three">
+      <div class="col does rv">
+        <h3><span class="ic">✦</span>Qué hacen los agentes</h3>
+        <ul>
+          <li>Responden al instante en WhatsApp, Instagram y Messenger.</li>
+          <li>Califican prospectos con criterios definidos.</li>
+          <li>Convierten mensajes y audios en datos ordenados y detectan intención de compra.</li>
+          <li>Agendan citas y ejecutan acciones en otros sistemas, como inventario o facturación.</li>
+          <li>Avisan a una persona en casos sensibles: citas VIP, quejas o crisis.</li>
+        </ul>
+      </div>
+      <div class="col pro rv">
+        <h3><span class="ic">+</span>Fortalezas</h3>
+        <ul>
+          <li>Atención 24/7 sin crecer el equipo al mismo ritmo.</li>
+          <li>El vendedor recibe prospectos ya calificados.</li>
+          <li>Los datos se capturan solos desde cada conversación.</li>
+          <li>Cada decisión llega con el contexto del cliente.</li>
+        </ul>
+      </div>
+      <div class="col con rv">
+        <h3><span class="ic">−</span>Debilidades</h3>
+        <ul>
+          <li>Con datos malos, la IA se equivoca más rápido.</li>
+          <li>Sin límites claros ni supervisión, un agente puede dar respuestas o ejecutar acciones incorrectas.</li>
+          <li>Tiene un costo variable por el uso de modelos de IA.</li>
+          <li>Exige cuidado extra con los datos personales de los clientes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. ERP -->
+<section class="slide" id="erp" aria-label="ERP">
+  <div class="wrap">
+    <p class="eyebrow rv" style="color:var(--purple)">ERP · Enterprise Resource Planning</p>
+    <h2 class="rv">El sistema de la operación: todo lo que pasa después de la venta.</h2>
+    <div class="split">
+      <div class="col pro rv">
+        <h3><span class="ic">+</span>Fortalezas</h3>
+        <ul>
+          <li>Una sola fuente para finanzas, inventario, compras y personal.</li>
+          <li>Elimina las islas de información entre áreas.</li>
+          <li>Da control de costos y orden fiscal.</li>
+        </ul>
+      </div>
+      <div class="col con rv">
+        <h3><span class="ic">−</span>Debilidades</h3>
+        <ul>
+          <li>Proyectos largos y costosos: de 6 a 18 meses como referencia.</li>
+          <li>Está pensado para procesos internos, no para la relación con el cliente.</li>
+          <li>Su módulo de clientes suele quedarse corto frente a un CRM dedicado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Comparativo -->
+<section class="slide" id="comparativo" aria-label="Comparativo">
+  <div class="wrap">
+    <p class="eyebrow rv">Comparativo</p>
+    <h2 class="rv">Lado a lado</h2>
+    <div class="table-wrap rv">
+      <table>
+        <thead>
+          <tr><th scope="col"><span class="muted" style="font-family:var(--mono);font-size:12px;font-weight:400">Aspecto</span></th>
+              <th scope="col">CRM<small>Registro</small></th>
+              <th scope="col" class="arm-col">ARM<small>Agentes de IA</small></th>
+              <th scope="col">ERP<small>Operación</small></th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Pregunta central</th>
+            <td data-k="CRM">¿Quién es mi cliente?</td>
+            <td data-k="ARM" class="arm-col">¿Qué hago ahora con este cliente?</td>
+            <td data-k="ERP">¿Cómo opera mi negocio?</td></tr>
+          <tr><th scope="row">Qué gestiona</th>
+            <td data-k="CRM">Contactos, embudo y ventas</td>
+            <td data-k="ARM" class="arm-col">Lo mismo, más conversaciones, intención de compra y próximas acciones</td>
+            <td data-k="ERP">Finanzas, inventario, compras y personal</td></tr>
+          <tr><th scope="row">Cómo trabaja</th>
+            <td data-k="CRM">El equipo captura y da seguimiento</td>
+            <td data-k="ARM" class="arm-col">Agentes de IA capturan y ejecutan; una persona aprueba lo crítico</td>
+            <td data-k="ERP">Procesos y transacciones internas</td></tr>
+          <tr><th scope="row">Respuesta al prospecto</th>
+            <td data-k="CRM">A la velocidad del equipo</td>
+            <td data-k="ARM" class="arm-col">Inmediata, 24/7</td>
+            <td data-k="ERP">No atiende prospectos</td></tr>
+          <tr><th scope="row">Quién lo usa</th>
+            <td data-k="CRM">Ventas y marketing</td>
+            <td data-k="ARM" class="arm-col">Ventas, marketing y dirección</td>
+            <td data-k="ERP">Operación y finanzas</td></tr>
+          <tr><th scope="row">Implementación</th>
+            <td data-k="CRM">3 a 6 meses</td>
+            <td data-k="ARM" class="arm-col">Se construye sobre el CRM</td>
+            <td data-k="ERP">6 a 18 meses</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note rv">Los tiempos de implementación son referencias de mercado y varían en cada proyecto.</p>
+  </div>
+</section>
+
+<!-- 7. Áreas de mejora -->
+<section class="slide improve" id="mejoras" aria-label="Áreas de mejora">
+  <div class="wrap">
+    <p class="eyebrow rv">Áreas de mejora</p>
+    <h2 class="rv">Dónde puede crecer cada sistema</h2>
+    <div class="grid g3">
+      <article class="card is-crm rv">
+        <span class="tag">CRM</span>
+        <ol>
+          <li>Capturar datos automáticamente desde cada canal.</li>
+          <li>Conectar la venta con la facturación sin capturar dos veces.</li>
+          <li>Medir el retorno real de la inversión en publicidad.</li>
+        </ol>
+      </article>
+      <article class="card is-arm rv">
+        <span class="tag">ARM</span>
+        <ol>
+          <li>Límites automáticos de lo que cada agente puede hacer.</li><li>Reglas claras de cuándo interviene una persona.</li>
+          <li>Bitácora de qué hizo la IA y por qué.</li>
+          <li>Control del costo por conversación.</li>
+          
+        </ol>
+      </article>
+      <article class="card is-erp rv">
+        <span class="tag">ERP</span>
+        <ol>
+          <li>Integración sencilla con el CRM y el ARM.</li>
+          <li>Versiones ligeras para pequeñas y medianas empresas.</li>
+          <li>Datos de venta en tiempo real para el área comercial.</li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Cómo se complementan -->
+<section class="slide glow" id="flujo" aria-label="Cómo se complementan">
+  <div class="wrap">
+    <p class="eyebrow rv">Cómo se complementan</p>
+    <h2 class="rv">El ARM genera la venta; el ERP la convierte en ingreso controlado.</h2>
+    <div class="flow">
+      <div class="step s-in rv"><div class="node">01</div><p class="sys">Canales</p><h3>Llega el prospecto</h3><p>Anuncio en Meta, mensaje de WhatsApp o Instagram.</p></div>
+      <div class="step s-arm rv"><div class="node">02</div><p class="sys">ARM · Agentes</p><h3>Responde y califica</h3><p>Contesta al momento y evalúa si es un prospecto real.</p></div>
+      <div class="step s-hum rv"><div class="node">03</div><p class="sys">Persona</p><h3>Aprueba</h3><p>Citas, propuestas y casos sensibles pasan por una persona.</p></div>
+      <div class="step s-crm rv"><div class="node">04</div><p class="sys">CRM</p><h3>Se cierra la venta</h3><p>Queda registrada con todo su historial.</p></div>
+      <div class="step s-erp rv"><div class="node">05</div><p class="sys">ERP</p><h3>Factura y cobra</h3><p>Emite la factura, registra el cobro y actualiza finanzas.</p></div>
+    </div>
+    <div class="loop rv">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#c3f400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+      <p>Las ventas registradas regresan al ARM para medir cuánto produjo cada peso invertido en publicidad.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Vector Community -->
+<section class="slide vc glow lime-glow" id="vector-community" aria-label="Vector Community">
+  <div class="wrap">
+    <p class="eyebrow rv">Vector Community</p>
+    <h2 class="rv">Vector Community es un <span class="lime">ARM</span>.</h2>
+    <p class="lead rv">Agentes de IA sobre un CRM para agencias y negocios, desarrollado por nuestro propio equipo, con una persona siempre en control.</p>
+    <div class="grid g3">
+      <article class="card rv"><span class="num">01</span><h3>Regla 95/5</h3><p>La IA atiende lo rutinario. Citas VIP, propuestas y crisis se aprueban con un clic.</p></article>
+      <article class="card rv"><span class="num">02</span><h3>Agenda maestra</h3><p>Disponibilidad real, sincronización con Google Calendar y confirmación por correo con archivo de calendario.</p></article>
+      <article class="card rv"><span class="num">03</span><h3>Atribución con Meta</h3><p>Cruza las ventas registradas con la inversión publicitaria, de servidor a servidor, sin depender solo del píxel.</p></article>
+      <article class="card rv"><span class="num">04</span><h3>Multinegocio</h3><p>Cada negocio con sus datos, reglas y marca separados. Preparado para 17 giros comerciales.</p></article>
+      <article class="card rv"><span class="num">05</span><h3>IA multiproveedor</h3><p>El modelo adecuado para cada tarea: respuesta rápida en conversación o análisis más profundo.</p></article>
+      <article class="card rv"><span class="num">06</span><h3>Pago por lead calificado</h3><p>Se cobra cuando el prospecto cumple criterios definidos, no por cada contacto.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- 10. Cobertura y siguiente etapa -->
+<section class="slide close" id="ruta" aria-label="Cobertura y siguiente etapa">
+  <div class="wrap">
+    <p class="eyebrow rv">Cobertura y siguiente etapa</p>
+    <h2 class="rv">Qué cubre Vector Community y hacia dónde crece</h2>
+    <div class="roadmap">
+      <div class="stage done rv"><span class="st">● Integrado</span><h3>CRM</h3>
+        <ul><li>Prospectos con embudo Kanban</li><li>Agenda de citas</li><li>Planificador de contenidos</li><li>Analítica por negocio</li></ul></div>
+      <div class="stage done rv"><span class="st">● Núcleo</span><h3>ARM</h3>
+        <ul><li>Agentes conversacionales</li><li>Triaje con aprobación humana</li><li>Generación de contenido</li><li>Calificación de prospectos</li></ul></div>
+      <div class="stage next rv"><span class="st">→ Hoja de ruta</span><h3>ERP ligero</h3>
+        <ul><li>Registro de cobro por lead calificado</li><li>Facturación electrónica (CFDI)</li><li>Conciliación y cobranza</li></ul></div>
+    </div>
+    <div class="cta rv">
+      <a class="btn primary" href="https://wa.me/527205622224?text=Hola%2C%20quiero%20una%20demostraci%C3%B3n%20de%20Vector%20Community" target="_blank" rel="noopener">Agendar una demostración</a>
+      <a class="btn ghost" href="mailto:contacto@vectorinside.com?subject=Vector%20Community">contacto@vectorinside.com</a>
+    </div>
+    <p class="sources rv">Referencias: tiempos de implementación de CRM y ERP según <a href="https://www.nutshell.com/blog/crm-vs-erp" target="_blank" rel="noopener">Nutshell, “CRM vs. ERP”</a>. Concepto de gestión agéntica de relaciones según <a href="https://www.algoritmobinario.com/ia/de-crm-a-arm-gestion-agentica.html" target="_blank" rel="noopener">Algoritmo Binario, “De CRM a ARM”</a>. © 2026 Vector Inside.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var doc=document.documentElement; doc.classList.add('js');
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var dots=document.getElementById('dots'), cur=document.getElementById('cur'), tot=document.getElementById('tot');
+  var pad=function(n){return (n<10?'0':'')+n};
+  tot.textContent=pad(slides.length);
+  var current=0;
+  slides.forEach(function(s,i){
+    var b=document.createElement('button');
+    b.type='button'; b.setAttribute('aria-label','Ir a: '+(s.getAttribute('aria-label')||('escena '+(i+1))));
+    b.addEventListener('click',function(){go(i)});
+    dots.appendChild(b);
+  });
+  function mark(i){
+    current=i; cur.textContent=pad(i+1);
+    [].forEach.call(dots.children,function(d,k){d.setAttribute('aria-current',k===i?'true':'false')});
+  }
+  function go(i){
+    i=Math.max(0,Math.min(slides.length-1,i));
+    slides[i].scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); }
+      });
+    },{threshold:.18});
+    var active=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting) mark(slides.indexOf(e.target)); });
+    },{rootMargin:'-45% 0px -45% 0px'});
+    slides.forEach(function(s){io.observe(s);active.observe(s)});
+  } else { slides.forEach(function(s){s.classList.add('in')}); }
+  mark(0);
+  document.addEventListener('keydown',function(e){
+    if(e.altKey||e.ctrlKey||e.metaKey) return;
+    var t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')) return;
+    var k=e.key;
+    if(k==='ArrowDown'||k==='PageDown'||(k===' '&&!e.shiftKey)||k==='ArrowRight'){e.preventDefault();go(current+1)}
+    else if(k==='ArrowUp'||k==='PageUp'||(k===' '&&e.shiftKey)||k==='ArrowLeft'){e.preventDefault();go(current-1)}
+    else if(k==='Home'){e.preventDefault();go(0)}
+    else if(k==='End'){e.preventDefault();go(slides.length-1)}
+  });
+})();
+</script>
+</body>
+</html>
