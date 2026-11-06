@@ -54,4 +54,10 @@ AddType video/mp4 .mp4
   RewriteCond %{HTTPS} off [OR]
   RewriteCond %{HTTP_HOST} ^www\. [NC]
   RewriteRule ^ https://vectorinside.com%{REQUEST_URI} [L,R=301]
+
+  # Backend API y Media para la invitacion de boda Karina & Alexis
+  RewriteRule ^api/(.*)$ studios/invitacion-K&A/api/index.php?route=$1 [QSA,L]
+  RewriteRule ^media/(.*)$ studios/invitacion-K&A/api/media.php?file=$1 [QSA,L]
+  RewriteRule ^studios/invitacion-K\&A/api/(.*)$ studios/invitacion-K&A/api/index.php?route=$1 [QSA,L]
+  RewriteRule ^studios/invitacion-K\&A/media/(.*)$ studios/invitacion-K&A/api/media.php?file=$1 [QSA,L]
 </IfModule>

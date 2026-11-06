@@ -1,6 +1,18 @@
 let csrf='',dashboardData={guests:[],photos:[]};
 const $=s=>document.querySelector(s);
-async function request(path,data){const response=await fetch(path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json','X-CSRF-Token':csrf}:{},body:data?JSON.stringify(data):undefined});const result=await response.json();if(response.status===401){$('#dashboard').hidden=true;$('#login').hidden=false;}if(!response.ok)throw new Error(result.error||'No pudimos completar la acción.');return result;}
+async function request(path,data){
+  const response=await fetch(path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json','X-CSRF-Token':csrf}:{},body:data?JSON.stringify(data):undefined});
+  let result;
+  try{
+    result=await response.json();
+  }catch(e){
+    if(response.status===401){$('#dashboard').hidden=true;$('#login').hidden=false;}
+    throw new Error('El servicio de datos no devolvió respuesta JSON. Si acabas de actualizar en GitHub, realiza Deploy y Purge All en Hostinger.');
+  }
+  if(response.status===401){$('#dashboard').hidden=true;$('#login').hidden=false;}
+  if(!response.ok)throw new Error(result.error||'No pudimos completar la acción.');
+  return result;
+}
 async function refresh(){try{dashboardData=await request('/api/admin/dashboard');for(const key of ['confirmed','companions','people','pending'])$('#total-'+key).textContent=dashboardData.totals[key];$('#declined-summary').textContent=dashboardData.totals.declined+' personas indicaron que no podrán asistir.';$('#dashboard').hidden=false;$('#login').hidden=true;renderGuests();renderPhotos();$('#last-update').textContent='Actualizado '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});$('#panel-feedback').textContent='';}catch(error){$('#panel-feedback').textContent=error.message;}}
 $('#login-form').addEventListener('submit',async event=>{event.preventDefault();const button=event.target.querySelector('button');button.disabled=true;try{const session=await request('/api/admin/login',{password:$('#password').value});csrf=session.csrf;$('#password').value='';$('#login-feedback').textContent='';await refresh();}catch(error){$('#login-feedback').textContent=error.message;}finally{button.disabled=false;}});
 $('#refresh').addEventListener('click',refresh);
