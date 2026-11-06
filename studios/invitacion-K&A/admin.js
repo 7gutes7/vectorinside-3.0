@@ -84,6 +84,7 @@ function renderPhotos(){
     const card=document.createElement('article');
     const img=document.createElement('img');img.src='media/'+photo.id+'.jpg';img.alt='Recuerdo de '+photo.name;img.loading='lazy';
     const name=document.createElement('h3');name.textContent=photo.name;
+    const code=document.createElement('span');code.className='photo-code';code.textContent=photo.rsvp_id?'Código '+photo.rsvp_id:'Sin código';
     const caption=document.createElement('p');caption.textContent=photo.caption;
     const status=document.createElement('small');status.textContent={pending:'Pendiente de revisión',approved:'Publicado en la invitación',hidden:'Oculto'}[photo.status]+(photo.created?' · '+fmtDate(photo.created):'');
     const actions=document.createElement('div');
@@ -93,7 +94,7 @@ function renderPhotos(){
       button.addEventListener('click',async()=>{button.disabled=true;try{await request('api/admin/moderate',{id:photo.id,status:state});await refresh();}catch(error){$('#panel-feedback').textContent=error.message;button.disabled=false;}});
       actions.append(button);
     }
-    const download=document.createElement('a');download.className='button';download.textContent='Descargar';download.href='media/'+photo.id+'.jpg';download.download='Recuerdo-'+photo.name.replace(/[^\p{L}\p{N}]+/gu,'-')+'-'+photo.id.slice(0,6)+'.jpg';
+    const download=document.createElement('a');download.className='button';download.textContent='Descargar';download.href='media/'+photo.id+'.jpg';download.download=photo.rsvp_id?photo.rsvp_id+'-'+photo.id.slice(0,6)+'.jpg':'Recuerdo-'+photo.name.replace(/[^\p{L}\p{N}]+/gu,'-')+'-'+photo.id.slice(0,6)+'.jpg';
     const remove=document.createElement('button');remove.className='danger';remove.textContent='Eliminar';
     remove.addEventListener('click',async()=>{
       if(!confirm('¿Eliminar esta foto de forma definitiva? Se borra del servidor y no se puede recuperar.'))return;
@@ -101,11 +102,31 @@ function renderPhotos(){
       try{await request('api/admin/delete-photo',{id:photo.id});await refresh();}catch(error){$('#panel-feedback').textContent=error.message;remove.disabled=false;}
     });
     actions.append(download,remove);
-    card.append(img,name,caption,status,actions);grid.append(card);
+    card.append(img,name,code,caption,status,actions);grid.append(card);
   }
   $('#photo-empty').hidden=photos.length>0;
+  const approved=dashboardData.photos.filter(p=>p.status==='approved').length;
+  $('#download-zip').textContent='Descargar aprobadas ('+approved+') ↓';
 }
 $('#photo-filter').addEventListener('change',renderPhotos);
+$('#download-zip').addEventListener('click',async()=>{
+  const button=$('#download-zip'),label=button.textContent;button.disabled=true;button.textContent='Preparando ZIP…';$('#panel-feedback').textContent='';
+  try{
+    const response=await fetch('api/admin/photos-zip');
+    if(!response.ok){
+      let message='No pudimos preparar la descarga.';
+      try{message=(await response.json()).error||message;}catch{}
+      if(response.status===401){$('#dashboard').hidden=true;$('#login').hidden=false;}
+      throw new Error(message);
+    }
+    const blob=await response.blob();
+    const link=document.createElement('a');link.href=URL.createObjectURL(blob);
+    const match=/filename="([^"]+)"/.exec(response.headers.get('Content-Disposition')||'');
+    link.download=match?match[1]:'Recuerdos-Karina-Alexis.zip';
+    document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),10000);
+  }catch(error){$('#panel-feedback').textContent=error.message;}
+  finally{button.disabled=false;button.textContent=label;}
+});
 
 $('#export-guests').addEventListener('click',()=>{
   const safe=(value,isPhone)=>{const text=String(value??'');const guarded=(!isPhone&&/^[=+@\-\t\r]/.test(text))?"'"+text:text;return '"'+guarded.replaceAll('"','""')+'"';};
