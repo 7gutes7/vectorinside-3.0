@@ -1,0 +1,6 @@
+# Configuracion local para la invitacion de boda Karina & Alexis
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
+  RewriteRule ^media/(.*)$ api/media.php?file=$1 [QSA,L]
+</IfModule>
