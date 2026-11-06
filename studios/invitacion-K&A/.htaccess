@@ -1,6 +1,10 @@
-# Configuracion local para la invitacion de boda Karina & Alexis
+# Invitación Karina & Alexis: rutas de la API y de las fotos dentro de esta carpeta
+Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  # api/<ruta> -> api/index.php (los archivos reales de api/ se sirven tal cual)
+  RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
+  # media/<id>.jpg -> api/media.php (valida estado de la foto y sesión)
   RewriteRule ^media/(.*)$ api/media.php?file=$1 [QSA,L]
 </IfModule>
