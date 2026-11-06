@@ -7,6 +7,7 @@
 
 define('KA_API', true);
 require_once __DIR__ . '/mail.php';
+require_once __DIR__ . '/export.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -91,6 +92,7 @@ try {
     ensure_column($db, 'rsvps', 'created', 'INTEGER NOT NULL DEFAULT 0');
     ensure_column($db, 'rsvps', 'email_sent', 'INTEGER NOT NULL DEFAULT 0');
     ensure_column($db, 'ip_limits', 'kind', "TEXT NOT NULL DEFAULT 'photo'");
+    ensure_column($db, 'photos', 'rsvp_id', "TEXT NOT NULL DEFAULT ''"); // código KA-XXXXXX del invitado que subió la foto
 } catch (Exception $e) {
     send_json(500, ['error' => 'No se pudo inicializar la base de datos.']);
 }
@@ -341,11 +343,38 @@ if ($method === 'POST' && $route === 'photos') {
         send_json(500, ['error' => 'El servidor no puede procesar imágenes en este momento.']);
     }
 
-    $insert = $db->prepare("INSERT INTO photos (id, name, caption, status, created) VALUES (?, ?, ?, 'pending', ?)");
-    $insert->execute([$photoId, $name, $caption, time()]);
+    // Vincula la foto con el código de confirmación del invitado (para identificarla en la lista).
+    // Se acepta el código escrito a mano o, si no, el de este dispositivo. Si no hay ninguno, la foto se guarda sin código.
+    $rsvpId = '';
+    $codeStatus = 'none';
+    $typed = strtoupper(preg_replace('/\s+/', '', (string)($input['code'] ?? '')) ?? '');
+    if ($typed !== '') {
+        $codeStatus = 'invalid';
+        if (preg_match('/^KA-?([A-F0-9]{6})$/', $typed, $cm)) {
+            $lookup = $db->prepare('SELECT id FROM rsvps WHERE id = ?');
+            $lookup->execute(['KA-' . $cm[1]]);
+            if ($found = $lookup->fetchColumn()) {
+                $rsvpId = $found;
+            }
+        }
+    }
+    $deviceToken = (string)($input['editToken'] ?? '');
+    if ($rsvpId === '' && strlen($deviceToken) >= 16 && strlen($deviceToken) <= 128) {
+        $lookup = $db->prepare('SELECT id FROM rsvps WHERE edit_hash = ?');
+        $lookup->execute([hash('sha256', $deviceToken)]);
+        if ($found = $lookup->fetchColumn()) {
+            $rsvpId = $found;
+        }
+    }
+    if ($rsvpId !== '') {
+        $codeStatus = 'linked';
+    }
+
+    $insert = $db->prepare("INSERT INTO photos (id, name, caption, status, created, rsvp_id) VALUES (?, ?, ?, 'pending', ?, ?)");
+    $insert->execute([$photoId, $name, $caption, time(), $rsvpId]);
     add_hit($db, 'photo');
 
-    send_json(201, ['ok' => true]);
+    send_json(201, ['ok' => true, 'codeStatus' => $codeStatus]);
 }
 
 // ---------------------------------------------------------------
@@ -397,7 +426,7 @@ if ($method === 'GET' && $route === 'admin/dashboard') {
     $guests = $db->query(
         'SELECT id, name, email, phone, notes, attendance, companions, created, updated FROM rsvps ORDER BY updated DESC'
     )->fetchAll();
-    $photos = $db->query('SELECT id, name, caption, status, created FROM photos ORDER BY created DESC')->fetchAll();
+    $photos = $db->query('SELECT id, name, caption, status, created, rsvp_id FROM photos ORDER BY created DESC')->fetchAll();
 
     $confirmed = 0;
     $companions = 0;
@@ -428,6 +457,31 @@ if ($method === 'GET' && $route === 'admin/dashboard') {
         'guests' => $guests,
         'photos' => $photos,
     ]);
+}
+
+// GET admin/photos-zip: ZIP con las fotos APROBADAS + Excel, CSV y álbum offline (solo con sesión de administrador)
+if ($method === 'GET' && $route === 'admin/photos-zip') {
+    if (!get_current_session($db)) {
+        send_json(401, ['error' => 'Vuelve a iniciar sesión.']);
+    }
+    $rows = $db->query("SELECT id, name, caption, created, rsvp_id FROM photos WHERE status = 'approved' ORDER BY created ASC, id ASC")->fetchAll();
+    $exportable = [];
+    foreach ($rows as $row) {
+        if (is_file($photosDir . '/' . $row['id'] . '.jpg')) {
+            $exportable[] = $row;
+        }
+    }
+    if (!$exportable) {
+        send_json(404, ['error' => 'Todavía no hay fotos aprobadas para descargar.']);
+    }
+    try {
+        ka_stream_photos_zip($exportable, $photosDir);
+    } catch (Throwable $e) {
+        if (!headers_sent()) {
+            send_json(500, ['error' => 'No pudimos preparar la descarga. Intenta de nuevo.']);
+        }
+        exit;
+    }
 }
 
 if ($method === 'POST' && $route === 'admin/logout') {
